@@ -3,6 +3,7 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 export const manifest: AppManifest = {
   id: 'file-manager',
   name: '文件管理',
+  nameKey: 'apps.fileManager',
   icon: 'folder',
   tint: 'from-sky-500 to-blue-600',
   entry: () => import('./App.vue'),

@@ -2,9 +2,11 @@
 import OsIcon from '@/components/OsIcon.vue'
 import { useAppRegistry, type RegisteredApp } from '@/kernel/stores/appRegistry'
 import { useWindowManager } from '@/kernel/stores/windowManager'
+import { useAppName } from '@/i18n'
 
 const registry = useAppRegistry()
 const wm = useWindowManager()
+const appName = useAppName()
 
 function onDockClick(app: RegisteredApp) {
   const wins = wm.windows.filter((w) => w.appId === app.id)
@@ -30,7 +32,7 @@ function onDockClick(app: RegisteredApp) {
       v-for="app in registry.dockApps"
       :key="app.id"
       class="group relative flex flex-col items-center gap-1"
-      :title="app.name"
+      :title="appName(app)"
       @click="onDockClick(app)"
     >
       <span
@@ -43,7 +45,7 @@ function onDockClick(app: RegisteredApp) {
       </span>
       <span
         v-if="wm.isRunning(app.id)"
-        class="absolute -bottom-1 h-1 w-1 rounded-full bg-slate-800/80"
+        class="absolute -bottom-1 h-1 w-1 rounded-full bg-ink-mute"
       />
     </button>
   </nav>

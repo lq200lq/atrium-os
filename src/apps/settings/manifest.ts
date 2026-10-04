@@ -3,6 +3,7 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 export const manifest: AppManifest = {
   id: 'settings',
   name: '设置',
+  nameKey: 'apps.settings',
   icon: 'settings',
   tint: 'from-slate-500 to-slate-700',
   entry: () => import('./App.vue'),

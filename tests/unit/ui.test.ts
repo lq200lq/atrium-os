@@ -45,7 +45,7 @@ describe('OsDialog', () => {
     const buttons = wrapper.findAll('button')
     await buttons[0].trigger('click')
     await buttons[1].trigger('click')
-    await wrapper.find('.bg-slate-900\\/25').trigger('pointerdown.self')
+    await wrapper.find('.bg-scrim').trigger('pointerdown.self')
     expect(wrapper.emitted('cancel')).toHaveLength(2)
     expect(wrapper.emitted('confirm')).toHaveLength(1)
   })

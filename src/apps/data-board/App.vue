@@ -145,7 +145,7 @@ const columns: TableColumn<Employee>[] = [
 
 <template>
   <div class="flex h-full flex-col text-ui">
-    <div class="flex flex-wrap items-center gap-2 border-b border-slate-200/70 px-4 py-2">
+    <div class="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2">
       <div class="w-44">
         <OsInput v-model="keyword" placeholder="搜索姓名/职位" @enter="reload" />
       </div>

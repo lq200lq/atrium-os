@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsEmpty from './OsEmpty.vue'
 import OsSkeleton from './OsSkeleton.vue'
 import OsPagination from './OsPagination.vue'
@@ -36,12 +37,14 @@ const props = withDefaults(
     loading: false,
     selectable: false,
     remote: false,
-    emptyText: '暂无数据',
+    emptyText: '',
     error: '',
     pageSize: 10,
     total: undefined,
   },
 )
+
+const { t } = useI18n()
 
 const emit = defineEmits<{
   'sort-change': [payload: { key: string; order: SortOrder }]
@@ -112,8 +115,8 @@ function toggleRow(row: T) {
   <div class="flex h-full flex-col text-ui">
     <div class="min-h-0 flex-1 overflow-auto">
       <table class="w-full border-collapse">
-        <thead class="sticky top-0 z-10 bg-slate-50/95 backdrop-blur">
-          <tr class="border-b border-slate-200">
+        <thead class="sticky top-0 z-10 bg-surface-sunken/95 backdrop-blur">
+          <tr class="border-b border-line">
             <th v-if="selectable" class="w-9 px-2 py-2">
               <input type="checkbox" :checked="allChecked" @change="toggleAll" />
             </th>
@@ -137,7 +140,7 @@ function toggleRow(row: T) {
             </th>
             <!-- 逃生口：行操作列表头 -->
             <th v-if="$slots.actions" class="w-24 px-3 py-2 text-right font-medium text-ink-mute">
-              操作
+              {{ t('common.actions') }}
             </th>
           </tr>
         </thead>
@@ -150,10 +153,10 @@ function toggleRow(row: T) {
               <OsEmpty icon="x" :description="error">
                 <template #action>
                   <button
-                    class="rounded-md border border-slate-200 px-3 py-1 text-ui text-ink hover:bg-slate-50"
+                    class="rounded-md border border-line px-3 py-1 text-ui text-ink hover:bg-surface-hover"
                     @click="emit('retry')"
                   >
-                    重试
+                    {{ t('common.retry') }}
                   </button>
                 </template>
               </OsEmpty>
@@ -171,7 +174,7 @@ function toggleRow(row: T) {
             <tr
               v-for="row in displayRows"
               :key="keyOf(row)"
-              class="border-b border-slate-100 transition hover:bg-accent-soft/40"
+              class="border-b border-line-soft transition hover:bg-accent-soft/40"
               @click="emit('row-click', row)"
               @dblclick="emit('row-dblclick', row)"
             >
@@ -197,7 +200,7 @@ function toggleRow(row: T) {
             </tr>
             <tr v-if="displayRows.length === 0">
               <td :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)">
-                <OsEmpty :description="emptyText">
+                <OsEmpty :description="emptyText || t('common.empty')">
                   <template #action><slot name="empty-action" /></template>
                 </OsEmpty>
               </td>
@@ -206,7 +209,7 @@ function toggleRow(row: T) {
         </tbody>
       </table>
     </div>
-    <div v-if="total !== undefined" class="shrink-0 border-t border-slate-200/70 px-3 py-2">
+    <div v-if="total !== undefined" class="shrink-0 border-t border-line px-3 py-2">
       <OsPagination v-model="page" :page-size="pageSize" :total="total" />
     </div>
   </div>

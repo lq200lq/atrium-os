@@ -15,7 +15,7 @@ const model = defineModel<boolean>({ required: true })
       type="checkbox"
       :checked="model"
       :disabled="disabled"
-      class="h-4 w-4 rounded border-slate-300 accent-[var(--color-accent)]"
+      class="h-4 w-4 rounded border-line accent-[var(--color-accent)]"
       @change="model = ($event.target as HTMLInputElement).checked"
     />
     <span v-if="label">{{ label }}</span>

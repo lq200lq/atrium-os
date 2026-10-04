@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 
+const { t, tm, rt } = useI18n()
 const now = ref(new Date())
 const timer = setInterval(() => (now.value = new Date()), 1000)
 onUnmounted(() => clearInterval(timer))
@@ -11,6 +13,10 @@ const clock = computed(() =>
 )
 const dateLine = computed(() =>
   now.value.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' }),
+)
+
+const weekdays = computed(() =>
+  (tm('widget.weekdays') as unknown[]).map((m) => rt(m as Parameters<typeof rt>[0])),
 )
 
 // Monday-first month grid
@@ -31,9 +37,9 @@ const cells = computed(() => {
 })
 
 const todos = ref([
-  { text: '评审智慧园区方案 v1', done: true },
-  { text: '整理技术文档归档', done: false },
-  { text: '准备周五项目汇报', done: false },
+  { key: 'widget.todos.t1', done: true },
+  { key: 'widget.todos.t2', done: false },
+  { key: 'widget.todos.t3', done: false },
 ])
 </script>
 
@@ -50,14 +56,14 @@ const todos = ref([
       class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
     >
       <div class="mb-2 grid grid-cols-7 gap-1 text-center text-micro opacity-70">
-        <span v-for="w in ['一', '二', '三', '四', '五', '六', '日']" :key="w">{{ w }}</span>
+        <span v-for="(w, i) in weekdays" :key="i">{{ w }}</span>
       </div>
       <div class="grid grid-cols-7 gap-1 text-center text-caption">
         <span
           v-for="(c, i) in cells"
           :key="i"
           class="flex h-6 items-center justify-center rounded-md"
-          :class="c.today ? 'bg-white text-accent-strong font-semibold' : 'opacity-80'"
+          :class="c.today ? 'bg-surface text-accent-strong font-semibold' : 'opacity-80'"
         >
           {{ c.day || '' }}
         </span>
@@ -67,20 +73,20 @@ const todos = ref([
     <div
       class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
     >
-      <p class="mb-2 text-ui font-medium">今日事项</p>
+      <p class="mb-2 text-ui font-medium">{{ t('widget.today') }}</p>
       <ul class="space-y-1.5">
-        <li v-for="(t, i) in todos" :key="i">
+        <li v-for="(todo, i) in todos" :key="i">
           <button
             class="flex w-full items-center gap-2 text-left text-caption"
-            @click="t.done = !t.done"
+            @click="todo.done = !todo.done"
           >
             <span
               class="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-glass-border-active text-micro"
-              :class="t.done ? 'bg-glass-strong text-accent-strong' : ''"
+              :class="todo.done ? 'bg-glass-strong text-accent-strong' : ''"
             >
-              <OsIcon v-if="t.done" name="check" :size="10" :stroke-width="3" />
+              <OsIcon v-if="todo.done" name="check" :size="10" :stroke-width="3" />
             </span>
-            <span :class="t.done ? 'opacity-50 line-through' : ''">{{ t.text }}</span>
+            <span :class="todo.done ? 'opacity-50 line-through' : ''">{{ t(todo.key) }}</span>
           </button>
         </li>
       </ul>

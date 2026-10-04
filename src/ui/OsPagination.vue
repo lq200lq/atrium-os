@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = withDefaults(
   defineProps<{
@@ -10,6 +11,7 @@ const props = withDefaults(
 )
 
 const page = defineModel<number>({ required: true })
+const { t } = useI18n()
 
 const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.pageSize)))
 
@@ -29,31 +31,31 @@ function go(p: number) {
 
 <template>
   <div class="flex items-center justify-end gap-1 text-ui text-ink">
-    <span class="mr-2 text-caption text-ink-mute">共 {{ total }} 条</span>
+    <span class="mr-2 text-caption text-ink-mute">{{ t('pagination.total', { n: total }) }}</span>
     <button
-      class="rounded border border-slate-200 px-2 py-0.5 disabled:opacity-40"
+      class="rounded border border-line px-2 py-0.5 disabled:opacity-40"
       :disabled="page <= 1"
       @click="go(page - 1)"
     >
-      上一页
+      {{ t('pagination.prev') }}
     </button>
     <button
       v-for="p in pages"
       :key="p"
       class="min-w-7 rounded border px-2 py-0.5"
       :class="
-        p === page ? 'border-accent bg-accent text-white' : 'border-slate-200 hover:bg-slate-50'
+        p === page ? 'border-accent bg-accent text-on-accent' : 'border-line hover:bg-surface-hover'
       "
       @click="go(p)"
     >
       {{ p }}
     </button>
     <button
-      class="rounded border border-slate-200 px-2 py-0.5 disabled:opacity-40"
+      class="rounded border border-line px-2 py-0.5 disabled:opacity-40"
       :disabled="page >= totalPages"
       @click="go(page + 1)"
     >
-      下一页
+      {{ t('pagination.next') }}
     </button>
   </div>
 </template>

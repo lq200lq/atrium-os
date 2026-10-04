@@ -3,6 +3,7 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 export const manifest: AppManifest = {
   id: 'component-gallery',
   name: '组件陈列',
+  nameKey: 'apps.componentGallery',
   icon: 'boxes',
   tint: 'from-fuchsia-500 to-pink-600',
   entry: () => import('./App.vue'),

@@ -3,6 +3,7 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 export const manifest: AppManifest = {
   id: 'ai-assistant',
   name: 'AI 助手',
+  nameKey: 'apps.aiAssistant',
   icon: 'bot',
   tint: 'from-violet-500 to-purple-600',
   entry: () => import('./App.vue'),

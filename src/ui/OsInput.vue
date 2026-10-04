@@ -8,7 +8,7 @@ const emit = defineEmits<{ enter: []; esc: [] }>()
   <input
     v-model="model"
     :placeholder="placeholder"
-    class="w-full rounded-md border border-slate-200 px-3 py-1.5 text-ui text-ink outline-none focus:border-accent"
+    class="w-full rounded-md border border-line px-3 py-1.5 text-ui text-ink outline-none focus:border-accent"
     @keydown.enter="emit('enter')"
     @keydown.esc="emit('esc')"
   />

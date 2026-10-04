@@ -17,11 +17,11 @@ const model = defineModel<boolean>({ required: true })
       :aria-checked="model"
       :disabled="disabled"
       class="relative h-5 w-9 rounded-full transition"
-      :class="model ? 'bg-accent' : 'bg-slate-300'"
+      :class="model ? 'bg-accent' : 'bg-ink-mute'"
       @click="!disabled && (model = !model)"
     >
       <span
-        class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all"
+        class="absolute top-0.5 h-4 w-4 rounded-full bg-surface shadow transition-all"
         :class="model ? 'left-4.5' : 'left-0.5'"
       />
     </button>

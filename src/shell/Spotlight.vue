@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import { useOS } from '@/kernel/composables/useOS'
 import { isUnderTrash } from '@/kernel/fs/types'
@@ -7,6 +8,7 @@ import { fileIconClass, fileIconName, type IconName } from '@/kernel/icons'
 import { useAppRegistry } from '@/kernel/stores/appRegistry'
 import { useShellUi } from '@/kernel/stores/shellUi'
 import { useVfs } from '@/kernel/stores/vfs'
+import { useAppName } from '@/i18n'
 
 type Hit = {
   kind: 'app' | 'file'
@@ -21,6 +23,8 @@ const ui = useShellUi()
 const os = useOS()
 const registry = useAppRegistry()
 const vfs = useVfs()
+const { t } = useI18n()
+const appName = useAppName()
 
 const query = ref('')
 const cursor = ref(0)
@@ -31,12 +35,13 @@ const hits = computed<Hit[]>(() => {
   const out: Hit[] = []
 
   for (const app of registry.accessibleApps) {
-    const hay = [app.id, app.name, ...(app.keywords ?? [])].join(' ').toLowerCase()
+    const label = appName(app)
+    const hay = [app.id, app.name, label, ...(app.keywords ?? [])].join(' ').toLowerCase()
     if (!q || hay.includes(q)) {
       out.push({
         kind: 'app',
-        label: app.name,
-        sub: `应用 · ${app.id}`,
+        label,
+        sub: `${t('spotlight.appKind')} · ${app.id}`,
         icon: app.icon,
         run: () => os.open(app.id),
       })
@@ -100,19 +105,19 @@ function onKey(e: KeyboardEvent) {
 <template>
   <div
     v-if="ui.spotlightOpen"
-    class="fixed inset-0 z-[9997] flex items-start justify-center bg-black/20 pt-28 backdrop-blur-sm"
+    class="fixed inset-0 z-[9997] flex items-start justify-center bg-scrim pt-28 backdrop-blur-sm"
     @pointerdown.self="ui.closeOverlays()"
   >
     <div
       class="w-[520px] max-w-[92vw] overflow-hidden rounded-2xl border border-glass-border-active bg-glass-pop shadow-pop"
     >
-      <div class="flex items-center gap-2 border-b border-slate-200/70 px-4 py-3">
+      <div class="flex items-center gap-2 border-b border-line px-4 py-3">
         <OsIcon name="search" :size="16" class="text-ink-mute" />
         <input
           ref="inputEl"
           v-model="query"
           class="flex-1 bg-transparent text-title text-ink outline-none placeholder:text-ink-mute"
-          placeholder="搜索应用与文件…"
+          :placeholder="t('spotlight.placeholder')"
           @keydown="onKey"
         />
         <span class="text-caption text-ink-mute">esc</span>
@@ -121,7 +126,7 @@ function onKey(e: KeyboardEvent) {
         <li v-for="(h, i) in hits" :key="h.kind + h.sub">
           <button
             class="flex w-full items-center gap-3 px-4 py-2 text-left"
-            :class="i === cursor ? 'bg-accent-soft' : 'hover:bg-slate-50'"
+            :class="i === cursor ? 'bg-accent-soft' : 'hover:bg-surface-hover'"
             @mouseenter="cursor = i"
             @click="pick(h)"
           >
@@ -133,7 +138,7 @@ function onKey(e: KeyboardEvent) {
           </button>
         </li>
         <li v-if="hits.length === 0" class="px-4 py-8 text-center text-ui text-ink-mute">
-          无匹配结果
+          {{ t('spotlight.noResult') }}
         </li>
       </ul>
     </div>

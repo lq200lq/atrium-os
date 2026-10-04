@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import OsBadge from '@/ui/OsBadge.vue'
 import { useNotification } from '@/kernel/stores/notification'
+import { useSettings } from '@/kernel/stores/settings'
 import { useShellUi } from '@/kernel/stores/shellUi'
 
 const ui = useShellUi()
 const notif = useNotification()
+const settings = useSettings()
+const { t } = useI18n()
 
-const menus = ['工作台', '文件', '编辑', '视图', '应用', '窗口', '帮助']
+const menus = ['workbench', 'file', 'edit', 'view', 'app', 'window', 'help'] as const
 const now = ref(new Date())
 const timer = setInterval(() => (now.value = new Date()), 1000)
 onUnmounted(() => clearInterval(timer))
 
 const time = () =>
-  now.value.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
+  now.value.toLocaleTimeString(settings.lang, { hour: '2-digit', minute: '2-digit', hour12: false })
 const date = () =>
-  now.value.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' })
+  now.value.toLocaleDateString(settings.lang, { month: 'long', day: 'numeric', weekday: 'short' })
 </script>
 
 <template>
@@ -29,7 +33,7 @@ const date = () =>
       >
         <OsIcon name="boxes" :size="14" />
       </div>
-      <span class="text-ui font-semibold text-ink-strong">万物皆应用</span>
+      <span class="text-ui font-semibold text-ink-strong">{{ t('brand.slogan') }}</span>
     </div>
 
     <nav class="flex shrink-0 items-center gap-0.5">
@@ -38,7 +42,7 @@ const date = () =>
         :key="m"
         class="whitespace-nowrap rounded px-2 py-0.5 text-ui text-ink hover:bg-glass-raise"
       >
-        {{ m }}
+        {{ t(`topbar.menus.${m}`) }}
       </button>
     </nav>
 
@@ -48,8 +52,8 @@ const date = () =>
         @click="ui.openSpotlight()"
       >
         <OsIcon name="search" :size="14" class="text-ink-mute" />
-        <span class="flex-1 truncate">搜索应用、文件、知识…</span>
-        <kbd class="rounded border border-slate-300/60 px-1 text-micro text-ink-mute">⌘K</kbd>
+        <span class="flex-1 truncate">{{ t('topbar.search') }}</span>
+        <kbd class="rounded border border-line px-1 text-micro text-ink-mute">⌘K</kbd>
       </button>
     </div>
 

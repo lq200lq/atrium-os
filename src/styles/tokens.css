@@ -4,35 +4,45 @@
   --text-ui: 13px;
   --text-title: 14px;
 
-  --color-ink-strong: #1e293b;
-  --color-ink: #334155;
-  --color-ink-mute: #94a3b8;
+  /* 语义色一律指向 --raw-* 原始值层（见 theme-light.css / theme-dark.css），
+   * 明暗切换只改原始层，工具类与语义名保持稳定。 */
+  --color-ink-strong: var(--raw-ink-strong);
+  --color-ink: var(--raw-ink);
+  --color-ink-mute: var(--raw-ink-mute);
 
-  --color-glass-bar: rgba(255, 255, 255, 0.28);
-  --color-glass-raise: rgba(255, 255, 255, 0.45);
-  --color-glass-base: rgba(255, 255, 255, 0.7);
-  --color-glass-strong: rgba(255, 255, 255, 0.85);
-  --color-glass-pop: rgba(255, 255, 255, 0.92);
-  --color-glass-border: rgba(255, 255, 255, 0.4);
-  --color-glass-border-active: rgba(255, 255, 255, 0.6);
+  --color-surface: var(--raw-surface);
+  --color-surface-sunken: var(--raw-surface-sunken);
+  --color-surface-hover: var(--raw-surface-hover);
+  --color-line: var(--raw-line);
+  --color-line-soft: var(--raw-line-soft);
+  --color-on-accent: var(--raw-on-accent);
+  --color-scrim: var(--raw-scrim);
 
-  --color-accent: #0ea5e9;
-  --color-accent-strong: #0369a1;
-  --color-accent-soft: #e0f2fe;
-  --color-danger: #f43f5e;
-  --color-warning: #f59e0b;
-  --color-success: #10b981;
+  --color-glass-bar: var(--raw-glass-bar);
+  --color-glass-raise: var(--raw-glass-raise);
+  --color-glass-base: var(--raw-glass-base);
+  --color-glass-strong: var(--raw-glass-strong);
+  --color-glass-pop: var(--raw-glass-pop);
+  --color-glass-border: var(--raw-glass-border);
+  --color-glass-border-active: var(--raw-glass-border-active);
 
-  --color-traffic-close: #ff5f57;
-  --color-traffic-min: #febc2e;
-  --color-traffic-max: #28c840;
+  --color-accent: var(--raw-accent);
+  --color-accent-strong: var(--raw-accent-strong);
+  --color-accent-soft: var(--raw-accent-soft);
+  --color-danger: var(--raw-danger);
+  --color-warning: var(--raw-warning);
+  --color-success: var(--raw-success);
 
-  --color-file-dir: #f59e0b;
-  --color-file-docx: #0ea5e9;
-  --color-file-xlsx: #10b981;
-  --color-file-pptx: #f97316;
-  --color-file-pdf: #f43f5e;
-  --color-file-other: #94a3b8;
+  --color-traffic-close: var(--raw-traffic-close);
+  --color-traffic-min: var(--raw-traffic-min);
+  --color-traffic-max: var(--raw-traffic-max);
+
+  --color-file-dir: var(--raw-file-dir);
+  --color-file-docx: var(--raw-file-docx);
+  --color-file-xlsx: var(--raw-file-xlsx);
+  --color-file-pptx: var(--raw-file-pptx);
+  --color-file-pdf: var(--raw-file-pdf);
+  --color-file-other: var(--raw-file-other);
 
   --shadow-window: 0 25px 50px -12px rgba(15, 23, 42, 0.3);
   --shadow-window-dim: 0 10px 15px -3px rgba(15, 23, 42, 0.15);

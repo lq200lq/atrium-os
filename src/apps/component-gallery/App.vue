@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsBadge from '@/ui/OsBadge.vue'
 import OsButton from '@/ui/OsButton.vue'
 import OsCheckbox from '@/ui/OsCheckbox.vue'
@@ -19,14 +20,15 @@ import OsTooltip from '@/ui/OsTooltip.vue'
 import OsTrafficLights from '@/ui/OsTrafficLights.vue'
 import { useNotification } from '@/kernel/stores/notification'
 
+const { t } = useI18n()
 const notif = useNotification()
 const tab = ref('basic')
-const tabs = [
-  { key: 'basic', label: '基础' },
-  { key: 'input', label: '录入' },
-  { key: 'display', label: '展示' },
-  { key: 'feedback', label: '反馈' },
-]
+const tabs = computed(() => [
+  { key: 'basic', label: t('gallery.tabs.basic') },
+  { key: 'input', label: t('gallery.tabs.input') },
+  { key: 'display', label: t('gallery.tabs.display') },
+  { key: 'feedback', label: t('gallery.tabs.feedback') },
+])
 
 // 录入
 const text = ref('')
@@ -42,26 +44,32 @@ const selectOptions = [
 
 // 表单
 const formModel = ref<Record<string, unknown>>({ name: '', framework: '', agree: false })
-const formFields: FormField[] = [
+const formFields = computed<FormField[]>(() => [
   {
     key: 'name',
-    label: '名称',
+    label: t('gallery.fieldName'),
     type: 'input',
     required: true,
     min: 2,
-    placeholder: '至少 2 个字符',
+    placeholder: t('gallery.namePlaceholder'),
   },
-  { key: 'framework', label: '框架', type: 'select', options: selectOptions, required: true },
+  {
+    key: 'framework',
+    label: t('gallery.fieldFramework'),
+    type: 'select',
+    options: selectOptions,
+    required: true,
+  },
   {
     key: 'agree',
-    label: '我已阅读并同意条款',
+    label: t('gallery.agree'),
     type: 'checkbox',
     required: true,
-    message: '请先同意条款',
+    message: t('gallery.agreeMsg'),
   },
-]
+])
 function onFormSubmit(values: Record<string, unknown>) {
-  notif.push('表单已提交', JSON.stringify(values))
+  notif.push(t('gallery.formSubmitted'), JSON.stringify(values))
 }
 
 // 表格
@@ -71,11 +79,11 @@ interface Row extends Record<string, unknown> {
   role: string
   age: number
 }
-const columns: TableColumn<Row>[] = [
-  { key: 'name', title: '姓名', sortable: true },
-  { key: 'role', title: '角色', slot: 'role' },
-  { key: 'age', title: '年龄', sortable: true, align: 'right' },
-]
+const columns = computed<TableColumn<Row>[]>(() => [
+  { key: 'name', title: t('gallery.tableName'), sortable: true },
+  { key: 'role', title: t('gallery.tableRole'), slot: 'role' },
+  { key: 'age', title: t('gallery.tableAge'), sortable: true, align: 'right' },
+])
 const rows = ref<Row[]>([
   { id: 1, name: '张三', role: 'admin', age: 28 },
   { id: 2, name: '李四', role: 'editor', age: 34 },
@@ -101,23 +109,29 @@ const drawerOpen = ref(false)
       <section>
         <h3 class="mb-2 text-title font-medium text-ink">OsButton</h3>
         <div class="flex flex-wrap items-center gap-2">
-          <OsButton variant="primary">主要</OsButton>
-          <OsButton>次要</OsButton>
-          <OsButton variant="danger">危险</OsButton>
-          <OsButton size="sm">小尺寸</OsButton>
-          <OsButton disabled>禁用</OsButton>
+          <OsButton variant="primary">{{ t('gallery.primary') }}</OsButton>
+          <OsButton>{{ t('gallery.secondary') }}</OsButton>
+          <OsButton variant="danger">{{ t('gallery.danger') }}</OsButton>
+          <OsButton size="sm">{{ t('gallery.small') }}</OsButton>
+          <OsButton disabled>{{ t('gallery.disabled') }}</OsButton>
         </div>
       </section>
       <section>
         <h3 class="mb-2 text-title font-medium text-ink">OsInput</h3>
-        <OsInput v-model="text" placeholder="输入点什么…" class="max-w-60" />
-        <p class="mt-1 text-caption text-ink-mute">当前值：{{ text || '（空）' }}</p>
+        <OsInput v-model="text" :placeholder="t('gallery.inputPlaceholder')" class="max-w-60" />
+        <p class="mt-1 text-caption text-ink-mute">
+          {{ t('gallery.currentValue', { v: text || t('gallery.emptyValue') }) }}
+        </p>
       </section>
       <section>
         <h3 class="mb-2 text-title font-medium text-ink">OsBadge / OsTrafficLights</h3>
         <div class="flex items-center gap-4">
-          <span class="inline-flex items-center gap-1">通知 <OsBadge :count="5" /></span>
-          <span class="inline-flex items-center gap-1">消息 <OsBadge :count="12" /></span>
+          <span class="inline-flex items-center gap-1"
+            >{{ t('gallery.badgeNotice') }} <OsBadge :count="5"
+          /></span>
+          <span class="inline-flex items-center gap-1"
+            >{{ t('gallery.badgeMessage') }} <OsBadge :count="12"
+          /></span>
           <OsTrafficLights />
         </div>
       </section>
@@ -127,8 +141,8 @@ const drawerOpen = ref(false)
     <div v-else-if="tab === 'input'" class="space-y-5 p-4">
       <section class="flex flex-wrap items-center gap-6">
         <OsSelect v-model="selectVal" :options="selectOptions" class="w-40" />
-        <OsSwitch v-model="switchVal" label="开关" />
-        <OsCheckbox v-model="checkVal" label="复选" />
+        <OsSwitch v-model="switchVal" :label="t('gallery.switch')" />
+        <OsCheckbox v-model="checkVal" :label="t('gallery.checkbox')" />
         <OsRadio
           v-model="radioVal"
           :options="[
@@ -139,7 +153,7 @@ const drawerOpen = ref(false)
         />
       </section>
       <section>
-        <h3 class="mb-2 text-title font-medium text-ink">OsForm（schema 驱动 + 校验）</h3>
+        <h3 class="mb-2 text-title font-medium text-ink">{{ t('gallery.formTitle') }}</h3>
         <OsForm
           v-model="formModel"
           :fields="formFields"
@@ -154,11 +168,15 @@ const drawerOpen = ref(false)
       <section>
         <div class="mb-2 flex items-center gap-2">
           <h3 class="text-title font-medium text-ink">OsTable</h3>
-          <OsButton size="sm" @click="reload">模拟加载</OsButton>
-          <OsTooltip text="刷新表格数据"><OsButton size="sm">悬停提示</OsButton></OsTooltip>
-          <span class="text-caption text-ink-mute">已选 {{ selected.length }} 行</span>
+          <OsButton size="sm" @click="reload">{{ t('gallery.simulateLoad') }}</OsButton>
+          <OsTooltip :text="t('gallery.hoverTipText')">
+            <OsButton size="sm">{{ t('gallery.hoverTip') }}</OsButton>
+          </OsTooltip>
+          <span class="text-caption text-ink-mute">{{
+            t('gallery.selectedRows', { n: selected.length })
+          }}</span>
         </div>
-        <div class="h-56 rounded-lg border border-slate-200">
+        <div class="h-56 rounded-lg border border-line">
           <OsTable
             v-model:selected="selected"
             v-model:page="page"
@@ -180,7 +198,7 @@ const drawerOpen = ref(false)
                 variant="danger"
                 @click="rows = rows.filter((r) => r.id !== row.id)"
               >
-                删除
+                {{ t('common.delete') }}
               </OsButton>
             </template>
           </OsTable>
@@ -192,7 +210,7 @@ const drawerOpen = ref(false)
       <section class="grid grid-cols-2 gap-4">
         <div>
           <h3 class="mb-2 text-title font-medium text-ink">OsEmpty</h3>
-          <OsEmpty description="这里空空如也" />
+          <OsEmpty :description="t('gallery.emptyText')" />
         </div>
         <div>
           <h3 class="mb-2 text-title font-medium text-ink">OsSkeleton</h3>
@@ -204,31 +222,33 @@ const drawerOpen = ref(false)
     <!-- 反馈 -->
     <div v-else class="space-y-5 p-4">
       <div class="flex flex-wrap gap-2">
-        <OsButton variant="primary" @click="dialogOpen = true">打开 Dialog</OsButton>
-        <OsButton @click="drawerOpen = true">打开 Drawer</OsButton>
-        <OsButton @click="notif.push('吐司提示', '这条来自 notification store')"
-          >触发 Toast</OsButton
-        >
+        <OsButton variant="primary" @click="dialogOpen = true">
+          {{ t('gallery.openDialog') }}
+        </OsButton>
+        <OsButton @click="drawerOpen = true">{{ t('gallery.openDrawer') }}</OsButton>
+        <OsButton @click="notif.push(t('gallery.toastTitle'), t('gallery.toastBody'))">
+          {{ t('gallery.triggerToast') }}
+        </OsButton>
       </div>
-      <p class="text-caption text-ink-mute">
-        Dialog / Drawer / Toast 均以 token 派生样式呈现；Toast 复用通知中心状态，不另起一套。
-      </p>
+      <p class="text-caption text-ink-mute">{{ t('gallery.feedbackHint') }}</p>
 
       <OsDialog
         v-if="dialogOpen"
-        title="确认操作"
+        :title="t('gallery.dialogTitle')"
         @confirm="dialogOpen = false"
         @cancel="dialogOpen = false"
       >
-        <p class="text-ui text-ink">这是一个 OsDialog 示例，点击确定或取消关闭。</p>
+        <p class="text-ui text-ink">{{ t('gallery.dialogBody') }}</p>
       </OsDialog>
 
-      <OsDrawer v-model="drawerOpen" title="抽屉标题">
-        <p>这是 OsDrawer 内容区，可放置详情、表单或长列表。</p>
+      <OsDrawer v-model="drawerOpen" :title="t('gallery.drawerTitle')">
+        <p>{{ t('gallery.drawerBody') }}</p>
         <template #footer>
           <div class="flex justify-end gap-2">
-            <OsButton size="sm" @click="drawerOpen = false">关闭</OsButton>
-            <OsButton size="sm" variant="primary" @click="drawerOpen = false">保存</OsButton>
+            <OsButton size="sm" @click="drawerOpen = false">{{ t('common.close') }}</OsButton>
+            <OsButton size="sm" variant="primary" @click="drawerOpen = false">
+              {{ t('common.save') }}
+            </OsButton>
           </div>
         </template>
       </OsDrawer>

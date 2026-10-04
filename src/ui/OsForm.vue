@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsButton from './OsButton.vue'
 import OsInput from './OsInput.vue'
 import OsSelect from './OsSelect.vue'
@@ -32,11 +33,12 @@ const props = withDefaults(
     labelWidth?: string
     submitText?: string
   }>(),
-  { layout: 'vertical', disabled: false, labelWidth: '88px', submitText: '提交' },
+  { layout: 'vertical', disabled: false, labelWidth: '88px', submitText: '' },
 )
 
 const emit = defineEmits<{ submit: [values: Record<string, unknown>] }>()
 const model = defineModel<Record<string, unknown>>({ required: true })
+const { t } = useI18n()
 
 const errors = reactive<Record<string, string>>({})
 
@@ -50,22 +52,23 @@ function setField(key: string, v: unknown) {
 
 function validateField(field: FormField): string {
   const v = valueOf(field.key)
+  const label = field.label
   const empty = v === undefined || v === null || v === '' || v === false
-  if (field.required && empty) return field.message ?? `${field.label}不能为空`
+  if (field.required && empty) return field.message ?? t('validation.required', { label })
   if (empty) return ''
   if (typeof v === 'string') {
     if (field.min !== undefined && v.length < field.min)
-      return field.message ?? `${field.label}至少 ${field.min} 个字符`
+      return field.message ?? t('validation.minLen', { label, min: field.min })
     if (field.max !== undefined && v.length > field.max)
-      return field.message ?? `${field.label}至多 ${field.max} 个字符`
+      return field.message ?? t('validation.maxLen', { label, max: field.max })
     if (field.pattern && !new RegExp(field.pattern).test(v))
-      return field.message ?? `${field.label}格式不正确`
+      return field.message ?? t('validation.pattern', { label })
   }
   if (typeof v === 'number') {
     if (field.min !== undefined && v < field.min)
-      return field.message ?? `${field.label}不得小于 ${field.min}`
+      return field.message ?? t('validation.minNum', { label, min: field.min })
     if (field.max !== undefined && v > field.max)
-      return field.message ?? `${field.label}不得大于 ${field.max}`
+      return field.message ?? t('validation.maxNum', { label, max: field.max })
   }
   return ''
 }
@@ -127,7 +130,7 @@ defineExpose({ validate, errors })
           />
           <textarea
             v-else-if="field.type === 'textarea'"
-            class="w-full rounded-md border border-slate-200 px-3 py-1.5 text-ui text-ink outline-none focus:border-accent"
+            class="w-full rounded-md border border-line px-3 py-1.5 text-ui text-ink outline-none focus:border-accent"
             :placeholder="field.placeholder"
             :disabled="disabled"
             rows="3"
@@ -172,7 +175,9 @@ defineExpose({ validate, errors })
 
     <div :class="layout === 'inline' ? '' : 'mt-1 flex justify-end gap-2'">
       <slot name="actions">
-        <OsButton type="submit" variant="primary" :disabled="disabled">{{ submitText }}</OsButton>
+        <OsButton type="submit" variant="primary" :disabled="disabled">{{
+          submitText || t('common.submit')
+        }}</OsButton>
       </slot>
     </div>
   </form>

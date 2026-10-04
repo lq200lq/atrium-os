@@ -177,32 +177,32 @@ function onRestore() {
 
 <template>
   <div class="relative flex h-full text-ui">
-    <aside class="w-36 shrink-0 space-y-1 border-r border-slate-200/70 bg-slate-50/60 p-2">
+    <aside class="w-36 shrink-0 space-y-1 border-r border-line bg-surface-sunken/60 p-2">
       <button
-        class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-ink hover:bg-white"
+        class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-ink hover:bg-surface"
         :class="{ 'bg-accent-soft text-accent-strong': cwd === HOME }"
         @click="navigate(HOME)"
       >
         我的文件
       </button>
       <button
-        class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-ink hover:bg-white"
+        class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-ink hover:bg-surface"
         :class="{ 'bg-accent-soft text-accent-strong': inTrash }"
         @click="navigate(TRASH_ROOT)"
       >
         回收站
-        <span v-if="vfs.trash.length" class="rounded bg-slate-200 px-1.5 text-caption text-ink">
+        <span v-if="vfs.trash.length" class="rounded bg-line px-1.5 text-caption text-ink">
           {{ vfs.trash.length }}
         </span>
       </button>
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">
-      <div class="flex items-center gap-2 border-b border-slate-200/70 px-4 py-2">
+      <div class="flex items-center gap-2 border-b border-line px-4 py-2">
         <nav class="flex min-w-0 flex-1 items-center gap-1 text-ink">
           <template v-for="(c, i) in crumbs" :key="c.path">
             <span v-if="i > 0" class="text-ink-mute">/</span>
-            <button class="truncate rounded px-1 hover:bg-slate-100" @click="navigate(c.path)">
+            <button class="truncate rounded px-1 hover:bg-surface-hover" @click="navigate(c.path)">
               {{ c.name }}
             </button>
           </template>

@@ -15,11 +15,11 @@ withDefaults(
       <div
         v-for="i in rows"
         :key="i"
-        class="mb-2 h-3 rounded bg-slate-200/80"
+        class="mb-2 h-3 rounded bg-line"
         :class="i === rows ? 'w-2/3' : 'w-full'"
       />
     </template>
-    <div v-else-if="variant === 'rect'" class="h-full w-full rounded-lg bg-slate-200/80" />
-    <div v-else class="h-10 w-10 rounded-full bg-slate-200/80" />
+    <div v-else-if="variant === 'rect'" class="h-full w-full rounded-lg bg-line" />
+    <div v-else class="h-10 w-10 rounded-full bg-line" />
   </div>
 </template>

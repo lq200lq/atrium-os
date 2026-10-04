@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useOS } from '@/kernel/composables/useOS'
 import { useTheme } from '@/kernel/stores/theme'
 import { useWindowManager } from '@/kernel/stores/windowManager'
@@ -10,6 +11,7 @@ const emit = defineEmits<{ close: [] }>()
 const wm = useWindowManager()
 const theme = useTheme()
 const os = useOS()
+const { t } = useI18n()
 const root = ref<HTMLElement | null>(null)
 
 const pos = computed(() => ({
@@ -18,9 +20,9 @@ const pos = computed(() => ({
 }))
 
 const items = [
-  { label: '层叠窗口', run: () => wm.cascadeAll() },
-  { label: '更换壁纸', run: () => theme.cycleWallpaper() },
-  { label: '打开应用中心', run: () => os.exec('app-center:open') },
+  { key: 'context.cascade', run: () => wm.cascadeAll() },
+  { key: 'context.wallpaper', run: () => theme.cycleWallpaper() },
+  { key: 'context.appCenter', run: () => os.exec('app-center:open') },
 ]
 
 function runItem(it: { run: () => void }) {
@@ -50,12 +52,12 @@ onUnmounted(() => {
     class="fixed z-[9000] w-44 rounded-lg border border-glass-border-active bg-glass-pop py-1 text-ui text-ink shadow-pop backdrop-blur-xl"
     :style="pos"
   >
-    <li v-for="it in items" :key="it.label">
+    <li v-for="it in items" :key="it.key">
       <button
         class="w-full px-4 py-1.5 text-left hover:bg-accent-soft hover:text-accent-strong"
         @click="runItem(it)"
       >
-        {{ it.label }}
+        {{ t(it.key) }}
       </button>
     </li>
   </ul>

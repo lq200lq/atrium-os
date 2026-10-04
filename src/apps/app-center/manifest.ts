@@ -3,6 +3,7 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 export const manifest: AppManifest = {
   id: 'app-center',
   name: '应用中心',
+  nameKey: 'apps.appCenter',
   icon: 'puzzle',
   tint: 'from-indigo-500 to-sky-500',
   entry: () => import('./App.vue'),

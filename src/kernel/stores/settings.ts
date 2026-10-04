@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
+import { toRaw } from 'vue'
 import { idbGet, idbSet } from '../fs/idb'
+import { LOCALES, setLocale, type Locale } from '@/i18n'
 
 const SETTINGS_KEY = 'settings-v1'
 
@@ -10,6 +12,7 @@ const SETTINGS_KEY = 'settings-v1'
 export const useSettings = defineStore('settings', {
   state: () => ({
     dockPinned: {} as Record<string, boolean>,
+    lang: 'zh-CN' as Locale,
   }),
   actions: {
     isPinned(appId: string, manifestDefault: boolean): boolean {
@@ -29,9 +32,16 @@ export const useSettings = defineStore('settings', {
       void this.persist()
     },
 
+    setLang(lang: Locale) {
+      if (!LOCALES.includes(lang)) return
+      this.lang = lang
+      setLocale(lang)
+      void this.persist()
+    },
+
     async persist() {
       try {
-        await idbSet(SETTINGS_KEY, { dockPinned: this.dockPinned })
+        await idbSet(SETTINGS_KEY, { dockPinned: toRaw(this.dockPinned), lang: this.lang })
       } catch (e) {
         console.warn('[settings] 持久化失败', e)
       }
@@ -39,9 +49,13 @@ export const useSettings = defineStore('settings', {
 
     async restore() {
       try {
-        const saved = await idbGet<{ dockPinned?: unknown }>(SETTINGS_KEY)
+        const saved = await idbGet<{ dockPinned?: unknown; lang?: unknown }>(SETTINGS_KEY)
         if (saved && saved.dockPinned && typeof saved.dockPinned === 'object') {
           this.dockPinned = { ...(saved.dockPinned as Record<string, boolean>) }
+        }
+        if (saved && typeof saved.lang === 'string' && LOCALES.includes(saved.lang as Locale)) {
+          this.lang = saved.lang as Locale
+          setLocale(this.lang)
         }
       } catch (e) {
         console.warn('[settings] 恢复失败', e)

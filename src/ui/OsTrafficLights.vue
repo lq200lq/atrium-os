@@ -1,24 +1,27 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 const emit = defineEmits<{ close: []; minimize: []; maximize: [] }>()
+const { t } = useI18n()
 </script>
 
 <template>
   <div class="flex items-center gap-1.5">
     <button
       class="h-3 w-3 rounded-full bg-traffic-close hover:brightness-90"
-      title="关闭"
+      :title="t('window.close')"
       @pointerdown.stop
       @click="emit('close')"
     />
     <button
       class="h-3 w-3 rounded-full bg-traffic-min hover:brightness-90"
-      title="最小化"
+      :title="t('window.minimize')"
       @pointerdown.stop
       @click="emit('minimize')"
     />
     <button
       class="h-3 w-3 rounded-full bg-traffic-max hover:brightness-90"
-      title="最大化 / 还原"
+      :title="t('window.maximize')"
       @pointerdown.stop
       @click="emit('maximize')"
     />

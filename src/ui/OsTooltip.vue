@@ -24,7 +24,7 @@ const show = ref(false)
     <span
       v-if="show"
       role="tooltip"
-      class="pointer-events-none absolute left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded bg-slate-800/90 px-2 py-1 text-caption text-white shadow-pop"
+      class="pointer-events-none absolute left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded bg-ink-strong px-2 py-1 text-caption text-surface shadow-pop"
       :class="placement === 'top' ? 'bottom-full mb-1' : 'top-full mt-1'"
     >
       {{ text }}

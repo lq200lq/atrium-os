@@ -3,6 +3,7 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 export const manifest: AppManifest = {
   id: 'data-board',
   name: '数据看板',
+  nameKey: 'apps.dataBoard',
   icon: 'file-spreadsheet',
   tint: 'from-emerald-500 to-teal-600',
   entry: () => import('./App.vue'),

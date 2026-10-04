@@ -63,7 +63,7 @@ onUnmounted(() => {
 
 <template>
   <div class="flex h-full flex-col text-ui">
-    <div class="flex items-center gap-3 border-b border-slate-200/70 px-4 py-2 text-ink">
+    <div class="flex items-center gap-3 border-b border-line px-4 py-2 text-ink">
       <span class="truncate font-medium text-ink">{{ node?.name ?? '未关联文件' }}</span>
       <span class="flex-1" />
       <span v-if="savedAt" class="text-success">已保存 {{ savedAt }}</span>

@@ -1,0 +1,66 @@
+/* 原始值层（浅色）：语义 token 在 tokens.css 中引用这些 --raw-* 变量。
+ * 暗色由 theme-dark.css 的 :root[data-theme='dark'] 覆盖同名 --raw-*，语义层与工具类无需改动。 */
+:root {
+  /* 文本墨色 */
+  --raw-ink-strong: #1e293b;
+  --raw-ink: #334155;
+  --raw-ink-mute: #94a3b8;
+
+  /* 面板/描边/遮罩 */
+  --raw-surface: #ffffff;
+  --raw-surface-sunken: #f8fafc;
+  --raw-surface-hover: #f1f5f9;
+  --raw-line: #e2e8f0;
+  --raw-line-soft: #f1f5f9;
+  --raw-on-accent: #ffffff;
+  --raw-scrim: rgba(15, 23, 42, 0.25);
+
+  /* 玻璃材质（浅底：白高透明） */
+  --raw-glass-bar: rgba(255, 255, 255, 0.28);
+  --raw-glass-raise: rgba(255, 255, 255, 0.45);
+  --raw-glass-base: rgba(255, 255, 255, 0.7);
+  --raw-glass-strong: rgba(255, 255, 255, 0.85);
+  --raw-glass-pop: rgba(255, 255, 255, 0.92);
+  --raw-glass-border: rgba(255, 255, 255, 0.4);
+  --raw-glass-border-active: rgba(255, 255, 255, 0.6);
+
+  /* 强调色（缺省 sky，可被 :root[data-accent=*] 预设覆盖） */
+  --raw-accent: #0ea5e9;
+  --raw-accent-strong: #0369a1;
+  --raw-accent-soft: #e0f2fe;
+
+  /* 状态色 */
+  --raw-danger: #f43f5e;
+  --raw-warning: #f59e0b;
+  --raw-success: #10b981;
+
+  /* 交通灯 */
+  --raw-traffic-close: #ff5f57;
+  --raw-traffic-min: #febc2e;
+  --raw-traffic-max: #28c840;
+
+  /* 文件类型着色 */
+  --raw-file-dir: #f59e0b;
+  --raw-file-docx: #0ea5e9;
+  --raw-file-xlsx: #10b981;
+  --raw-file-pptx: #f97316;
+  --raw-file-pdf: #f43f5e;
+  --raw-file-other: #94a3b8;
+}
+
+/* 强调色预设：与明暗无关，仅覆盖 --raw-accent*，故 data-theme 与 data-accent 可自由组合 */
+:root[data-accent='violet'] {
+  --raw-accent: #8b5cf6;
+  --raw-accent-strong: #6d28d9;
+  --raw-accent-soft: #ede9fe;
+}
+:root[data-accent='emerald'] {
+  --raw-accent: #10b981;
+  --raw-accent-strong: #047857;
+  --raw-accent-soft: #d1fae5;
+}
+:root[data-accent='rose'] {
+  --raw-accent: #f43f5e;
+  --raw-accent-strong: #be123c;
+  --raw-accent-soft: #ffe4e6;
+}

@@ -61,14 +61,14 @@ function generatePlan() {
         :class="[
           'max-w-[85%] rounded-2xl px-3 py-2 text-ui leading-relaxed',
           m.role === 'bot'
-            ? 'bg-slate-100 text-ink'
+            ? 'bg-surface-hover text-ink'
             : 'ml-auto bg-gradient-to-br from-violet-500 to-purple-600 text-white',
         ]"
       >
         {{ m.text }}
         <div
           v-if="m.doc"
-          class="mt-2 flex items-center gap-2 rounded-lg border border-violet-200 bg-white px-3 py-2"
+          class="mt-2 flex items-center gap-2 rounded-lg border border-violet-200 bg-surface px-3 py-2"
         >
           <OsIcon name="file-text" :size="20" class="shrink-0 text-accent" />
           <span class="min-w-0 flex-1 truncate text-ink">{{ baseName(m.doc) }}</span>
@@ -81,7 +81,7 @@ function generatePlan() {
         </div>
       </div>
     </div>
-    <div class="border-t border-slate-200/70 p-3">
+    <div class="border-t border-line p-3">
       <button
         class="mb-2 flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-caption text-violet-600 hover:bg-violet-100"
         @click="generatePlan"
@@ -92,7 +92,7 @@ function generatePlan() {
       <div class="flex items-center gap-2">
         <input
           v-model="input"
-          class="flex-1 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-ui outline-none focus:border-violet-400"
+          class="flex-1 rounded-full border border-line bg-surface px-4 py-1.5 text-ui outline-none focus:border-violet-400"
           placeholder="输入你的问题…"
           @keydown.enter="send"
         />

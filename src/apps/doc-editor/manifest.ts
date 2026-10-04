@@ -3,6 +3,7 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 export const manifest: AppManifest = {
   id: 'doc-editor',
   name: '文档编辑',
+  nameKey: 'apps.docEditor',
   icon: 'notebook-pen',
   tint: 'from-blue-500 to-indigo-600',
   entry: () => import('./App.vue'),

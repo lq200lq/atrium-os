@@ -8,12 +8,19 @@ import { useWindowResize, type ResizeDir } from '@/kernel/composables/useWindowR
 import { WIN_ID_KEY } from '@/kernel/composables/useWindowContext'
 import { useAppRegistry } from '@/kernel/stores/appRegistry'
 import { useWindowManager, type WinState } from '@/kernel/stores/windowManager'
+import { useAppName } from '@/i18n'
 
 const props = defineProps<{ win: WinState }>()
 
 const wm = useWindowManager()
 const registry = useAppRegistry()
+const appName = useAppName()
 const manifest = computed(() => registry.byId(props.win.appId))
+// 默认标题（等于 manifest.name）随语言本地化；应用自定义标题（如文档名）保持原样
+const displayTitle = computed(() => {
+  const m = manifest.value
+  return m && props.win.title === m.name ? appName(m) : props.win.title
+})
 const { offset, dragging, onPointerdown } = useWindowDrag(props.win.id)
 const { delta, resizing, start } = useWindowResize(props.win.id)
 
@@ -69,7 +76,7 @@ const handles: { dir: ResizeDir; cls: string }[] = [
         class="flex min-w-0 flex-1 items-center justify-center gap-1.5 text-ui font-medium text-ink"
       >
         <OsIcon v-if="manifest" :name="manifest.icon" :size="14" class="text-ink-mute" />
-        <span class="truncate">{{ win.title }}</span>
+        <span class="truncate">{{ displayTitle }}</span>
       </div>
       <div class="w-14" />
     </header>

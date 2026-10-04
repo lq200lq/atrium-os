@@ -10,7 +10,7 @@ const active = defineModel<string>({ required: true })
 
 <template>
   <div class="flex h-full flex-col">
-    <div class="flex shrink-0 items-center gap-1 border-b border-slate-200/70 px-2" role="tablist">
+    <div class="flex shrink-0 items-center gap-1 border-b border-line px-2" role="tablist">
       <button
         v-for="t in tabs"
         :key="t.key"
