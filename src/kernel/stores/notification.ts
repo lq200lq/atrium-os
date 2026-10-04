@@ -2,12 +2,18 @@ import { defineStore } from 'pinia'
 import { commandBus } from '../bus/commandBus'
 import { baseName, type VfsChangeEvent } from '../fs/types'
 
+export interface NoticeAction {
+  label: string
+  appId: string
+}
+
 export interface Notice {
   id: number
   title: string
   body?: string
   time: number
   read: boolean
+  action?: NoticeAction
 }
 
 let seq = 0
@@ -31,9 +37,9 @@ export const useNotification = defineStore('notification', {
       })
     },
 
-    push(title: string, body?: string) {
+    push(title: string, body?: string, action?: NoticeAction) {
       seq += 1
-      this.items.unshift({ id: seq, title, body, time: Date.now(), read: false })
+      this.items.unshift({ id: seq, title, body, time: Date.now(), read: false, action })
       if (this.items.length > 50) this.items.pop()
     },
 

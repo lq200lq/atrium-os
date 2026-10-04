@@ -30,7 +30,7 @@ const hits = computed<Hit[]>(() => {
   const q = query.value.trim().toLowerCase()
   const out: Hit[] = []
 
-  for (const app of registry.apps) {
+  for (const app of registry.accessibleApps) {
     const hay = [app.id, app.name, ...(app.keywords ?? [])].join(' ').toLowerCase()
     if (!q || hay.includes(q)) {
       out.push({

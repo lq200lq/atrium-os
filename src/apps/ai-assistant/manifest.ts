@@ -13,4 +13,5 @@ export const manifest: AppManifest = {
   version: '0.1.0',
   category: 'productivity',
   order: 10,
+  permissions: ['app:ai-assistant'],
 }

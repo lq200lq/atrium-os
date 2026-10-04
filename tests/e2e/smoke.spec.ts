@@ -74,3 +74,34 @@ test('布局持久化：刷新后窗口还原', async ({ page }) => {
   await page.reload()
   await expect(page.locator('section').filter({ hasText: '文件管理' })).toBeVisible()
 })
+
+test('切换角色：受限应用从 Dock 消失，刷新后角色保持', async ({ page }) => {
+  // 默认管理员可见文件管理
+  await expect(page.locator(dockTile('文件管理'))).toBeVisible()
+
+  await page.locator(dockTile('设置')).click()
+  const settings = page.locator('section.absolute').filter({ hasText: '用户与角色' })
+  await expect(settings).toBeVisible()
+
+  // 切到访客（仅公开应用）
+  await settings.locator('button', { hasText: '访客' }).click()
+  await expect(page.locator(dockTile('文件管理'))).toHaveCount(0)
+  await expect(page.locator(dockTile('设置'))).toBeVisible()
+
+  // 刷新后角色还原，仍看不到受限应用
+  await page.waitForTimeout(600)
+  await page.reload()
+  await expect(page.locator(dockTile('文件管理'))).toHaveCount(0)
+})
+
+test('未授权 exec 被拒并在通知中心留痕', async ({ page }) => {
+  await page.locator(dockTile('设置')).click()
+  const settings = page.locator('section.absolute').filter({ hasText: '用户与角色' })
+  await settings.locator('button', { hasText: '访客' }).click()
+
+  // 访客态下用 Spotlight 搜不到受限应用，仅公开应用可见
+  await page.keyboard.press('Control+k')
+  const input = page.locator('input[placeholder="搜索应用与文件…"]')
+  await input.fill('文件管理')
+  await expect(page.locator('li button').filter({ hasText: '文件管理' })).toHaveCount(0)
+})

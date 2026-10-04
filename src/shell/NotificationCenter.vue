@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import OsIcon from '@/components/OsIcon.vue'
-import { useNotification } from '@/kernel/stores/notification'
+import { useOS } from '@/kernel/composables/useOS'
+import { useNotification, type Notice } from '@/kernel/stores/notification'
 import { useShellUi } from '@/kernel/stores/shellUi'
 
 const ui = useShellUi()
 const notif = useNotification()
+const os = useOS()
 
 const fmt = (t: number) =>
   new Date(t).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false })
+
+function runAction(n: Notice) {
+  if (!n.action) return
+  os.exec(`${n.action.appId}:open`)
+  notif.dismiss(n.id)
+}
 </script>
 
 <template>
@@ -28,6 +36,13 @@ const fmt = (t: number) =>
         <div class="min-w-0 flex-1">
           <p class="font-medium text-ink">{{ n.title }}</p>
           <p v-if="n.body" class="truncate text-ink-mute">{{ n.body }}</p>
+          <button
+            v-if="n.action"
+            class="mt-1 rounded border border-accent/40 px-2 py-0.5 text-caption text-accent-strong hover:bg-accent-soft"
+            @click="runAction(n)"
+          >
+            {{ n.action.label }}
+          </button>
           <p class="mt-0.5 text-caption text-ink-mute">{{ fmt(n.time) }}</p>
         </div>
         <button class="text-ink-mute hover:text-ink" title="关闭" @click="notif.dismiss(n.id)">

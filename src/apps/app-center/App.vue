@@ -10,8 +10,8 @@ const q = ref('')
 
 const apps = computed(() => {
   const kw = q.value.trim().toLowerCase()
-  if (!kw) return registry.apps
-  return registry.apps.filter(
+  if (!kw) return registry.accessibleApps
+  return registry.accessibleApps.filter(
     (a) =>
       a.name.toLowerCase().includes(kw) ||
       a.id.includes(kw) ||

@@ -14,8 +14,11 @@ import {
   Puzzle,
   ScrollText,
   Search,
+  Settings,
+  Shield,
   Sparkles,
   Trash2,
+  User,
   Wifi,
   X,
 } from 'lucide-vue-next'
@@ -36,8 +39,11 @@ export const ICON_MAP = {
   puzzle: Puzzle,
   'scroll-text': ScrollText,
   search: Search,
+  settings: Settings,
+  shield: Shield,
   sparkles: Sparkles,
   'trash-2': Trash2,
+  user: User,
   wifi: Wifi,
   x: X,
 } as const satisfies Record<string, Component>

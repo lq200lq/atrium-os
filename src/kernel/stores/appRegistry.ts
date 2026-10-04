@@ -1,6 +1,8 @@
 import { defineAsyncComponent, markRaw, type Component } from 'vue'
 import { defineStore } from 'pinia'
 import type { IconName } from '../icons'
+import { useSession } from './session'
+import { useSettings } from './settings'
 
 export interface AppWindowSpec {
   w: number
@@ -48,7 +50,16 @@ export const useAppRegistry = defineStore('appRegistry', {
     apps: [] as RegisteredApp[],
   }),
   getters: {
-    dockApps: (state) => state.apps.filter((a) => a.dock !== false),
+    /** 当前会话可访问的应用（已按 order 排序）；派生入口一律消费此 getter，不各自过滤 */
+    accessibleApps(state): RegisteredApp[] {
+      const session = useSession()
+      return state.apps.filter((a) => session.canAccessApp(a))
+    },
+    /** Dock 应用：可访问 + 用户固定项（settings 覆盖 manifest.dock 默认） */
+    dockApps(): RegisteredApp[] {
+      const settings = useSettings()
+      return this.accessibleApps.filter((a) => settings.isPinned(a.id, a.dock !== false))
+    },
     byId: (state) => (id: string) => state.apps.find((a) => a.id === id),
   },
   actions: {

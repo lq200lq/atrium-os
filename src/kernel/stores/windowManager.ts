@@ -3,6 +3,8 @@ import { toRaw } from 'vue'
 import { idbGet, idbSet } from '../fs/idb'
 import { clamp, clampRect, desktopBounds, type Rect } from '../layout'
 import { useAppRegistry } from './appRegistry'
+import { useNotification } from './notification'
+import { useSession } from './session'
 
 const LAYOUT_KEY = 'layout-v1'
 
@@ -59,6 +61,15 @@ export const useWindowManager = defineStore('windowManager', {
     open(appId: string, payload?: unknown): string | null {
       const manifest = useAppRegistry().byId(appId)
       if (!manifest) return null
+
+      // 鉴权落点：未授权不抛异常——通知中心留痕并给出「去设置切换角色」出口
+      if (!useSession().canAccessApp(manifest)) {
+        useNotification().push('无权访问', `当前角色无法打开「${manifest.name}」`, {
+          label: '去设置切换角色',
+          appId: 'settings',
+        })
+        return null
+      }
 
       const key = payloadKey(payload)
       const reusable =
