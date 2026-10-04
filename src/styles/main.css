@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
+    "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wallpaper-sky {
+  background:
+    radial-gradient(1100px 520px at 72% 12%, rgba(255, 255, 255, 0.4), transparent 62%),
+    radial-gradient(900px 480px at 18% 88%, rgba(38, 84, 138, 0.35), transparent 60%),
+    linear-gradient(180deg, #6ea8e0 0%, #9cc4ec 34%, #cfe3f6 62%, #e6f0f9 100%);
+}
+
+.wallpaper-dusk {
+  background:
+    radial-gradient(1000px 480px at 70% 16%, rgba(255, 214, 165, 0.35), transparent 60%),
+    linear-gradient(180deg, #2b3a67 0%, #495b8f 42%, #b06a8f 74%, #e8a87c 100%);
+}
+
+.wallpaper-jade {
+  background:
+    radial-gradient(1000px 480px at 68% 14%, rgba(255, 255, 255, 0.32), transparent 60%),
+    linear-gradient(180deg, #0f5c4f 0%, #2e8b74 46%, #a8d5ba 100%);
+}
+
+.wallpaper-slogan {
+  font-family: "STKaiti", "KaiTi", "楷体", serif;
+}
+
+/* 窗口开合动画：覆盖 section 上的 transition-[left,top,width,height] 工具类 */
+.win-enter-active,
+.win-leave-active {
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.win-enter-from,
+.win-leave-to {
+  opacity: 0;
+  transform: scale(0.96) translateY(8px);
+}
