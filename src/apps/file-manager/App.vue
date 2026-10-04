@@ -7,21 +7,79 @@ import { fileIconClass, fileIconName } from '@/kernel/icons'
 import { useVfs } from '@/kernel/stores/vfs'
 import OsButton from '@/ui/OsButton.vue'
 import OsDialog from '@/ui/OsDialog.vue'
-import OsInput from '@/ui/OsInput.vue'
+import OsForm, { type FormField } from '@/ui/OsForm.vue'
+import OsTable, { type TableColumn } from '@/ui/OsTable.vue'
+
+interface Row extends Record<string, unknown> {
+  id: string
+  name: string
+  isDir: boolean
+  kind: string
+  size: number
+  sizeText: string
+  updatedAt: number
+  updatedText: string
+  path: string
+  icon: ReturnType<typeof fileIconName>
+  iconCls: string
+}
 
 const vfs = useVfs()
 const os = useOS()
 const HOME = '/我的文件'
 const cwd = ref(HOME)
-const selected = ref<string | null>(null)
-const dialog = ref<{ mode: 'mkdir' | 'newfile' | 'rename'; name: string } | null>(null)
+const selected = ref<(string | number)[]>([])
+const formRef = ref<InstanceType<typeof OsForm> | null>(null)
+const dialog = ref<{ mode: 'mkdir' | 'newfile' | 'rename' } | null>(null)
+const formModel = ref<Record<string, unknown>>({ name: '' })
+
+const nameField: FormField[] = [
+  { key: 'name', label: '名称', type: 'input', required: true, min: 1 },
+]
 
 const inTrash = computed(() => isUnderTrash(cwd.value))
-const items = computed(() => vfs.ls(cwd.value))
+
+function toRow(node: FsNode): Row {
+  const isDir = node.type === 'dir'
+  return {
+    id: node.path,
+    name: node.name,
+    isDir,
+    kind: isDir ? '目录' : (node.name.split('.').pop()?.toUpperCase() ?? '文件'),
+    size: node.size,
+    sizeText: isDir ? `${vfs.ls(node.path).length} 项` : formatSize(node.size),
+    updatedAt: node.updatedAt,
+    updatedText: new Date(node.updatedAt).toLocaleString('zh-CN', { hour12: false }),
+    path: node.path,
+    icon: fileIconName(node),
+    iconCls: fileIconClass(node),
+  }
+}
+
+const rows = computed<Row[]>(() => vfs.ls(cwd.value).map(toRow))
+
+const columns = computed<TableColumn<Row>[]>(() => [
+  { key: 'name', title: '名称', sortable: true, slot: 'name' },
+  { key: 'kind', title: '类型', width: '88px' },
+  { key: 'sizeText', title: '大小', width: '96px', align: 'right' },
+  ...(inTrash.value
+    ? []
+    : [
+        {
+          key: 'updatedText',
+          title: '修改时间',
+          width: '170px',
+          sortable: true,
+        } as TableColumn<Row>,
+      ]),
+])
+
 const crumbs = computed(() => {
   const parts = cwd.value.split('/').filter(Boolean)
   return parts.map((name, i) => ({ name, path: `/${parts.slice(0, i + 1).join('/')}` }))
 })
+
+const selectedPath = computed(() => (selected.value[0] as string | undefined) ?? null)
 
 const dialogTitle = computed(() =>
   dialog.value?.mode === 'mkdir'
@@ -31,44 +89,38 @@ const dialogTitle = computed(() =>
       : '重命名',
 )
 
-function metaOf(node: FsNode): string {
-  return node.type === 'dir' ? `${vfs.ls(node.path).length} 项` : formatSize(node.size)
-}
-
 function navigate(path: string) {
   cwd.value = path
-  selected.value = null
+  selected.value = []
 }
 
-function onDoubleClick(node: FsNode) {
-  if (node.type === 'dir') {
-    navigate(node.path)
-    return
-  }
-  os.exec('doc-editor:open', { key: node.path, path: node.path })
+function onRowDblClick(row: Row) {
+  if (row.isDir) navigate(row.path)
+  else os.exec('doc-editor:open', { key: row.path, path: row.path })
 }
 
 function openDialog(mode: 'mkdir' | 'newfile' | 'rename') {
-  dialog.value = {
-    mode,
+  formModel.value = {
     name:
-      mode === 'rename' && selected.value
-        ? baseName(selected.value)
+      mode === 'rename' && selectedPath.value
+        ? baseName(selectedPath.value)
         : mode === 'mkdir'
           ? '新建目录'
           : '新建文档.txt',
   }
+  dialog.value = { mode }
 }
 
 function confirmDialog() {
+  if (!formRef.value?.validate()) return
   const d = dialog.value
-  const name = d?.name.trim()
+  const name = String(formModel.value.name ?? '').trim()
   if (!d || !name) return
   if (d.mode === 'mkdir') vfs.mkdir(cwd.value, name)
   else if (d.mode === 'newfile') vfs.writeFile(cwd.value, name, '（占位内容）')
-  else if (d.mode === 'rename' && selected.value) vfs.rename(selected.value, name)
+  else if (d.mode === 'rename' && selectedPath.value) vfs.rename(selectedPath.value, name)
   dialog.value = null
-  selected.value = null
+  selected.value = []
 }
 </script>
 
@@ -107,8 +159,15 @@ function confirmDialog() {
         <template v-if="!inTrash">
           <OsButton size="sm" variant="primary" @click="openDialog('mkdir')">新建目录</OsButton>
           <OsButton size="sm" variant="primary" @click="openDialog('newfile')">新建文档</OsButton>
-          <OsButton size="sm" :disabled="!selected" @click="openDialog('rename')">重命名</OsButton>
-          <OsButton size="sm" variant="danger" :disabled="!selected" @click="vfs.remove(selected!)">
+          <OsButton size="sm" :disabled="!selectedPath" @click="openDialog('rename')"
+            >重命名</OsButton
+          >
+          <OsButton
+            size="sm"
+            variant="danger"
+            :disabled="!selectedPath"
+            @click="vfs.remove(selectedPath!)"
+          >
             删除
           </OsButton>
         </template>
@@ -116,37 +175,37 @@ function confirmDialog() {
           v-else
           size="sm"
           variant="primary"
-          :disabled="!selected"
-          @click="vfs.restore(selected!)"
+          :disabled="!selectedPath"
+          @click="vfs.restore(selectedPath!)"
         >
           还原
         </OsButton>
       </div>
 
-      <div
-        class="grid flex-1 grid-cols-4 content-start gap-2 overflow-y-auto p-4"
-        @click.self="selected = null"
-      >
-        <button
-          v-for="node in items"
-          :key="node.path"
-          class="flex flex-col items-center gap-1 rounded-lg p-3 hover:bg-accent-soft"
-          :class="{ 'bg-accent-soft/80 hover:bg-accent-soft': selected === node.path }"
-          @click="selected = node.path"
-          @dblclick="onDoubleClick(node)"
+      <div class="min-h-0 flex-1">
+        <OsTable
+          v-model:selected="selected"
+          :columns="columns"
+          :rows="rows"
+          row-key="id"
+          selectable
+          :empty-text="inTrash ? '回收站是空的' : '此目录为空'"
+          @row-dblclick="onRowDblClick"
         >
-          <OsIcon :name="fileIconName(node)" :size="32" :class="fileIconClass(node)" />
-          <span class="w-full truncate text-center text-ink">{{ node.name }}</span>
-          <span class="text-caption text-ink-mute">{{ metaOf(node) }}</span>
-        </button>
-        <p v-if="items.length === 0" class="col-span-4 py-10 text-center text-ink-mute">
-          {{ inTrash ? '回收站是空的' : '此目录为空' }}
-        </p>
+          <template #name="{ row }">
+            <span class="inline-flex items-center gap-2">
+              <OsIcon :name="row.icon" :size="16" :class="row.iconCls" />
+              <span class="truncate">{{ row.name }}</span>
+            </span>
+          </template>
+        </OsTable>
       </div>
     </div>
 
     <OsDialog v-if="dialog" :title="dialogTitle" @confirm="confirmDialog" @cancel="dialog = null">
-      <OsInput v-model="dialog.name" @enter="confirmDialog" @esc="dialog = null" />
+      <OsForm ref="formRef" v-model="formModel" :fields="nameField" layout="vertical">
+        <template #actions><span /></template>
+      </OsForm>
     </OsDialog>
   </div>
 </template>

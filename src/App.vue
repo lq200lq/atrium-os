@@ -6,6 +6,7 @@ import NotificationCenter from '@/shell/NotificationCenter.vue'
 import Spotlight from '@/shell/Spotlight.vue'
 import TopBar from '@/shell/TopBar.vue'
 import Widgets from '@/shell/Widgets.vue'
+import OsToast from '@/ui/OsToast.vue'
 import WindowManager from '@/windows/WindowManager.vue'
 import { useShellUi } from '@/kernel/stores/shellUi'
 
@@ -30,5 +31,6 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
     <Dock />
     <NotificationCenter />
     <Spotlight />
+    <OsToast />
   </div>
 </template>

@@ -105,3 +105,24 @@ test('未授权 exec 被拒并在通知中心留痕', async ({ page }) => {
   await input.fill('文件管理')
   await expect(page.locator('li button').filter({ hasText: '文件管理' })).toHaveCount(0)
 })
+
+test('组件陈列：页签切换与表格渲染', async ({ page }) => {
+  await page.locator(dockTile('组件陈列')).click()
+  const win = page.locator('section.absolute').filter({ has: page.locator('[role="tablist"]') })
+  await expect(win).toBeVisible()
+  await expect(win.locator('[role="tab"]')).toHaveCount(4)
+
+  await win.locator('[role="tab"]', { hasText: '展示' }).click()
+  await expect(win.locator('thead th', { hasText: '姓名' })).toBeVisible()
+  await expect(win.locator('tbody tr')).toHaveCount(3)
+})
+
+test('文件管理改用 OsTable 渲染并保留新建目录表单', async ({ page }) => {
+  await page.locator(dockTile('文件管理')).click()
+  const win = page.locator('section.absolute').filter({ hasText: '修改时间' })
+  await expect(win.locator('thead th', { hasText: '名称' })).toBeVisible()
+  await expect(win.locator('tbody tr').first()).toBeVisible()
+
+  await win.locator('button', { hasText: '新建目录' }).click()
+  await expect(win.locator('form input')).toBeVisible()
+})
