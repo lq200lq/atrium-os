@@ -1,0 +1,42 @@
+import { defineConfig } from 'vitepress'
+
+export default defineConfig({
+  lang: 'zh-CN',
+  title: 'WebOS 脚手架',
+  description:
+    '企业级 Vue 3 前端脚手架：应用接入契约、权限模型、组件纵深、数据层、主题国际化、文档站与可观测',
+  cleanUrls: true,
+  themeConfig: {
+    nav: [
+      { text: '指南', link: '/guide/app-development' },
+      { text: '组件', link: '/components/' },
+      { text: 'Token', link: '/tokens' },
+      { text: '架构', link: '/architecture' },
+    ],
+    sidebar: {
+      '/guide/': [
+        {
+          text: '指南',
+          items: [
+            { text: '应用开发指南', link: '/guide/app-development' },
+            { text: '架构与规范', link: '/architecture' },
+          ],
+        },
+      ],
+      '/components/': [
+        {
+          text: '组件 API',
+          items: [
+            { text: '总览', link: '/components/' },
+            { text: 'OsTable 表格', link: '/components/table' },
+            { text: 'OsForm 表单', link: '/components/form' },
+            { text: '反馈与展示', link: '/components/feedback' },
+          ],
+        },
+      ],
+    },
+    outline: { level: [2, 3], label: '本页目录' },
+    docFooter: { prev: '上一页', next: '下一页' },
+    lastUpdated: { text: '最后更新' },
+  },
+})

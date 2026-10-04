@@ -13,6 +13,7 @@ export default {
     },
   },
   window: { close: 'Close', minimize: 'Minimize', maximize: 'Maximize / Restore' },
+  errorboundary: { title: 'Something went wrong', reload: 'Reload' },
   spotlight: { placeholder: 'Search apps and files…', appKind: 'App', noResult: 'No matches' },
   notification: {
     title: 'Notifications',
@@ -113,6 +114,13 @@ export default {
       accessible: 'Accessible',
       wallpapers: 'Wallpapers',
     },
+    diagnostics: {
+      title: 'Diagnostics',
+      hint: 'Runtime errors from apps and the shell are logged here for troubleshooting (last 50 only)',
+      empty: 'No errors recorded',
+      clear: 'Clear log',
+      scope: { app: 'App', window: 'Window', global: 'Global', data: 'Data' },
+    },
   },
   gallery: {
     tabs: { basic: 'Basic', input: 'Input', display: 'Display', feedback: 'Feedback' },
@@ -146,6 +154,7 @@ export default {
     openDialog: 'Open Dialog',
     openDrawer: 'Open Drawer',
     triggerToast: 'Trigger Toast',
+    triggerCrash: 'Simulate app crash',
     toastTitle: 'Toast',
     toastBody: 'This comes from the notification store',
     feedbackHint:

@@ -1,5 +1,7 @@
 import type { Component } from 'vue'
 import {
+  Activity,
+  AlertTriangle,
   BatteryFull,
   Bell,
   Bot,
@@ -25,6 +27,8 @@ import {
 import type { FsNode } from './fs/types'
 
 export const ICON_MAP = {
+  activity: Activity,
+  'alert-triangle': AlertTriangle,
   'battery-full': BatteryFull,
   bell: Bell,
   bot: Bot,

@@ -13,6 +13,7 @@ export default {
     },
   },
   window: { close: '关闭', minimize: '最小化', maximize: '最大化 / 还原' },
+  errorboundary: { title: '应用出错了', reload: '重新加载' },
   spotlight: { placeholder: '搜索应用与文件…', appKind: '应用', noResult: '无匹配结果' },
   notification: { title: '通知', clear: '清空', empty: '暂无通知', close: '关闭' },
   context: { cascade: '层叠窗口', wallpaper: '更换壁纸', appCenter: '打开应用中心' },
@@ -100,6 +101,13 @@ export default {
       accessible: '当前可访问',
       wallpapers: '壁纸候选',
     },
+    diagnostics: {
+      title: '诊断日志',
+      hint: '应用与壳层的运行时错误在此留痕，便于排查（仅存最近 50 条）',
+      empty: '暂无错误记录',
+      clear: '清空日志',
+      scope: { app: '应用', window: '窗口', global: '全局', data: '数据' },
+    },
   },
   gallery: {
     tabs: { basic: '基础', input: '录入', display: '展示', feedback: '反馈' },
@@ -133,6 +141,7 @@ export default {
     openDialog: '打开 Dialog',
     openDrawer: '打开 Drawer',
     triggerToast: '触发 Toast',
+    triggerCrash: '模拟应用崩溃',
     toastTitle: '吐司提示',
     toastBody: '这条来自 notification store',
     feedbackHint:

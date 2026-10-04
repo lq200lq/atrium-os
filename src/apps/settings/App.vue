@@ -15,6 +15,7 @@ import {
   type AccentKey,
 } from '@/kernel/stores/theme'
 import { useWindowManager } from '@/kernel/stores/windowManager'
+import { useErrorLog } from '@/kernel/observability/errorLog'
 import { LOCALES, useAppName, type Locale } from '@/i18n'
 import OsButton from '@/ui/OsButton.vue'
 
@@ -24,7 +25,14 @@ const settings = useSettings()
 const theme = useTheme()
 const registry = useAppRegistry()
 const wm = useWindowManager()
+const errorLog = useErrorLog()
 const appName = useAppName()
+
+const version = __APP_VERSION__
+
+function fmtTime(ts: number): string {
+  return new Date(ts).toLocaleString(settings.lang === 'en-US' ? 'en-US' : 'zh-CN')
+}
 
 const sep = computed(() => (settings.lang.startsWith('zh') ? '、' : ', '))
 const rolesText = computed(
@@ -190,6 +198,41 @@ function resetLayout() {
       </div>
     </section>
 
+    <!-- 诊断：错误日志回看 -->
+    <section class="border-b border-line p-4">
+      <h2 class="mb-1 flex items-center gap-1.5 text-title font-medium">
+        <OsIcon name="activity" :size="15" class="text-accent-strong" />
+        {{ t('settings.diagnostics.title') }}
+      </h2>
+      <p class="mb-3 text-caption text-ink-mute">{{ t('settings.diagnostics.hint') }}</p>
+      <div v-if="errorLog.entries.length" class="flex flex-col gap-1.5">
+        <div
+          v-for="e in errorLog.entries"
+          :key="e.id"
+          class="rounded-lg border border-line bg-surface-sunken px-3 py-2 text-caption"
+        >
+          <div class="flex items-center gap-2">
+            <span class="rounded bg-danger/15 px-1.5 py-0.5 text-danger">
+              {{ t(`settings.diagnostics.scope.${e.scope}`) }}
+            </span>
+            <span v-if="e.appId" class="text-ink-mute">{{ e.appId }}</span>
+            <span class="ml-auto text-ink-mute">{{ fmtTime(e.ts) }}</span>
+          </div>
+          <p class="mt-1 truncate text-ink" :title="e.stack || e.message">{{ e.message }}</p>
+        </div>
+      </div>
+      <p v-else class="text-caption text-ink-mute">{{ t('settings.diagnostics.empty') }}</p>
+      <OsButton
+        size="sm"
+        variant="danger"
+        class="mt-3"
+        :disabled="!errorLog.entries.length"
+        @click="errorLog.clear()"
+      >
+        {{ t('settings.diagnostics.clear') }}
+      </OsButton>
+    </section>
+
     <!-- 系统信息 -->
     <section class="p-4">
       <h2 class="mb-3 flex items-center gap-1.5 text-title font-medium">
@@ -198,7 +241,7 @@ function resetLayout() {
       </h2>
       <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-caption">
         <dt class="text-ink-mute">{{ t('settings.system.version') }}</dt>
-        <dd>0.0.1</dd>
+        <dd>{{ version }}</dd>
         <dt class="text-ink-mute">{{ t('settings.system.registered') }}</dt>
         <dd>{{ registry.apps.length }}</dd>
         <dt class="text-ink-mute">{{ t('settings.system.accessible') }}</dt>

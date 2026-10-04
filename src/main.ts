@@ -8,6 +8,7 @@ import { useSettings } from './kernel/stores/settings'
 import { useTheme } from './kernel/stores/theme'
 import { useVfs } from './kernel/stores/vfs'
 import { useWindowManager } from './kernel/stores/windowManager'
+import { useErrorLog } from './kernel/observability/errorLog'
 import { i18n } from './i18n'
 import './styles/main.css'
 
@@ -28,6 +29,19 @@ for (const mod of Object.values(manifestModules)) {
 
 useNotification(pinia).boot()
 
+// 全局错误可观测：组件错误经 app.config.errorHandler，运行时/未处理 Promise 经 window 监听，
+// 统一落错误日志环形缓冲（窗口级错误由 ErrorBoundary 就地捕获，返回 false 后不会到达此处）。
+const errorLog = useErrorLog(pinia)
+app.config.errorHandler = (err) => {
+  errorLog.captureError('global', err)
+}
+window.addEventListener('error', (e) => {
+  errorLog.captureError('global', e.error ?? e.message)
+})
+window.addEventListener('unhandledrejection', (e) => {
+  errorLog.captureError('global', e.reason)
+})
+
 const wm = useWindowManager(pinia)
 wm.$subscribe(() => wm.schedulePersist())
 
@@ -37,6 +51,6 @@ const session = useSession(pinia)
 const settings = useSettings(pinia)
 
 // 先还原会话与偏好，再还原依赖它们的窗口布局（权限/固定项在布局还原前就位）
-void Promise.all([session.restore(), settings.restore()])
+void Promise.all([session.restore(), settings.restore(), errorLog.restore()])
   .then(() => Promise.all([vfs.init(), theme.restore(), wm.restoreLayout()]))
   .then(() => app.mount('#app'))

@@ -17,6 +17,17 @@ jobs:
       - run: npm ci
       - run: npm run type-check
       - run: npm run lint
-      - run: npm run test:unit
+      - run: npm run test:unit:coverage
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      # 构建 + 包体预算门禁（manualChunks 分包、首屏与单 chunk 阈值）
+      - run: npm run build:check
+      # 文档站可构建性校验
+      - run: npm run docs:build
+      # E2E 失败时上传 trace/screenshot 产物便于排查
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

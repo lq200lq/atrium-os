@@ -3,6 +3,7 @@ import { computed, provide } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
 import OsTrafficLights from '@/ui/OsTrafficLights.vue'
 import OsSkeleton from '@/ui/OsSkeleton.vue'
+import ErrorBoundary from '@/windows/ErrorBoundary.vue'
 import { useWindowDrag } from '@/kernel/composables/useWindowDrag'
 import { useWindowResize, type ResizeDir } from '@/kernel/composables/useWindowResize'
 import { WIN_ID_KEY } from '@/kernel/composables/useWindowContext'
@@ -82,16 +83,18 @@ const handles: { dir: ResizeDir; cls: string }[] = [
     </header>
 
     <div class="min-h-0 flex-1 overflow-hidden bg-glass-base">
-      <Suspense>
-        <KeepAlive :max="8">
-          <component :is="manifest?.component" v-if="win.status !== 'minimized' && manifest" />
-        </KeepAlive>
-        <template #fallback>
-          <div class="p-4">
-            <OsSkeleton :rows="5" />
-          </div>
-        </template>
-      </Suspense>
+      <ErrorBoundary :app-id="win.appId">
+        <Suspense>
+          <KeepAlive :max="8">
+            <component :is="manifest?.component" v-if="win.status !== 'minimized' && manifest" />
+          </KeepAlive>
+          <template #fallback>
+            <div class="p-4">
+              <OsSkeleton :rows="5" />
+            </div>
+          </template>
+        </Suspense>
+      </ErrorBoundary>
     </div>
 
     <div

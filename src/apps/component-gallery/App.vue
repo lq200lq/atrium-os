@@ -19,10 +19,12 @@ import OsTabs from '@/ui/OsTabs.vue'
 import OsTooltip from '@/ui/OsTooltip.vue'
 import OsTrafficLights from '@/ui/OsTrafficLights.vue'
 import { useNotification } from '@/kernel/stores/notification'
+import CrashProbe from './CrashProbe.vue'
 
 const { t } = useI18n()
 const notif = useNotification()
 const tab = ref('basic')
+const crash = ref(false)
 const tabs = computed(() => [
   { key: 'basic', label: t('gallery.tabs.basic') },
   { key: 'input', label: t('gallery.tabs.input') },
@@ -229,7 +231,11 @@ const drawerOpen = ref(false)
         <OsButton @click="notif.push(t('gallery.toastTitle'), t('gallery.toastBody'))">
           {{ t('gallery.triggerToast') }}
         </OsButton>
+        <OsButton variant="danger" @click="crash = true">
+          {{ t('gallery.triggerCrash') }}
+        </OsButton>
       </div>
+      <CrashProbe :when="crash" />
       <p class="text-caption text-ink-mute">{{ t('gallery.feedbackHint') }}</p>
 
       <OsDialog

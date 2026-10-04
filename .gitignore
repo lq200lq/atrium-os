@@ -3,6 +3,7 @@ dist
 coverage
 test-results
 playwright-report
+website/.vitepress/cache
 *.tsbuildinfo
 *.local
 .DS_Store
