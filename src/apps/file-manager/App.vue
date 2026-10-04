@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
+import { commandBus } from '@/kernel/bus/commandBus'
 import { useOS } from '@/kernel/composables/useOS'
+import { createVfsDataSource } from '@/kernel/data/vfsDataSource'
 import { baseName, formatSize, isUnderTrash, TRASH_ROOT, type FsNode } from '@/kernel/fs/types'
 import { fileIconClass, fileIconName } from '@/kernel/icons'
 import { useVfs } from '@/kernel/stores/vfs'
@@ -26,9 +28,13 @@ interface Row extends Record<string, unknown> {
 
 const vfs = useVfs()
 const os = useOS()
+const ds = createVfsDataSource()
 const HOME = '/我的文件'
 const cwd = ref(HOME)
 const selected = ref<(string | number)[]>([])
+const rows = ref<Row[]>([])
+const loading = ref(false)
+const error = ref('')
 const formRef = ref<InstanceType<typeof OsForm> | null>(null)
 const dialog = ref<{ mode: 'mkdir' | 'newfile' | 'rename' } | null>(null)
 const formModel = ref<Record<string, unknown>>({ name: '' })
@@ -56,7 +62,30 @@ function toRow(node: FsNode): Row {
   }
 }
 
-const rows = computed<Row[]>(() => vfs.ls(cwd.value).map(toRow))
+// 经统一契约读取；file-manager 不分页，取全量后由 vfs.ls 的目录优先排序呈现
+async function reload() {
+  loading.value = true
+  error.value = ''
+  try {
+    const res = await ds.query({
+      page: 1,
+      pageSize: Number.MAX_SAFE_INTEGER,
+      filter: { dir: cwd.value, trash: inTrash.value },
+    })
+    rows.value = res.rows.map(toRow)
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : '加载失败'
+  } finally {
+    loading.value = false
+  }
+}
+
+let offBus: (() => void) | null = null
+onMounted(() => {
+  offBus = commandBus.on('vfs:changed', reload)
+})
+onUnmounted(() => offBus?.())
+watch(cwd, reload, { immediate: true })
 
 const columns = computed<TableColumn<Row>[]>(() => [
   { key: 'name', title: '名称', sortable: true, slot: 'name' },
@@ -111,16 +140,38 @@ function openDialog(mode: 'mkdir' | 'newfile' | 'rename') {
   dialog.value = { mode }
 }
 
-function confirmDialog() {
+async function confirmDialog() {
   if (!formRef.value?.validate()) return
   const d = dialog.value
   const name = String(formModel.value.name ?? '').trim()
   if (!d || !name) return
-  if (d.mode === 'mkdir') vfs.mkdir(cwd.value, name)
-  else if (d.mode === 'newfile') vfs.writeFile(cwd.value, name, '（占位内容）')
-  else if (d.mode === 'rename' && selectedPath.value) vfs.rename(selectedPath.value, name)
-  dialog.value = null
+  try {
+    if (d.mode === 'mkdir') await ds.create({ path: `${cwd.value}/${name}`, type: 'dir' })
+    else if (d.mode === 'newfile')
+      await ds.create({ path: `${cwd.value}/${name}`, type: 'file', content: '（占位内容）' })
+    else if (d.mode === 'rename' && selectedPath.value)
+      await ds.update(selectedPath.value, { name })
+    dialog.value = null
+    selected.value = []
+  } catch {
+    /* 数据源已集中上报；保留对话框供重试 */
+  }
+}
+
+async function onDelete() {
+  if (!selectedPath.value) return
+  const path = selectedPath.value
   selected.value = []
+  await ds.remove(path)
+}
+
+// 还原为回收站专有动作，不在通用 CRUD 契约内，直接走 vfs store
+function onRestore() {
+  const path = selectedPath.value
+  if (!path) return
+  const node = vfs.byPath(path)
+  selected.value = []
+  if (node?.trashedFrom) vfs.restore(path)
 }
 </script>
 
@@ -162,22 +213,11 @@ function confirmDialog() {
           <OsButton size="sm" :disabled="!selectedPath" @click="openDialog('rename')"
             >重命名</OsButton
           >
-          <OsButton
-            size="sm"
-            variant="danger"
-            :disabled="!selectedPath"
-            @click="vfs.remove(selectedPath!)"
-          >
+          <OsButton size="sm" variant="danger" :disabled="!selectedPath" @click="onDelete">
             删除
           </OsButton>
         </template>
-        <OsButton
-          v-else
-          size="sm"
-          variant="primary"
-          :disabled="!selectedPath"
-          @click="vfs.restore(selectedPath!)"
-        >
+        <OsButton v-else size="sm" variant="primary" :disabled="!selectedPath" @click="onRestore">
           还原
         </OsButton>
       </div>
@@ -187,10 +227,13 @@ function confirmDialog() {
           v-model:selected="selected"
           :columns="columns"
           :rows="rows"
+          :loading="loading"
+          :error="error"
           row-key="id"
           selectable
           :empty-text="inTrash ? '回收站是空的' : '此目录为空'"
           @row-dblclick="onRowDblClick"
+          @retry="reload"
         >
           <template #name="{ row }">
             <span class="inline-flex items-center gap-2">

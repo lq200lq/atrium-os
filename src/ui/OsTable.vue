@@ -26,6 +26,8 @@ const props = withDefaults(
     /** 排序/分页由远端驱动时为 true：表格只做展示与事件派发，不本地排序 */
     remote?: boolean
     emptyText?: string
+    /** 非空字符串时进入 error 三态，覆盖 loading/empty；配合 @retry 重试 */
+    error?: string
     pageSize?: number
     total?: number
   }>(),
@@ -35,6 +37,7 @@ const props = withDefaults(
     selectable: false,
     remote: false,
     emptyText: '暂无数据',
+    error: '',
     pageSize: 10,
     total: undefined,
   },
@@ -44,6 +47,7 @@ const emit = defineEmits<{
   'sort-change': [payload: { key: string; order: SortOrder }]
   'row-click': [row: T]
   'row-dblclick': [row: T]
+  retry: []
 }>()
 
 const selected = defineModel<(string | number)[]>('selected', { default: () => [] })
@@ -138,7 +142,24 @@ function toggleRow(row: T) {
           </tr>
         </thead>
         <tbody>
-          <tr v-if="loading">
+          <tr v-if="error">
+            <td
+              :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)"
+              class="p-4"
+            >
+              <OsEmpty icon="x" :description="error">
+                <template #action>
+                  <button
+                    class="rounded-md border border-slate-200 px-3 py-1 text-ui text-ink hover:bg-slate-50"
+                    @click="emit('retry')"
+                  >
+                    重试
+                  </button>
+                </template>
+              </OsEmpty>
+            </td>
+          </tr>
+          <tr v-else-if="loading">
             <td
               :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)"
               class="p-4"

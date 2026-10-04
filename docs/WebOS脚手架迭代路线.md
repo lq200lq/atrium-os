@@ -205,17 +205,18 @@ S1 接入契约 ──┬─→ S2 权限 + settings ──┐
 
 ## 8. 实施状态
 
-| 阶段 | 状态   | 说明                                                                                                                                                      |
-| ---- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| S1   | 已完成 | manifest 扩展 + glob 自动注册 + `gen:app` 生成器 + 应用开发指南；4 单测 + 6 E2E 全绿                                                                      |
-| S2   | 已完成 | session 权限模型（权限点为主/角色为集合）+ `can`/`accessibleApps` 收口 + `wm.open` 鉴权留痕 + settings 应用；7 单测 + 2 E2E 全绿                          |
-| S3   | 已完成 | 13 个 `src/ui` 组件（表格/表单/反馈/录入/展示）+ WindowFrame Suspense 骨架屏 + component-gallery + file-manager 改用 OsTable/OsForm；23 单测 + 2 E2E 全绿 |
-| S4   | 未开始 |                                                                                                                                                           |
-| S5   | 未开始 |                                                                                                                                                           |
-| S6   | 未开始 |                                                                                                                                                           |
+| 阶段 | 状态   | 说明                                                                                                                                                                                                            |
+| ---- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1   | 已完成 | manifest 扩展 + glob 自动注册 + `gen:app` 生成器 + 应用开发指南；4 单测 + 6 E2E 全绿                                                                                                                            |
+| S2   | 已完成 | session 权限模型（权限点为主/角色为集合）+ `can`/`accessibleApps` 收口 + `wm.open` 鉴权留痕 + settings 应用；7 单测 + 2 E2E 全绿                                                                                |
+| S3   | 已完成 | 13 个 `src/ui` 组件（表格/表单/反馈/录入/展示）+ WindowFrame Suspense 骨架屏 + component-gallery + file-manager 改用 OsTable/OsForm；23 单测 + 2 E2E 全绿                                                       |
+| S4   | 已完成 | `kernel/data`（Query/Page/DataSource 契约 + `applyQuery` 纯函数）+ fixture/vfs 两实现（RemoteFS 只留接口）+ OsTable 内建 error 三态 + data-board 参考页 + file-manager 改走 vfsDataSource；15 单测 + 2 E2E 全绿 |
+| S5   | 未开始 |                                                                                                                                                                                                                 |
+| S6   | 未开始 |                                                                                                                                                                                                                 |
 
 **实施期对路线的修正（回写此处）**
 
 - S1：`register()` 内部按 `order` 升序稳定插入（缺省 100），排序不依赖 glob/import 顺序，无需额外 `sortedApps` getter；`dockApps`/`app-center`/`spotlight` 直接消费 `apps` 即已有序。生成器为纯 Node（`readline/promises`），无新依赖；eslint 为 `scripts/**/*.mjs` 增加 Node 全局与 `no-console: off` 覆盖。
 - S2：权限模型采「权限点为主、角色为集合」（开放问题倾向落地）——`manifest.permissions` 为权限点数组，空即公开；`ROLES`/`USERS` 为本地 fixture，`admin` 角色持通配 `*`。鉴权唯一判定 `session.canAccessApp(manifest)`，`useOS().can(appId)` 与 `registry.accessibleApps`/`dockApps` 均经它派生；`wm.open` 为单一落点（app-center/Dock 直调 `wm.open`，故 gate 放此处最稳），未授权返回 `null` + 通知中心留痕，通知带 `action`（去设置切换角色）作为可操作出口，不做等待确认死态。`dockApps` 叠加 `settings.dockPinned` 覆盖表（用户固定/取消，缺省沿用 `manifest.dock`）。默认用户 `admin` 保证既有 E2E 不回归。
 - S3：组件测试按品类分组落文件（`ui-inputs`/`ui-table`/`ui-form`/`ui-feedback`）而非文档暗示的「一组件一测试文件」，避免碎文件。`OsBadge` 只渲染计数胶囊、无默认插槽，故陈列与角色标签均以内联 `<span>` 包裹或改用普通样式 span，不套 `OsBadge`。`OsForm` 必填星号用 `<span class="text-danger">*</span>` 而非 `after:content-['*']`（转义引号 Tailwind 源码扫描不识别）。`OsTable` 为泛型组件（`generic="T"`），`defineModel` 托管 `selected`/`page`，`remote` prop 关闭本地排序交由父级，内置 `OsSkeleton`/`OsEmpty` 与分页页脚，file-manager 的行图标在 `toRow()` 里预计算（`icon`/`iconCls`）以规避模板内 `as never` 断言。`WindowFrame` 内容区以 `Suspense + KeepAlive(:max=8)` 包裹，fallback 出骨架屏。
+- S4：分页/排序/关键字/过滤语义抽到 `kernel/data/types.ts` 的纯函数 `applyQuery`，fixture 与 vfs 两实现共用，契约单测用同一套断言跑两遍（`runContract`）保证行为一致。`DataSource` 变更方法在失败时 **reject**（供调用方回滚乐观更新），错误由 `kernel/data/errors.ts` 的 `reportError` 集中 `console.warn` + 通知中心留痕（无活动 pinia 时静默降级，不反噬业务），即「不打断调用方」= 不同步抛异常、不吞掉 reject。三态补齐：`OsTable` 新增 `error` prop + `@retry`（error 优先级高于 loading/empty，内建 `OsEmpty` + 重试按钮），loading/empty 沿用 S3。`vfsDataSource` 的 `query.filter` 约定 `{dir,trash}` 为寻址参数、非 `FsNode` 字段，须在 `applyQuery` 前剔除否则会按不存在字段过滤掉全部行；`update` 重命名的目标路径要在 `rename` **前**用 `uniquePath` 算出（rename 会移动子树，事后再算将命中已存在目标而误加序号）。file-manager 改为 `ds.query` 异步读取 + 订阅 `vfs:changed` 重载，回收站「还原」为 VFS 专有动作、不在通用 CRUD 契约内，仍直走 store。data-board 用「模拟异常」开关驱动 `failWhen`，无需断网即可演示 error 三态、可重试与乐观回滚。RemoteFS 仅留 `kernel/data/remote.ts` 接口（`extends DataSource` + `baseUrl`），不起 mock server。
