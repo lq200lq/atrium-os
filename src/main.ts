@@ -1,26 +1,26 @@
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import App from './App.vue'
-import { manifest as aiAssistant } from './apps/ai-assistant/manifest'
-import { manifest as appCenter } from './apps/app-center/manifest'
-import { manifest as docEditor } from './apps/doc-editor/manifest'
-import { manifest as fileManager } from './apps/file-manager/manifest'
-import { useAppRegistry } from './kernel/stores/appRegistry'
+import { useAppRegistry, type AppManifest } from './kernel/stores/appRegistry'
 import { useNotification } from './kernel/stores/notification'
 import { useTheme } from './kernel/stores/theme'
 import { useVfs } from './kernel/stores/vfs'
 import { useWindowManager } from './kernel/stores/windowManager'
 import './styles/main.css'
 
+// 自动收集应用 manifest：新增/删除一个 apps/<id>/manifest.ts 即自动注册/注销，无需改此处
+const manifestModules = import.meta.glob<{ manifest: AppManifest }>('./apps/*/manifest.ts', {
+  eager: true,
+})
+
 const pinia = createPinia()
 const app = createApp(App)
 app.use(pinia)
 
 const registry = useAppRegistry(pinia)
-registry.register(aiAssistant)
-registry.register(fileManager)
-registry.register(docEditor)
-registry.register(appCenter)
+for (const mod of Object.values(manifestModules)) {
+  registry.register(mod.manifest)
+}
 
 useNotification(pinia).boot()
 

@@ -10,4 +10,7 @@ export const manifest: AppManifest = {
   singleton: false,
   dock: true,
   keywords: ['文件', '目录', 'folder'],
+  version: '0.1.0',
+  category: 'productivity',
+  order: 20,
 }

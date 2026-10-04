@@ -20,5 +20,13 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
+  {
+    // Node CLI 脚本（生成器等）：允许 Node 全局与 console 输出
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { process: 'readonly', console: 'readonly' },
+    },
+    rules: { 'no-console': 'off' },
+  },
   prettier,
 )

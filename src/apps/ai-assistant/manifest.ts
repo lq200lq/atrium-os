@@ -10,4 +10,7 @@ export const manifest: AppManifest = {
   singleton: true,
   dock: true,
   keywords: ['ai', '助手', '对话'],
+  version: '0.1.0',
+  category: 'productivity',
+  order: 10,
 }

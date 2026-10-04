@@ -10,4 +10,7 @@ export const manifest: AppManifest = {
   singleton: true,
   dock: true,
   keywords: ['应用', '启动器', 'launcher'],
+  version: '0.1.0',
+  category: 'system',
+  order: 40,
 }
