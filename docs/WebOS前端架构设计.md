@@ -21,14 +21,14 @@
 
 ## 2. 产品形态盘点（源自概念图）
 
-| 区域 | 内容 | 归属层 |
-| --- | --- | --- |
-| 顶栏 TopBar | 全局菜单（工作台/文件/编辑/视图/应用/窗口/帮助）、全局搜索、通知铃铛、应用启动器、用户头像、网络/电池状态、日期时间 | Shell |
-| 桌面 Desktop | 壁纸与品牌标语、桌面图标（我的电脑/工作资料/云盘/回收站）、右键菜单 | Shell |
-| Widgets | 时钟、月历、今日事项、品牌卡片 | Shell |
-| Dock | 应用图标、运行中指示、最小化窗口回收 | Shell |
-| 窗口 | 标题栏（交通灯/最小化/最大化/关闭）、内容区；示例：AI 助手、文档编辑器、工作流设计器、文件管理、应用中心 | Windows 层渲染，内容来自 Apps |
-| 应用间联动 | AI 助手产出文档卡片 →「打开文档」唤起文档编辑器 | Kernel（CommandBus） |
+| 区域         | 内容                                                                                                                | 归属层                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| 顶栏 TopBar  | 全局菜单（工作台/文件/编辑/视图/应用/窗口/帮助）、全局搜索、通知铃铛、应用启动器、用户头像、网络/电池状态、日期时间 | Shell                         |
+| 桌面 Desktop | 壁纸与品牌标语、桌面图标（我的电脑/工作资料/云盘/回收站）、右键菜单                                                 | Shell                         |
+| Widgets      | 时钟、月历、今日事项、品牌卡片                                                                                      | Shell                         |
+| Dock         | 应用图标、运行中指示、最小化窗口回收                                                                                | Shell                         |
+| 窗口         | 标题栏（交通灯/最小化/最大化/关闭）、内容区；示例：AI 助手、文档编辑器、工作流设计器、文件管理、应用中心            | Windows 层渲染，内容来自 Apps |
+| 应用间联动   | AI 助手产出文档卡片 →「打开文档」唤起文档编辑器                                                                     | Kernel（CommandBus）          |
 
 ## 3. 总体分层
 
@@ -48,14 +48,14 @@
 
 ## 4. 技术选型
 
-| 项 | 选择 | 理由 |
-| --- | --- | --- |
-| 框架 | Vue 3 + TypeScript + Vite | 组合式 API 适合 store 驱动的桌面 UI；TS 保证 manifest/store 契约 |
-| 状态 | Pinia + pinia-plugin-persistedstate | 窗口/应用/主题状态集中管理；布局与设置持久化开箱即用 |
-| 工具 | VueUse | useDraggable、useEventListener、useStorage、useRafFn 等减少胶水代码 |
-| 样式 | Tailwind CSS | 桌面 UI 密度高，原子类效率与一致性最好 |
-| 图标 | lucide-vue-next | 线性 SVG 图标，按需 tree-shake；经 `OsIcon` + `ICON_MAP` 统一出口渲染，`manifest.icon` 为类型安全图标名 |
-| 持久化介质 | localStorage（设置/布局）+ IndexedDB（VFS 文件内容） | 文件内容体积大，不入 localStorage |
+| 项         | 选择                                                 | 理由                                                                                                    |
+| ---------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| 框架       | Vue 3 + TypeScript + Vite                            | 组合式 API 适合 store 驱动的桌面 UI；TS 保证 manifest/store 契约                                        |
+| 状态       | Pinia + pinia-plugin-persistedstate                  | 窗口/应用/主题状态集中管理；布局与设置持久化开箱即用                                                    |
+| 工具       | VueUse                                               | useDraggable、useEventListener、useStorage、useRafFn 等减少胶水代码                                     |
+| 样式       | Tailwind CSS                                         | 桌面 UI 密度高，原子类效率与一致性最好                                                                  |
+| 图标       | lucide-vue-next                                      | 线性 SVG 图标，按需 tree-shake；经 `OsIcon` + `ICON_MAP` 统一出口渲染，`manifest.icon` 为类型安全图标名 |
+| 持久化介质 | localStorage（设置/布局）+ IndexedDB（VFS 文件内容） | 文件内容体积大，不入 localStorage                                                                       |
 
 ## 5. 核心机制设计
 
@@ -65,14 +65,14 @@
 
 ```ts
 interface AppManifest {
-  id: string                  // 'doc-editor'
-  name: string                // '文档编辑'
-  icon: IconName              // 类型安全图标名（src/kernel/icons.ts 的 ICON_MAP 键）
+  id: string // 'doc-editor'
+  name: string // '文档编辑'
+  icon: IconName // 类型安全图标名（src/kernel/icons.ts 的 ICON_MAP 键）
   entry: () => Promise<Component>
   window: { w: number; h: number; minW?: number; minH?: number }
-  singleton?: boolean         // true: 重复打开聚焦既有窗口（AI 助手）；false: 多实例（文档编辑器按 fileId 多开）
-  dock?: boolean              // 是否固定出现在 Dock
-  keywords?: string[]         // Spotlight 搜索命中词
+  singleton?: boolean // true: 重复打开聚焦既有窗口（AI 助手）；false: 多实例（文档编辑器按 fileId 多开）
+  dock?: boolean // 是否固定出现在 Dock
+  keywords?: string[] // Spotlight 搜索命中词
 }
 ```
 
@@ -86,13 +86,16 @@ interface AppManifest {
 type WinStatus = 'normal' | 'maximized' | 'minimized'
 
 interface WinState {
-  id: string                  // 'win-0001'
+  id: string // 'win-0001'
   appId: string
   title: string
-  x: number; y: number; w: number; h: number
+  x: number
+  y: number
+  w: number
+  h: number
   z: number
   status: WinStatus
-  payload?: unknown           // 打开时传参（如 { fileId }）
+  payload?: unknown // 打开时传参（如 { fileId }）
 }
 ```
 
@@ -130,11 +133,14 @@ os.emit('ai-assistant:doc-ready', {...})   // 应用事件
 
 ```ts
 interface FsNode {
-  path: string; name: string
+  path: string
+  name: string
   type: 'dir' | 'file'
-  size: number; updatedAt: number
-  mime?: string; content?: string     // 文本内容；二进制后续扩 Blob
-  trashedFrom?: string                // 存在即表示在回收站，值为原父目录
+  size: number
+  updatedAt: number
+  mime?: string
+  content?: string // 文本内容；二进制后续扩 Blob
+  trashedFrom?: string // 存在即表示在回收站，值为原父目录
 }
 // store actions: init / mkdir / writeFile / rename / remove(入回收站) / restore
 // getters: ls(dir) / trash / byPath
@@ -183,26 +189,26 @@ src/
 
 ## 7. 实施路线
 
-| 阶段 | 内容 | 验收标准 |
-| --- | --- | --- |
-| P0 骨架 | Vite+TS+Pinia 脚手架；Desktop/TopBar/Dock 静态壳；WindowManager MVP（open/close/focus/拖拽/缩放/z 序/最大化/最小化）；2 个占位应用 | 从 Dock 点开两个窗口，可拖拽、叠放、聚焦、最小化到 Dock、最大化还原 |
-| P1 应用体系 | AppRegistry 全量落地；应用中心；VFS（IndexedDBFS）+ 文件管理应用；KeepAlive/懒加载/缓存上限 | 应用中心网格由 registry 派生；文件管理可建目录/新建/重命名/删除入回收站 |
-| P2 联通与外壳增强 | CommandBus；AI 助手→文档编辑器链路；通知中心；Spotlight；Widgets；桌面右键菜单 | AI 助手产出文档卡片，点「打开文档」唤起编辑器并加载该文件 |
-| P3 打磨 | 布局持久化；Theme/换壁纸；窗口开合动画；拖拽边界与多窗口排布优化 | 刷新后窗口布局与设置还原；换壁纸全局生效 |
+| 阶段              | 内容                                                                                                                               | 验收标准                                                                |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| P0 骨架           | Vite+TS+Pinia 脚手架；Desktop/TopBar/Dock 静态壳；WindowManager MVP（open/close/focus/拖拽/缩放/z 序/最大化/最小化）；2 个占位应用 | 从 Dock 点开两个窗口，可拖拽、叠放、聚焦、最小化到 Dock、最大化还原     |
+| P1 应用体系       | AppRegistry 全量落地；应用中心；VFS（IndexedDBFS）+ 文件管理应用；KeepAlive/懒加载/缓存上限                                        | 应用中心网格由 registry 派生；文件管理可建目录/新建/重命名/删除入回收站 |
+| P2 联通与外壳增强 | CommandBus；AI 助手→文档编辑器链路；通知中心；Spotlight；Widgets；桌面右键菜单                                                     | AI 助手产出文档卡片，点「打开文档」唤起编辑器并加载该文件               |
+| P3 打磨           | 布局持久化；Theme/换壁纸；窗口开合动画；拖拽边界与多窗口排布优化                                                                   | 刷新后窗口布局与设置还原；换壁纸全局生效                                |
 
 ## 8. 关键决策
 
-| 编号 | 决策 | 结论与理由 |
-| --- | --- | --- |
-| D1 | 应用隔离方式 | **同仓组件 + manifest 懒加载**。通信直接、样式统一、可做毛玻璃与统一动画；微前端（wujie/module-federation）留作将来应用需独立部署时的演进方向 |
-| D2 | 窗口内容渲染 | **纯 DOM**，不用 iframe。概念图的半透明材质、统一窗口动画依赖同文档渲染 |
-| D3 | z 序管理 | 单调递增计数器（focus 时 `z = ++topZ`），避免数组重排与全量重渲染 |
-| D4 | 单例/多实例 | 由 manifest `singleton` 声明；多实例以 `appId + payload.key` 去重复用 |
-| D5 | 拖拽/缩放性能 | 跟手阶段走 transform，pointerup 回写 store，避免 pointermove 高频触发全树响应式更新 |
-| D6 | Dock 点击语义 | 聚焦中→最小化；存在最小化→还原；否则新开（P0 实测补） |
-| D7 | 组件入 store | `markRaw` 包裹异步组件，禁止组件对象被响应式化 |
-| D8 | 持久化与挂载 | VFS 落库前 `toRaw`；IDB 不可用降级内存模式，挂载不被持久化 gate |
-| D9 | 统一图标出口 | 不用 emoji；lucide-vue-next 经 `OsIcon` + `ICON_MAP` 收口渲染，`manifest.icon` 为类型安全图标名，文件类型图标（含配色）由共享 `fileIconName/fileIconClass` 派生 |
+| 编号 | 决策          | 结论与理由                                                                                                                                                      |
+| ---- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1   | 应用隔离方式  | **同仓组件 + manifest 懒加载**。通信直接、样式统一、可做毛玻璃与统一动画；微前端（wujie/module-federation）留作将来应用需独立部署时的演进方向                   |
+| D2   | 窗口内容渲染  | **纯 DOM**，不用 iframe。概念图的半透明材质、统一窗口动画依赖同文档渲染                                                                                         |
+| D3   | z 序管理      | 单调递增计数器（focus 时 `z = ++topZ`），避免数组重排与全量重渲染                                                                                               |
+| D4   | 单例/多实例   | 由 manifest `singleton` 声明；多实例以 `appId + payload.key` 去重复用                                                                                           |
+| D5   | 拖拽/缩放性能 | 跟手阶段走 transform，pointerup 回写 store，避免 pointermove 高频触发全树响应式更新                                                                             |
+| D6   | Dock 点击语义 | 聚焦中→最小化；存在最小化→还原；否则新开（P0 实测补）                                                                                                           |
+| D7   | 组件入 store  | `markRaw` 包裹异步组件，禁止组件对象被响应式化                                                                                                                  |
+| D8   | 持久化与挂载  | VFS 落库前 `toRaw`；IDB 不可用降级内存模式，挂载不被持久化 gate                                                                                                 |
+| D9   | 统一图标出口  | 不用 emoji；lucide-vue-next 经 `OsIcon` + `ICON_MAP` 收口渲染，`manifest.icon` 为类型安全图标名，文件类型图标（含配色）由共享 `fileIconName/fileIconClass` 派生 |
 
 **开放问题**
 
@@ -211,23 +217,24 @@ src/
 
 ## 9. 风险与对策
 
-| 风险 | 对策 |
-| --- | --- |
+| 风险                        | 对策                                                                   |
+| --------------------------- | ---------------------------------------------------------------------- |
 | 多窗口 + KeepAlive 内存膨胀 | KeepAlive max 上限 + 最久未聚焦淘汰；应用卸载时经 onUnmounted 清理订阅 |
-| pointermove 高频更新卡顿 | 见 D5；必要时 useRafFn 合帧 |
-| 应用样式污染壳层 | 应用根组件 scoped + 命名前缀约定；全局样式只放 CSS 变量与 reset |
-| 应用间隐式耦合 | 强制经 CommandBus/VFS；code review 检查 apps/ 之间无互相 import |
-| 持久化数据版本演进 | persistedstate 键带版本号，启动时迁移或丢弃旧版 |
+| pointermove 高频更新卡顿    | 见 D5；必要时 useRafFn 合帧                                            |
+| 应用样式污染壳层            | 应用根组件 scoped + 命名前缀约定；全局样式只放 CSS 变量与 reset        |
+| 应用间隐式耦合              | 强制经 CommandBus/VFS；code review 检查 apps/ 之间无互相 import        |
+| 持久化数据版本演进          | persistedstate 键带版本号，启动时迁移或丢弃旧版                        |
 
 ## 10. 实施状态
 
-| 阶段 | 状态 | 说明 |
-| --- | --- | --- |
-| P0 骨架 | 已完成（2026-10-04） | 壳层 + 窗口管理全行为浏览器实测通过 |
-| P1 应用体系 | 已完成（2026-10-04） | AppRegistry 派生应用中心；VFS + 文件管理 CRUD/回收站/还原；IndexedDB 持久化刷新验证通过 |
+| 阶段              | 状态                 | 说明                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P0 骨架           | 已完成（2026-10-04） | 壳层 + 窗口管理全行为浏览器实测通过                                                                                                                                                                                                                                                                                                                         |
+| P1 应用体系       | 已完成（2026-10-04） | AppRegistry 派生应用中心；VFS + 文件管理 CRUD/回收站/还原；IndexedDB 持久化刷新验证通过                                                                                                                                                                                                                                                                     |
 | P2 联通与外壳增强 | 已完成（2026-10-04） | CommandBus + useOS（`appId:open` 语义快捷、未注册命令回退通知）+ doc-editor + AI 助手→打开文档链路 + vfs:changed 事件；通知中心（vfs 删除/还原、AI 生成文档触发，未读角标 + 打开即已读）、Spotlight（⌘K/搜索钮唤起，应用+文件检索→唤起）、Widgets（时钟/月历今日高亮/今日事项，窄屏隐藏）、桌面右键菜单（层叠窗口/更换壁纸/打开应用中心）全部浏览器实测通过 |
-| P3 打磨 | 已完成（2026-10-04） | Theme store + 三套壁纸切换（右键菜单驱动）；窗口布局持久化（位置/尺寸/z/最小化集合/标题/payload，`layout-v1`）+ 壁纸持久化（`theme-v1`），刷新后精确还原；窗口开合动画（TransitionGroup `.win-*` opacity+scale，覆盖 section 的 transition 工具类）； Dock 固定项/多用户设置暂无对应功能，不在本期范围 |
-| 图标系统改造 | 已完成（2026-10-04） | 全仓 emoji 图标（4 个 manifest + 17 处 UI 硬编码）替换为 lucide-vue-next 线性图标，经 `OsIcon` + `ICON_MAP` 收口；Dock 磁贴保持 tint 渐变 + 白色线图标；文件类型图标/配色由 `fileIconName/fileIconClass` 共享（file-manager 与 Spotlight 一致）；vue-tsc + 浏览器实测通过 |
+| P3 打磨           | 已完成（2026-10-04） | Theme store + 三套壁纸切换（右键菜单驱动）；窗口布局持久化（位置/尺寸/z/最小化集合/标题/payload，`layout-v1`）+ 壁纸持久化（`theme-v1`），刷新后精确还原；窗口开合动画（TransitionGroup `.win-*` opacity+scale，覆盖 section 的 transition 工具类）； Dock 固定项/多用户设置暂无对应功能，不在本期范围                                                      |
+| 图标系统改造      | 已完成（2026-10-04） | 全仓 emoji 图标（4 个 manifest + 17 处 UI 硬编码）替换为 lucide-vue-next 线性图标，经 `OsIcon` + `ICON_MAP` 收口；Dock 磁贴保持 tint 渐变 + 白色线图标；文件类型图标/配色由 `fileIconName/fileIconClass` 共享（file-manager 与 Spotlight 一致）；vue-tsc + 浏览器实测通过                                                                                   |
+| 工程基建打底      | 已完成（2026-10-04） | 详见《WebOS设计规范与工程基建.md》：ESLint/Prettier/husky 门禁、Vitest 单测（45 例）、Playwright E2E 冒烟（6 例）、GitHub Actions CI、设计 token 化（`src/styles/tokens.css`）、`src/ui/` 基础组件收口                                                                                                                                                      |
 
 **实施期对设计的修正（已回写本文档）**
 
