@@ -103,34 +103,36 @@ function onKey(e: KeyboardEvent) {
     class="fixed inset-0 z-[9997] flex items-start justify-center bg-black/20 pt-28 backdrop-blur-sm"
     @pointerdown.self="ui.closeOverlays()"
   >
-    <div class="w-[520px] max-w-[92vw] overflow-hidden rounded-2xl border border-white/50 bg-white/95 shadow-2xl">
+    <div
+      class="w-[520px] max-w-[92vw] overflow-hidden rounded-2xl border border-glass-border-active bg-glass-pop shadow-pop"
+    >
       <div class="flex items-center gap-2 border-b border-slate-200/70 px-4 py-3">
-        <OsIcon name="search" :size="16" class="text-slate-400" />
+        <OsIcon name="search" :size="16" class="text-ink-mute" />
         <input
           ref="inputEl"
           v-model="query"
-          class="flex-1 bg-transparent text-[15px] text-slate-700 outline-none placeholder-slate-400"
+          class="flex-1 bg-transparent text-title text-ink outline-none placeholder:text-ink-mute"
           placeholder="搜索应用与文件…"
           @keydown="onKey"
         />
-        <span class="text-[11px] text-slate-300">esc</span>
+        <span class="text-caption text-ink-mute">esc</span>
       </div>
       <ul class="max-h-[320px] overflow-y-auto py-1">
         <li v-for="(h, i) in hits" :key="h.kind + h.sub">
           <button
             class="flex w-full items-center gap-3 px-4 py-2 text-left"
-            :class="i === cursor ? 'bg-sky-50' : 'hover:bg-slate-50'"
+            :class="i === cursor ? 'bg-accent-soft' : 'hover:bg-slate-50'"
             @mouseenter="cursor = i"
             @click="pick(h)"
           >
             <OsIcon :name="h.icon" :size="18" :class="h.iconCls" />
             <span class="min-w-0 flex-1">
-              <span class="block truncate text-[13px] font-medium text-slate-700">{{ h.label }}</span>
-              <span class="block truncate text-[11px] text-slate-400">{{ h.sub }}</span>
+              <span class="block truncate text-ui font-medium text-ink">{{ h.label }}</span>
+              <span class="block truncate text-caption text-ink-mute">{{ h.sub }}</span>
             </span>
           </button>
         </li>
-        <li v-if="hits.length === 0" class="px-4 py-8 text-center text-[13px] text-slate-400">
+        <li v-if="hits.length === 0" class="px-4 py-8 text-center text-ui text-ink-mute">
           无匹配结果
         </li>
       </ul>

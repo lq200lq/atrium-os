@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, provide } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
+import OsTrafficLights from '@/ui/OsTrafficLights.vue'
 import { useWindowDrag } from '@/kernel/composables/useWindowDrag'
 import { useWindowResize, type ResizeDir } from '@/kernel/composables/useWindowResize'
 import { WIN_ID_KEY } from '@/kernel/composables/useWindowContext'
@@ -44,48 +45,35 @@ const handles: { dir: ResizeDir; cls: string }[] = [
     v-show="win.status !== 'minimized'"
     :class="[
       'absolute flex flex-col overflow-hidden rounded-xl border backdrop-blur-xl',
-      'transition-[left,top,width,height] duration-200',
+      'transition-[left,top,width,height] duration-base',
       active
-        ? 'border-white/60 bg-white/85 shadow-2xl shadow-slate-900/30'
-        : 'border-white/40 bg-white/70 shadow-lg shadow-slate-900/15',
+        ? 'border-glass-border-active bg-glass-strong shadow-window'
+        : 'border-glass-border bg-glass-base shadow-window-dim',
     ]"
     :style="[frameStyle, (dragging || resizing) && { transition: 'none' }]"
     @pointerdown="wm.focus(win.id)"
   >
     <header
       class="flex h-10 shrink-0 items-center gap-3 px-3"
-      :class="active ? 'bg-white/70' : 'bg-white/40'"
+      :class="active ? 'bg-glass-base' : 'bg-glass-raise'"
       @pointerdown="onPointerdown"
       @dblclick="wm.toggleMax(win.id)"
     >
-      <div class="flex items-center gap-1.5">
-        <button
-          class="h-3 w-3 rounded-full bg-[#ff5f57] hover:brightness-90"
-          title="关闭"
-          @pointerdown.stop
-          @click="wm.close(win.id)"
-        />
-        <button
-          class="h-3 w-3 rounded-full bg-[#febc2e] hover:brightness-90"
-          title="最小化"
-          @pointerdown.stop
-          @click="wm.minimize(win.id)"
-        />
-        <button
-          class="h-3 w-3 rounded-full bg-[#28c840] hover:brightness-90"
-          title="最大化 / 还原"
-          @pointerdown.stop
-          @click="wm.toggleMax(win.id)"
-        />
-      </div>
-      <div class="flex min-w-0 flex-1 items-center justify-center gap-1.5 text-[13px] font-medium text-slate-700">
-        <OsIcon v-if="manifest" :name="manifest.icon" :size="14" class="text-slate-500" />
+      <OsTrafficLights
+        @close="wm.close(win.id)"
+        @minimize="wm.minimize(win.id)"
+        @maximize="wm.toggleMax(win.id)"
+      />
+      <div
+        class="flex min-w-0 flex-1 items-center justify-center gap-1.5 text-ui font-medium text-ink"
+      >
+        <OsIcon v-if="manifest" :name="manifest.icon" :size="14" class="text-ink-mute" />
         <span class="truncate">{{ win.title }}</span>
       </div>
       <div class="w-14" />
     </header>
 
-    <div class="min-h-0 flex-1 overflow-hidden bg-white/60">
+    <div class="min-h-0 flex-1 overflow-hidden bg-glass-base">
       <KeepAlive :max="8">
         <component :is="manifest?.component" v-if="win.status !== 'minimized' && manifest" />
       </KeepAlive>

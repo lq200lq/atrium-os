@@ -16,7 +16,10 @@ const vfs = useVfs()
 const os = useOS()
 const notif = useNotification()
 const messages = ref<Msg[]>([
-  { role: 'bot', text: '你好！我是「万物皆应用」的 AI 助手。点击下方快捷指令，我会生成一份文档并通过 CommandBus 唤起文档编辑器。' },
+  {
+    role: 'bot',
+    text: '你好！我是「万物皆应用」的 AI 助手。点击下方快捷指令，我会生成一份文档并通过 CommandBus 唤起文档编辑器。',
+  },
 ])
 const input = ref('')
 
@@ -56,9 +59,9 @@ function generatePlan() {
         v-for="(m, i) in messages"
         :key="i"
         :class="[
-          'max-w-[85%] rounded-2xl px-3 py-2 text-[13px] leading-relaxed',
+          'max-w-[85%] rounded-2xl px-3 py-2 text-ui leading-relaxed',
           m.role === 'bot'
-            ? 'bg-slate-100 text-slate-700'
+            ? 'bg-slate-100 text-ink'
             : 'ml-auto bg-gradient-to-br from-violet-500 to-purple-600 text-white',
         ]"
       >
@@ -67,8 +70,8 @@ function generatePlan() {
           v-if="m.doc"
           class="mt-2 flex items-center gap-2 rounded-lg border border-violet-200 bg-white px-3 py-2"
         >
-          <OsIcon name="file-text" :size="20" class="shrink-0 text-sky-500" />
-          <span class="min-w-0 flex-1 truncate text-slate-700">{{ baseName(m.doc) }}</span>
+          <OsIcon name="file-text" :size="20" class="shrink-0 text-accent" />
+          <span class="min-w-0 flex-1 truncate text-ink">{{ baseName(m.doc) }}</span>
           <button
             class="shrink-0 rounded-md bg-violet-500 px-2 py-0.5 text-white hover:brightness-110"
             @click="os.exec('doc-editor:open', { key: m.doc, path: m.doc })"
@@ -80,7 +83,7 @@ function generatePlan() {
     </div>
     <div class="border-t border-slate-200/70 p-3">
       <button
-        class="mb-2 flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-[12px] text-violet-600 hover:bg-violet-100"
+        class="mb-2 flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-caption text-violet-600 hover:bg-violet-100"
         @click="generatePlan"
       >
         <OsIcon name="sparkles" :size="13" />
@@ -89,12 +92,12 @@ function generatePlan() {
       <div class="flex items-center gap-2">
         <input
           v-model="input"
-          class="flex-1 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-[13px] outline-none focus:border-violet-400"
+          class="flex-1 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-ui outline-none focus:border-violet-400"
           placeholder="输入你的问题…"
           @keydown.enter="send"
         />
         <button
-          class="rounded-full bg-gradient-to-br from-violet-500 to-purple-600 px-4 py-1.5 text-[13px] text-white hover:brightness-110"
+          class="rounded-full bg-gradient-to-br from-violet-500 to-purple-600 px-4 py-1.5 text-ui text-white hover:brightness-110"
           @click="send"
         >
           发送

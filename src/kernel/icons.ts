@@ -61,17 +61,17 @@ export function fileIconName(node: FsNode): IconName {
 }
 
 export function fileIconClass(node: FsNode): string {
-  if (node.type === 'dir') return 'text-amber-500'
+  if (node.type === 'dir') return 'text-file-dir'
   switch (node.name.split('.').pop()?.toLowerCase()) {
     case 'docx':
-      return 'text-sky-500'
+      return 'text-file-docx'
     case 'xlsx':
-      return 'text-emerald-500'
+      return 'text-file-xlsx'
     case 'pptx':
-      return 'text-orange-500'
+      return 'text-file-pptx'
     case 'pdf':
-      return 'text-rose-500'
+      return 'text-file-pdf'
     default:
-      return 'text-slate-400'
+      return 'text-file-other'
   }
 }

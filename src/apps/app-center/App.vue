@@ -21,7 +21,7 @@ const apps = computed(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col text-[13px]">
+  <div class="flex h-full flex-col text-ui">
     <div class="border-b border-slate-200/70 p-3">
       <input
         v-model="q"
@@ -44,10 +44,12 @@ const apps = computed(() => {
         >
           <OsIcon :name="app.icon" :size="26" class="text-white" />
         </span>
-        <span class="text-slate-700">{{ app.name }}</span>
-        <span class="text-[11px] text-slate-400">{{ app.singleton ? '单例' : '多实例' }}</span>
+        <span class="text-ink">{{ app.name }}</span>
+        <span class="text-caption text-ink-mute">{{ app.singleton ? '单例' : '多实例' }}</span>
       </button>
-      <p v-if="apps.length === 0" class="col-span-4 py-10 text-center text-slate-400">没有匹配的应用</p>
+      <p v-if="apps.length === 0" class="col-span-4 py-10 text-center text-ink-mute">
+        没有匹配的应用
+      </p>
     </div>
   </div>
 </template>

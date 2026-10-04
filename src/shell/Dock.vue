@@ -24,7 +24,7 @@ function onDockClick(app: RegisteredApp) {
 
 <template>
   <nav
-    class="fixed bottom-3 left-1/2 z-[9999] flex -translate-x-1/2 items-end gap-2 rounded-2xl border border-white/40 bg-white/25 px-3 py-2 shadow-xl shadow-slate-900/20 backdrop-blur-xl"
+    class="fixed bottom-3 left-1/2 z-[9999] flex -translate-x-1/2 items-end gap-2 rounded-2xl border border-glass-border bg-glass-bar px-3 py-2 shadow-dock backdrop-blur-xl"
   >
     <button
       v-for="app in registry.dockApps"

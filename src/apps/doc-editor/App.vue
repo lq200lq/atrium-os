@@ -62,22 +62,25 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex h-full flex-col text-[13px]">
-    <div class="flex items-center gap-3 border-b border-slate-200/70 px-4 py-2 text-slate-600">
-      <span class="truncate font-medium text-slate-700">{{ node?.name ?? '未关联文件' }}</span>
+  <div class="flex h-full flex-col text-ui">
+    <div class="flex items-center gap-3 border-b border-slate-200/70 px-4 py-2 text-ink">
+      <span class="truncate font-medium text-ink">{{ node?.name ?? '未关联文件' }}</span>
       <span class="flex-1" />
-      <span v-if="savedAt" class="text-emerald-600">已保存 {{ savedAt }}</span>
-      <span v-else-if="node" class="text-slate-400">编辑中…</span>
+      <span v-if="savedAt" class="text-success">已保存 {{ savedAt }}</span>
+      <span v-else-if="node" class="text-ink-mute">编辑中…</span>
     </div>
 
-    <div v-if="missing" class="flex flex-1 flex-col items-center justify-center gap-2 text-slate-400">
-      <OsIcon name="trash-2" :size="48" :stroke-width="1.5" class="text-slate-300" />
+    <div
+      v-if="missing"
+      class="flex flex-1 flex-col items-center justify-center gap-2 text-ink-mute"
+    >
+      <OsIcon name="trash-2" :size="48" :stroke-width="1.5" class="text-ink-mute" />
       <p>文件已被删除或移动</p>
     </div>
     <textarea
       v-else
       v-model="content"
-      class="min-h-0 flex-1 resize-none bg-transparent p-5 leading-relaxed text-slate-700 outline-none"
+      class="min-h-0 flex-1 resize-none bg-transparent p-5 leading-relaxed text-ink outline-none"
       placeholder="开始输入…"
       @input="onInput"
     />

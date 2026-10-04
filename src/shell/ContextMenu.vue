@@ -47,12 +47,12 @@ onUnmounted(() => {
 <template>
   <ul
     ref="root"
-    class="fixed z-[9000] w-44 rounded-lg border border-white/50 bg-white/90 py-1 text-[13px] text-slate-700 shadow-xl backdrop-blur-xl"
+    class="fixed z-[9000] w-44 rounded-lg border border-glass-border-active bg-glass-pop py-1 text-ui text-ink shadow-pop backdrop-blur-xl"
     :style="pos"
   >
     <li v-for="it in items" :key="it.label">
       <button
-        class="w-full px-4 py-1.5 text-left hover:bg-sky-50 hover:text-sky-700"
+        class="w-full px-4 py-1.5 text-left hover:bg-accent-soft hover:text-accent-strong"
         @click="runItem(it)"
       >
         {{ it.label }}

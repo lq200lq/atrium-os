@@ -38,41 +38,45 @@ const todos = ref([
 </script>
 
 <template>
-  <div
-    class="pointer-events-none absolute right-4 top-14 z-[5] hidden w-60 flex-col gap-3 xl:flex"
-  >
-    <div class="pointer-events-auto rounded-2xl border border-white/40 bg-white/25 p-4 text-white shadow-lg backdrop-blur-xl">
+  <div class="pointer-events-none absolute right-4 top-14 z-[5] hidden w-60 flex-col gap-3 xl:flex">
+    <div
+      class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
+    >
       <p class="text-4xl font-light tabular-nums drop-shadow">{{ clock }}</p>
-      <p class="mt-1 text-[13px] opacity-90">{{ dateLine }}</p>
+      <p class="mt-1 text-ui opacity-90">{{ dateLine }}</p>
     </div>
 
-    <div class="pointer-events-auto rounded-2xl border border-white/40 bg-white/25 p-4 text-white shadow-lg backdrop-blur-xl">
-      <div class="mb-2 grid grid-cols-7 gap-1 text-center text-[10px] opacity-70">
+    <div
+      class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
+    >
+      <div class="mb-2 grid grid-cols-7 gap-1 text-center text-micro opacity-70">
         <span v-for="w in ['一', '二', '三', '四', '五', '六', '日']" :key="w">{{ w }}</span>
       </div>
-      <div class="grid grid-cols-7 gap-1 text-center text-[11px]">
+      <div class="grid grid-cols-7 gap-1 text-center text-caption">
         <span
           v-for="(c, i) in cells"
           :key="i"
           class="flex h-6 items-center justify-center rounded-md"
-          :class="c.today ? 'bg-white text-sky-600 font-semibold' : 'opacity-80'"
+          :class="c.today ? 'bg-white text-accent-strong font-semibold' : 'opacity-80'"
         >
           {{ c.day || '' }}
         </span>
       </div>
     </div>
 
-    <div class="pointer-events-auto rounded-2xl border border-white/40 bg-white/25 p-4 text-white shadow-lg backdrop-blur-xl">
-      <p class="mb-2 text-[13px] font-medium">今日事项</p>
+    <div
+      class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
+    >
+      <p class="mb-2 text-ui font-medium">今日事项</p>
       <ul class="space-y-1.5">
         <li v-for="(t, i) in todos" :key="i">
           <button
-            class="flex w-full items-center gap-2 text-left text-[12px]"
+            class="flex w-full items-center gap-2 text-left text-caption"
             @click="t.done = !t.done"
           >
             <span
-              class="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-white/60 text-[10px]"
-              :class="t.done ? 'bg-white/80 text-sky-600' : ''"
+              class="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-glass-border-active text-micro"
+              :class="t.done ? 'bg-glass-strong text-accent-strong' : ''"
             >
               <OsIcon v-if="t.done" name="check" :size="10" :stroke-width="3" />
             </span>
