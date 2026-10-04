@@ -7,11 +7,6 @@ const wm = useWindowManager()
 
 <template>
   <TransitionGroup tag="div" name="win" class="pointer-events-none absolute inset-0">
-    <WindowFrame
-      v-for="win in wm.windows"
-      :key="win.id"
-      :win="win"
-      class="pointer-events-auto"
-    />
+    <WindowFrame v-for="win in wm.windows" :key="win.id" :win="win" class="pointer-events-auto" />
   </TransitionGroup>
 </template>

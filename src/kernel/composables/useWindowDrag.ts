@@ -21,7 +21,11 @@ export function useWindowDrag(winId: string) {
     const onMove = (ev: PointerEvent) => {
       const w = wm.byId(winId)
       if (!w) return
-      const c = clampRect({ x: w.x + ev.clientX - sx, y: w.y + ev.clientY - sy, w: w.w, h: w.h }, w.w, w.h)
+      const c = clampRect(
+        { x: w.x + ev.clientX - sx, y: w.y + ev.clientY - sy, w: w.w, h: w.h },
+        w.w,
+        w.h,
+      )
       offset.value = { x: c.x - w.x, y: c.y - w.y }
     }
     const onUp = () => {

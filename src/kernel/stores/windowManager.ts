@@ -82,7 +82,11 @@ export const useWindowManager = defineStore('windowManager', {
         appId,
         title: manifest.name,
         x: clamp(bounds.x + 140 + cascade, 8, Math.max(8, bounds.w - w - 8)),
-        y: clamp(bounds.y + 48 + cascade, bounds.y + 4, Math.max(bounds.y + 4, bounds.y + bounds.h - h - 8)),
+        y: clamp(
+          bounds.y + 48 + cascade,
+          bounds.y + 4,
+          Math.max(bounds.y + 4, bounds.y + bounds.h - h - 8),
+        ),
         w,
         h,
         z: 0,
@@ -178,7 +182,11 @@ export const useWindowManager = defineStore('windowManager', {
       for (const win of this.windows.filter((w) => w.status === 'normal')) {
         const c = (i++ % 6) * 28
         win.x = clamp(bounds.x + 140 + c, 8, Math.max(8, bounds.w - win.w - 8))
-        win.y = clamp(bounds.y + 48 + c, bounds.y + 4, Math.max(bounds.y + 4, bounds.y + bounds.h - win.h - 8))
+        win.y = clamp(
+          bounds.y + 48 + c,
+          bounds.y + 4,
+          Math.max(bounds.y + 4, bounds.y + bounds.h - win.h - 8),
+        )
       }
     },
 
@@ -236,8 +244,10 @@ export const useWindowManager = defineStore('windowManager', {
         this.windows = restored
         this.topZ = maxZ + 1
         this.activeId =
-          [...restored].filter((w) => w.status !== 'minimized').sort((a, b) => a.z - b.z).pop()?.id ??
-          null
+          [...restored]
+            .filter((w) => w.status !== 'minimized')
+            .sort((a, b) => a.z - b.z)
+            .pop()?.id ?? null
       } catch (e) {
         console.warn('[wm] 布局恢复失败', e)
       }

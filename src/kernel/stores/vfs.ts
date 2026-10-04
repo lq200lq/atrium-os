@@ -37,8 +37,16 @@ function seed(): Record<string, FsNode> {
   dir('/我的文件/技术文档')
   dir('/我的文件/项目资料')
   dir('/我的文件/设计素材')
-  file('/我的文件/项目汇报.pptx', '智慧园区项目汇报提纲（占位内容）', 'application/vnd.ms-powerpoint')
-  file('/我的文件/需求文档.docx', '智慧园区数字化解决方案需求说明（占位内容）', 'application/msword')
+  file(
+    '/我的文件/项目汇报.pptx',
+    '智慧园区项目汇报提纲（占位内容）',
+    'application/vnd.ms-powerpoint',
+  )
+  file(
+    '/我的文件/需求文档.docx',
+    '智慧园区数字化解决方案需求说明（占位内容）',
+    'application/msword',
+  )
   file('/我的文件/数据报表.xlsx', '园区运营数据报表（占位内容）', 'application/vnd.ms-excel')
   file('/我的文件/合同文件.pdf', '园区服务合同（占位内容）', 'application/pdf')
   return nodes
