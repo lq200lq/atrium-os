@@ -114,6 +114,32 @@ export default {
     singleton: 'Singleton',
     multi: 'Multi-instance',
     noMatch: 'No matching apps',
+    tabAll: 'All apps',
+    tabWeb: 'Web apps',
+    tabsAria: 'App sections',
+  },
+  webApp: {
+    name: 'Name',
+    url: 'URL',
+    add: 'Add web app',
+    editTitle: 'Edit web app',
+    open: 'Open',
+    edit: 'Edit',
+    remove: 'Remove',
+    count: '{n} total',
+    empty: 'No web apps yet — add one to turn a site you use daily into an app',
+    dialogHint:
+      'Only http/https addresses. Some sites refuse to be embedded (X-Frame-Options / CSP); if the window stays blank, use "Open in new tab".',
+    confirmRemove: 'Remove “{name}”? Its windows close too, and this cannot be undone.',
+    added: 'Web app added',
+    updated: 'Web app updated',
+    removed: 'Web app removed',
+    reason: {
+      empty: 'Enter an address',
+      'too-long': 'Address is too long (2048 characters max)',
+      parse: 'Address cannot be parsed',
+      protocol: 'Only http/https addresses are supported',
+    },
   },
   settings: {
     account: {

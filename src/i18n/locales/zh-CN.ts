@@ -93,6 +93,32 @@ export default {
     singleton: '单例',
     multi: '多实例',
     noMatch: '没有匹配的应用',
+    tabAll: '全部应用',
+    tabWeb: '网页应用',
+    tabsAria: '应用分区',
+  },
+  webApp: {
+    name: '名称',
+    url: '地址',
+    add: '添加网页应用',
+    editTitle: '编辑网页应用',
+    open: '打开',
+    edit: '编辑',
+    remove: '卸载',
+    count: '共 {n} 个',
+    empty: '还没有网页应用，点「添加网页应用」把常用站点变成一个应用',
+    dialogHint:
+      '只支持 http/https 地址。部分站点禁止被嵌入（X-Frame-Options / CSP），打开后若是空白，请用「新标签页打开」。',
+    confirmRemove: '卸载「{name}」？它的窗口会一并关闭，此操作不可撤销。',
+    added: '已添加网页应用',
+    updated: '已更新网页应用',
+    removed: '已卸载网页应用',
+    reason: {
+      empty: '请填写地址',
+      'too-long': '地址过长（上限 2048 字符）',
+      parse: '地址无法解析',
+      protocol: '只支持 http/https 地址',
+    },
   },
   settings: {
     account: {

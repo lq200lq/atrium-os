@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
+import OsSegmented from '@/ui/OsSegmented.vue'
+import WebAppsPanel from './WebAppsPanel.vue'
 import { useAppRegistry } from '@/kernel/stores/appRegistry'
 import { useWindowManager } from '@/kernel/stores/windowManager'
 import { useAppName } from '@/i18n'
@@ -11,6 +13,12 @@ const wm = useWindowManager()
 const { t } = useI18n()
 const appName = useAppName()
 const q = ref('')
+const tab = ref('all')
+
+const tabs = computed(() => [
+  { value: 'all', label: t('appCenter.tabAll'), icon: 'boxes' as const },
+  { value: 'web', label: t('appCenter.tabWeb'), icon: 'globe' as const },
+])
 
 const apps = computed(() => {
   const kw = q.value.trim().toLowerCase()
@@ -27,14 +35,16 @@ const apps = computed(() => {
 
 <template>
   <div class="flex h-full flex-col text-ui">
-    <div class="border-b border-line p-3">
+    <div class="flex items-center gap-2 border-b border-line p-3">
       <input
         v-model="q"
-        class="h-control w-full rounded-full border border-line bg-surface-sunken px-md focus:border-accent focus:bg-surface"
+        class="h-control min-w-0 flex-1 rounded-full border border-line bg-surface-sunken px-md focus:border-accent focus:bg-surface"
         :placeholder="t('appCenter.search')"
       />
+      <OsSegmented v-model="tab" :options="tabs" :label="t('appCenter.tabsAria')" />
     </div>
-    <div class="grid flex-1 grid-cols-4 content-start gap-3 overflow-y-auto p-4">
+    <WebAppsPanel v-if="tab === 'web'" :query="q" class="min-h-0 flex-1" />
+    <div v-else class="grid flex-1 grid-cols-4 content-start gap-3 overflow-y-auto p-4">
       <button
         v-for="app in apps"
         :key="app.id"

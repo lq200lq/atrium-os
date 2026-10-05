@@ -78,6 +78,10 @@ function leafKeys(tree: unknown, prefix = ''): string[] {
   )
 }
 
+// mergeLocaleMessage 会就地改写字典（下面的探测用例就是那么注入的），所以对照用的 key 集合在模块加载时定格。
+const ZH_KEYS = leafKeys(zhCN)
+const EN_KEYS = leafKeys(enUS)
+
 describe('文案可被消息编译器接受', () => {
   // vue-i18n 的消息是运行期首次取词才编译的：`@` 开头会被当成 linked message 语法，
   // 写坏了整棵子树直接进错误边界，而逐件挂载的单测碰不到，所以这里全量 t() 一遍。
@@ -92,4 +96,12 @@ describe('文案可被消息编译器接受', () => {
       for (const key of keys) expect(() => i18n.global.t(key), key).not.toThrow()
     })
   }
+
+  // 只测「各自能编译」碰不到缺键：en 少一条会静默回退成中文，界面变成中英混排却全绿。
+  // 用模块加载时定格的 key：mergeLocaleMessage 会就地改写字典，上面的探测用例就是那么注入的。
+  it('两份语言包叶子 key 集合完全一致', () => {
+    expect(EN_KEYS.filter((k) => !ZH_KEYS.includes(k))).toEqual([])
+    expect(ZH_KEYS.filter((k) => !EN_KEYS.includes(k))).toEqual([])
+    expect(EN_KEYS).toHaveLength(ZH_KEYS.length)
+  })
 })
