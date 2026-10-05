@@ -75,6 +75,7 @@ export default {
     settings: '设置',
     componentGallery: '组件陈列',
     dataBoard: '数据看板',
+    docsCenter: '文档中心',
   },
   embed: {
     loading: '正在加载…',

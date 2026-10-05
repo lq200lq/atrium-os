@@ -100,41 +100,42 @@ function openInTab() {
 
     <div class="relative min-h-0 flex-1">
       <OsEmpty v-if="!hasUrl" icon="globe" :description="t('embed.invalid')" />
-      <!-- iframe 必须立刻挂载：不挂就永远等不到 load；:key 换实例即为重试 -->
-      <iframe
-        v-if="hasUrl"
-        :key="attempt"
-        class="block h-full w-full"
-        :src="url"
-        :title="win.title"
-        :sandbox="SANDBOX"
-        :allow="ALLOW"
-        @load="phase = 'ready'"
-        @error="phase = 'failed'"
-      />
-      <div
-        v-if="phase === 'loading'"
-        class="absolute inset-0 flex items-center justify-center bg-glass-base"
-      >
-        <OsSpin :tip="t('embed.loading')" />
-      </div>
-      <div
-        v-else-if="phase === 'timeout' || phase === 'failed'"
-        class="absolute inset-0 flex items-center justify-center overflow-y-auto bg-glass-base p-4"
-      >
-        <OsResult
-          :status="phase === 'timeout' ? 'warning' : 'error'"
-          :title="phase === 'timeout' ? t('embed.timeoutTitle') : t('embed.failedTitle')"
-          :subtitle="phase === 'timeout' ? t('embed.timeoutSubtitle') : t('embed.failedSubtitle')"
+      <template v-else>
+        <!-- iframe 必须立刻挂载：不挂就永远等不到 load；:key 换实例即为重试 -->
+        <iframe
+          :key="attempt"
+          class="block h-full w-full"
+          :src="url"
+          :title="win.title"
+          :sandbox="SANDBOX"
+          :allow="ALLOW"
+          @load="phase = 'ready'"
+          @error="phase = 'failed'"
+        />
+        <div
+          v-if="phase === 'loading'"
+          class="absolute inset-0 flex items-center justify-center bg-glass-base"
         >
-          <template #extra>
-            <OsButton size="sm" @click="retry">{{ t('embed.retry') }}</OsButton>
-            <OsButton size="sm" variant="primary" @click="openInTab">
-              {{ t('embed.openInTab') }}
-            </OsButton>
-          </template>
-        </OsResult>
-      </div>
+          <OsSpin :tip="t('embed.loading')" />
+        </div>
+        <div
+          v-else-if="phase === 'timeout' || phase === 'failed'"
+          class="absolute inset-0 flex items-center justify-center overflow-y-auto bg-glass-base p-4"
+        >
+          <OsResult
+            :status="phase === 'timeout' ? 'warning' : 'error'"
+            :title="phase === 'timeout' ? t('embed.timeoutTitle') : t('embed.failedTitle')"
+            :subtitle="phase === 'timeout' ? t('embed.timeoutSubtitle') : t('embed.failedSubtitle')"
+          >
+            <template #extra>
+              <OsButton size="sm" @click="retry">{{ t('embed.retry') }}</OsButton>
+              <OsButton size="sm" variant="primary" @click="openInTab">
+                {{ t('embed.openInTab') }}
+              </OsButton>
+            </template>
+          </OsResult>
+        </div>
+      </template>
     </div>
   </div>
 </template>

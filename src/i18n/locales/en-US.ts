@@ -107,6 +107,7 @@ export default {
     settings: 'Settings',
     componentGallery: 'Components',
     dataBoard: 'Data Board',
+    docsCenter: 'Docs',
   },
   appCenter: {
     search: 'Search apps…',

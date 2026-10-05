@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>嵌入测试页</title>
+    <style>
+      /* 静态 fixture：不经 Tailwind 构建，字体栈与仓库 UI 一致即可，不参与 token 门禁（扫描面是 src/） */
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #f7f7f8;
+        color: #1f1f23;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'PingFang SC',
+          'Microsoft YaHei',
+          sans-serif;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+      p {
+        margin: 0 0 8px;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 唯一被同源嵌入的页面：E2E 用它给 frameLocator 一个确定可读的断言目标（不是 mock server） -->
+    <h1 id="fixture-title">嵌入内容渲染成功</h1>
+    <p id="fixture-body">
+      这是 WebOS 的 embed 测试夹具，只有被真实 iframe 装载时才该看到这段文字。
+    </p>
+  </body>
+</html>
