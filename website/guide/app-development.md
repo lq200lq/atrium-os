@@ -77,7 +77,7 @@ export const manifest: AppManifest = {
 - **用户可在运行期添加**：应用中心 →「网页应用」分区，填名称与地址即可；记录落 IndexedDB（`webapps-v1`），启动时在第一波 restore 内注册进注册表（必须早于窗口布局恢复，否则这些 appId 会被当成未知应用丢弃）。
 - **地址在写入边界校验**：`kernel/webapp/url.ts` 用**正向协议白名单**只放 `http:`/`https:`（`new URL('javascript:alert(1)')` 是能解析成功的，反向黑名单必漏），剥凭证、限长 2048。
 - **沙箱取值是有意的**：给 `allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-presentation`，**不给 `allow-top-navigation`**——外部页面不能把整个系统顶掉。`allow-scripts`+`allow-same-origin` 只对同源文档构成逃逸，而外部地址按构造是第三方。
-- **跨源读不到，不假装能读**：窗口标题恒为 `manifest.name`，没有前进/后退/URL 回读，暗色主题不注入 frame。被 `X-Frame-Options`/CSP `frame-ancestors` 拒绝时浏览器加载的是 `about:blank` 且照常触发 `load`，**无法可靠检测**，所以 `EmbedView` 只做「超时 → 警示态 + 重试 + 新标签页打开」并明示限制，不谎称识别出了拒绝。
+- **跨源读不到，不假装能读**：窗口标题恒为 `manifest.name`，没有前进/后退/URL 回读，暗色主题不注入 frame。被 `X-Frame-Options`/CSP `frame-ancestors` 拒绝时浏览器加载的是 `about:blank` 且照常触发 `load`，**无法可靠检测**，所以 `EmbedView` 只做「超时 → 警示态 + 重试 + 新标签页打开」，不谎称识别出了拒绝。实测：嵌 `https://www.google.com`（`x-frame-options: SAMEORIGIN`）时 frame 照样拿到 200、`load` 照常触发，界面停在就绪态、画面空白——这是正确行为，任何伪检测都会连带误伤能正常嵌入的站点；限制因此在两处明示：添加/编辑弹窗的说明文案，与窗口工具栏常驻的「重试 / 新标签页打开」出口。
 - **同源入口必须带扩展名**：`/docs/index.html` 可以，`/docs/` 与 `/docs/tokens` 不行——Vite dev 的 SPA fallback 会把未知路径落回本应用 `index.html`，那样 frame 里装的是 **WebOS 壳层自己**（壳套壳）。因此 `main.ts` 判断 `window.self !== window.top`，被嵌入时不挂载，只留一行说明；用户手填指向本站根路径的地址也会撞上同一条，这道判断是系统性的。
 - **不要在应用里自写 iframe**，也不要与 frame 内容建 `postMessage` 通道（本阶段没有这个协议）。
 

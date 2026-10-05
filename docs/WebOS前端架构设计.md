@@ -222,15 +222,15 @@ public/
 
 ## 9. 风险与对策
 
-| 风险                        | 对策                                                                                                                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 多窗口 + KeepAlive 内存膨胀 | KeepAlive max 上限 + 最久未聚焦淘汰；应用卸载时经 onUnmounted 清理订阅                                                                                                                                 |
-| pointermove 高频更新卡顿    | 见 D5；必要时 useRafFn 合帧                                                                                                                                                                            |
-| 应用样式污染壳层            | 应用根组件 scoped + 命名前缀约定；全局样式只放 CSS 变量与 reset                                                                                                                                        |
-| 应用间隐式耦合              | 强制经 CommandBus/VFS；code review 检查 apps/ 之间无互相 import                                                                                                                                        |
-| 持久化数据版本演进          | persistedstate 键带版本号，启动时迁移或丢弃旧版                                                                                                                                                        |
-| 外部站点拒绝被嵌入          | X-Frame-Options/CSP frame-ancestors 拒绝在跨源 frame 里表现为 `about:blank` + 照常 `load`，**不可靠检测**；因此不做伪检测，加载超时给 warning + 「新标签页打开」出口，限制在文档与应用内明示           |
-| embed 内容越权              | 地址在写入边界（webApps.add）做正向协议白名单 http/https；`sandbox` 故意不给 `allow-top-navigation`（拦 frame-busting）；`src` 只做属性绑定，不进 `v-html`/标题插值，本阶段不注册任何 postMessage 监听 |
+| 风险                        | 对策                                                                                                                                                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 多窗口 + KeepAlive 内存膨胀 | KeepAlive max 上限 + 最久未聚焦淘汰；应用卸载时经 onUnmounted 清理订阅                                                                                                                                                       |
+| pointermove 高频更新卡顿    | 见 D5；必要时 useRafFn 合帧                                                                                                                                                                                                  |
+| 应用样式污染壳层            | 应用根组件 scoped + 命名前缀约定；全局样式只放 CSS 变量与 reset                                                                                                                                                              |
+| 应用间隐式耦合              | 强制经 CommandBus/VFS；code review 检查 apps/ 之间无互相 import                                                                                                                                                              |
+| 持久化数据版本演进          | persistedstate 键带版本号，启动时迁移或丢弃旧版                                                                                                                                                                              |
+| 外部站点拒绝被嵌入          | 拒绝在跨源 frame 里表现为画面空白 + 照常 `load`（实测 google：响应 200、`load` 触发、内容空且父页读不到），**不可靠检测**；因此不做伪检测，加载超时给 warning + 「新标签页打开」出口，限制在添加弹窗文案与工具栏常驻出口明示 |
+| embed 内容越权              | 地址在写入边界（webApps.add）做正向协议白名单 http/https；`sandbox` 故意不给 `allow-top-navigation`（拦 frame-busting）；`src` 只做属性绑定，不进 `v-html`/标题插值，本阶段不注册任何 postMessage 监听                       |
 
 ## 10. 实施状态
 
@@ -245,7 +245,7 @@ public/
 | 后续迭代路线         | 已规划（2026-10-04） | P0~P3 与打底完成后的脚手架方向路线（S1 应用接入契约与生成器 / S2 权限模型与 settings / S3 组件纵深 / S4 数据访问层 / S5 主题与 i18n / S6 文档站·版本·可观测）详见《WebOS脚手架迭代路线.md》，该文档为后续迭代的设计依据                                                                                                                                     |
 | 对标 Ant Design 纵深 | 进行中（2026-10-05） | S1~S6 之后以 Ant Design 的设计/研发/组件体系为参照另文规划 S7~S12（设计语言成文与 token 刻度、组件契约、布局与展示件、反馈与导航件、配置层与文档自动化、a11y 与质量线），详见《WebOS对标AntDesign迭代规划.md》；S7~S11 已完成，逐阶段状态见该文档 §9                                                                                                        |
 
-| 外部网页应用类目 | 进行中（2026-10-05） | D2′ 落地：`AppManifest` 加 `embed` 与 `entry` 二选一（`register()` 合成内置 `EmbedView`，渲染路径仍一条），新增 `webApps` store（`webapps-v1`）持久化用户在应用中心「网页应用」分区添加的外部站点，内置 `docs-center` 以 `embed: { url: '/docs/index.html' }` 指向同源文档站（`docs:embed` 把 VitePress 产物复制进 `public/docs/`；同源入口必须带扩展名，故壳层加了「被嵌入即拒绝挂载」的反嵌套判断）；跨源拒绝嵌入不做伪检测，走超时告警 + 新标签页出口 |
+| 外部网页应用类目 | 已完成（2026-10-05） | D2′ 落地：`AppManifest` 加 `embed` 与 `entry` 二选一（`register()` 合成内置 `EmbedView`，渲染路径仍一条），新增 `webApps` store（`webapps-v1`）持久化用户在应用中心「网页应用」分区添加的外部站点，内置 `docs-center` 以 `embed: { url: '/docs/index.html' }` 指向同源文档站（`docs:embed` 把 VitePress 产物复制进 `public/docs/`；同源入口必须带扩展名，故壳层加了「被嵌入即拒绝挂载」的反嵌套判断）；跨源拒绝嵌入不做伪检测，走超时告警 + 新标签页出口（两类结局均已浏览器实测：同源 fixture 与文档站正文可读；`https://www.google.com` 因 `x-frame-options: SAMEORIGIN` 拿到 200 + 触发 `load` 却画面空白，界面如实停在就绪态、工具栏「重试 / 新标签页打开」始终可用，卸载后刷新不复活）。**门禁实测**：单测 60 文件 / 479 例（新增 `webapp-url` 21 + `webApps` 10 + `embed-view` 9 + `web-apps-panel` 5 + 双语 key 齐平 1），E2E 83 条全绿（77→83：`web-app.spec.ts` 5 条走「添加 → Dock 磁贴 → `frameLocator` 读到同源正文 → 刷新仍在 → 卸载连带关窗且刷新不复活 → `javascript:` 被字段错误拦下」，另 1 条为 a11y 的网页应用三场景扫描），首屏 235.5KB（预算 700KB）、最大单块 `vue` 147.7KB（预算 260KB）、`EmbedView` 独立异步块 2.8KB，图标白名单 28 个覆盖 24 个用点，42 张 API 表 `docs:check` 一致。**反证（证明门禁不是摆设，跑完即撤）**：manifest 里把图标写成 `nope` → `gen-icons --check` exit=1；`entry`+`embed` 同时给出由 `@ts-expect-error` 用例锁住（指令一旦失效 vue-tsc 即报错）；语言包删一条 en key → 双语齐平用例如期报出 `webApp.add`；面板里把拒绝原因路径写回错的 `webApp.reason.tooLong` → 组件用例报出「显示成 key 而不是文案」 |
 
 **实施期对设计的修正（已回写本文档）**
 

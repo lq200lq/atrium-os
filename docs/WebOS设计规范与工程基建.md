@@ -47,17 +47,21 @@ docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 
 ### 2.3 测试策略
 
-| 层     | 工具                     | 覆盖对象                                                                                                | 不做什么                                     |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| 单元   | Vitest + happy-dom       | store 纯逻辑（windowManager/vfs/icons/notification）、纯函数                                            | 不测视觉                                     |
-| 组件   | Vitest + @vue/test-utils | 基础组件（src/ui）的 props/emit 契约                                                                    | 不测样式渲染像素                             |
-| E2E    | Playwright               | 按主题拆分的 spec（壳层/窗口/权限/数据/组件/主题/可观测…）                                              | 不穷举交互                                   |
-| 无障碍 | Playwright + axe-core    | `a11y.spec.ts` 四场景 serious/critical 必须为 0；`keyboard.spec.ts` 键盘契约；`contrast.spec.ts` 对比度 | 不做 AA 之外的全量 WCAG 打分                 |
-| 视觉   | Playwright 截图基线      | `visual.spec.ts` 10 张组件级基线（壳层明暗 / Spotlight / 陈列窗口 7 页签）随仓库提交，CI 比对           | 不做全页面像素回归（噪声大，见规划 §8 定案） |
+| 层     | 工具                     | 覆盖对象                                                                                                                                                                                  | 不做什么                                     |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| 单元   | Vitest + happy-dom       | store 纯逻辑（windowManager/vfs/icons/notification）、纯函数                                                                                                                              | 不测视觉                                     |
+| 组件   | Vitest + @vue/test-utils | 基础组件（src/ui）的 props/emit 契约                                                                                                                                                      | 不测样式渲染像素                             |
+| E2E    | Playwright               | 按主题拆分的 spec（壳层/窗口/权限/数据/组件/主题/可观测…）                                                                                                                                | 不穷举交互                                   |
+| 无障碍 | Playwright + axe-core    | `a11y.spec.ts` 13 次 axe 扫描（壳层 / Spotlight / 陈列 7 页签 / 设置 / 网页应用面板与弹窗 / embed 窗口）serious/critical 必须为 0；`keyboard.spec.ts` 键盘契约；`contrast.spec.ts` 对比度 | 不做 AA 之外的全量 WCAG 打分                 |
+| 视觉   | Playwright 截图基线      | `visual.spec.ts` 10 张组件级基线（壳层明暗 / Spotlight / 陈列窗口 7 页签）随仓库提交，CI 比对                                                                                             | 不做全页面像素回归（噪声大，见规划 §8 定案） |
 
 覆盖率下限自 S12 起按目录分档（`vitest.config.ts`）：全局 75/72/78/78（stmts/branch/funcs/lines）之外，另设 `src/ui/**` 85/78/85/88 与 `src/kernel/**` 65/58/70/68 两块地板。分档而不是一刀切全局，是因为 `windows`/`i18n` 的覆盖结构与组件层不同，混在一个全局阈值里只会把地板架空。
 
 **跨源 frame 的断言口径（D2′ 外部网页应用）**：iframe 里是别人的文档，选择器与 axe 都进不去，因此「内容真的渲染了」这一条只能对**同源页面**断言。测试用 `public/embed-demo.html`（唯一的同源嵌入样本，纯静态文件，不是 mock server）配合 `page.frameLocator()` 拿到真信号；第三方站点只断言我们自己的 embed chrome（工具条、超时 warning、重试、新标签页出口）。axe 会**下钻同源 iframe**，所以无障碍场景只覆盖管理面板 + embed chrome + 同源 fixture，不把文档站正文纳入扫描面——VitePress 自有页面的问题该由文档站自己修，不该让壳层门禁继承一份不属于它的红。
+
+**扫描前等窗口过渡收尾**：axe 的对比度取的是即时计算样式，玻璃层入场动画跑到一半时背景被混淡，读数会漂移（`settings` 场景曾偶发 `color-contrast 4.15:1`，单独重跑又 9/9 全绿——典型的「门禁自己不稳定」而不是「产品有红」）。`scan()` 因此先 `waitForFunction` 到页面上不再有 `.win-enter-active/.win-leave-active` 再分析；这不是给断言放水，`animations: 'disabled'` 只管截图，管不到 axe。
+
+**就绪屏障收进 `gotoShell()`**：S10 记过一次同类竞态（`⌘K` 监听挂在 `App.vue` 的 `onMounted`，而 `goto()` 在 `load` 就返回，按键可能早于监听注册），当时只在 `shell.spec.ts` 一处补了屏障。D2′ 新增的 a11y Spotlight 场景又红了一次——它是按用例逐个 `gotoShell()` 的文件，绕过了那处局部屏障。根因只有一个，所以修在共用入口：`helpers.ts` 的 `gotoShell()` 现在 `goto()` 后固定 `expect(getByRole('banner')).toBeVisible()`，所有 spec（含 `page.reload()` 后走自动重试定位的用例）一并受益，没有屏障的老写法留着也不冲突——它只是重复了一次同一个等待。修完连跑 4 轮全套 83 条全绿。
 
 ### 2.4 CI
 
@@ -66,7 +70,7 @@ docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 | job      | 内容                                                                                                                                                           |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `check`  | install → `type-check` → `lint` → `format:check` → `check:tokens` → `test:unit:coverage` → E2E（`--grep-invert "a11y\|visual"`）→ `build:check` → `docs:build` |
-| `a11y`   | `test:e2e:a11y`（axe 四场景 + 键盘契约），独立红                                                                                                               |
+| `a11y`   | `test:e2e:a11y`（axe 13 次扫描 + 键盘契约），独立红                                                                                                            |
 | `visual` | `test:e2e:visual` 截图 diff；缺本平台基线时先跑 `--update-snapshots` 并把产物上传为 `visual-baselines-linux`，提交后转为真正的 diff 门禁                       |
 
 截图基线按平台分目录（`snapshotPathTemplate` 里的 `{platform}`）：字体栅格化与抗锯齿跨 OS 不可比，同 OS 的 diff 才是有效门禁，所以 darwin 基线守护本地开发、linux 基线由 CI 首跑引导生成。
@@ -286,7 +290,7 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 开闭原则：基础组件只通过 props/slot 扩展表现，新场景优先加 variant，不在业务侧复制样式。
 
-**键盘与焦点规范（S12 成文）**：这一类行为在 S11 之前只散落在个别组件里，现在定为契约，验收在 `tests/e2e/keyboard.spec.ts`（6 条）+ `tests/e2e/focus.spec.ts`（4 条）+ `tests/e2e/a11y.spec.ts`（axe 四场景 + 降级一条）。
+**键盘与焦点规范（S12 成文）**：这一类行为在 S11 之前只散落在个别组件里，现在定为契约，验收在 `tests/e2e/keyboard.spec.ts`（6 条）+ `tests/e2e/focus.spec.ts`（4 条）+ `tests/e2e/a11y.spec.ts`（axe 13 次扫描 + 降级一条）。
 
 | 条目     | 规范                                                                                                                                                                                          | 落点                                                                        |
 | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -296,7 +300,7 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 | 焦点归还 | 浮层关闭后焦点必须回到打开它的元素（记住 `document.activeElement`，卸载/关闭时 `focus()`，节点已消失则不动）。没有这条，键盘用户每关一次浮层就要从页头重新 Tab 一遍                           | `OsDialog.onBeforeUnmount` / `OsDrawer` 的 `watch(open)` / `Spotlight` 同构 |
 | 唤起键   | `⌘K`/`Ctrl+K` 是**开合开关**而不是只开有关（否则键盘用户无法用同一键位退出）                                                                                                                  | `App.vue` 的全局 keydown                                                    |
 | 方向键   | 列表型浮层用 `aria-current="true"` 标活动项（Spotlight 结果），树型结构支持上下移动 + 回车展开/选中（`OsTree`）                                                                               | `keyboard.spec.ts`、`tree.spec.ts`                                          |
-| 可访问名 | 无可见 label 的原生控件必须有名：录入族（`OsInput/OsInputNumber/OsTextarea/OsSelect/OsCheckbox`）走 `ariaLabel` 契约，`OsTree` 复选框取节点名，图标按钮（顶栏铃铛等）取 `aria-label`          | axe `label`/`button-name`/`select-name` 在四场景均为 0                      |
+| 可访问名 | 无可见 label 的原生控件必须有名：录入族（`OsInput/OsInputNumber/OsTextarea/OsSelect/OsCheckbox`）走 `ariaLabel` 契约，`OsTree` 复选框取节点名，图标按钮（顶栏铃铛等）取 `aria-label`          | axe `label`/`button-name`/`select-name` 在各扫描场景均为 0                  |
 | 动效降级 | `prefers-reduced-motion: reduce` 下时长统一压到 `--duration-reduced`（0.01ms）并取消入场位移，但**状态切换本身照常发生**——Vue 的 Transition 靠 `transitionend` 判定结束，降级不能把它一起关掉 | `a11y.spec.ts` 降级用例（窗口能开也能关 + 时长实测 ≤1ms）                   |
 
 未做（诚实记录，不在 S12 范围内）：浮层的**焦点陷阱**（Tab 循环锁在浮层内）与打开时自动聚焦首个可交互元素。`OsDialog`/`OsDrawer` 已声明 `aria-modal="true"`，但辅助技术之外，纯键盘仍可 Tab 到浮层背后的桌面元素。补这条要先定「谁负责 trap」（组件 vs 壳层），单独立项。
@@ -330,17 +334,17 @@ tests/
 
 > 下表数字是 **S1~S6 打底完成时（2026-10-04）的基线快照**，不作为现状读数。当前组件数见 §4.2，各阶段增量与实测数（单测/E2E/包体）见《WebOS对标AntDesign迭代规划.md》§9。
 
-| 项            | 状态                 | 说明                                                                                                                                             |
-| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 工程规范      | 已完成（2026-10-04） | ESLint flat（vue/ts/prettier 兼容）+ Prettier + husky/lint-staged（lint-staged + type-check 门禁）                                               |
-| 单测基建      | 已完成（2026-10-04） | Vitest + happy-dom + @vue/test-utils；45 个用例（windowManager/vfs/notification/icons/layout/ui 契约）                                           |
-| E2E 冒烟      | 已完成（2026-10-04） | Playwright chromium 6 条冒烟（壳层/Dock 语义/交通灯/拖拽/Spotlight/布局刷新还原），替代手工点测                                                  |
-| CI 门禁       | 已完成（2026-10-04） | `.github/workflows/ci.yml`：type-check → lint → unit → e2e；仓库暂无远端，CI 未实跑过，待首次 push 验证                                          |
-| 设计 token 化 | 已完成（2026-10-04） | `src/styles/tokens.css`（Tailwind `@theme`）；全仓硬编码色值/字号/阴影/时长已收敛，computed style 断言验证（玻璃/交通灯/文件类型/字号层级）      |
-| 基础组件收口  | 已完成（2026-10-04） | `src/ui/` 五个组件落地并被 WindowFrame/TopBar/file-manager 消费，props/emit 契约有单测                                                           |
-| 无障碍门禁    | 已完成（2026-10-05） | axe 四场景 serious/critical = 0（`BASELINE` 空表，只减不增）+ 键盘/焦点契约 10 条 + 对比度含暗色×4 预设与中性 `ink-mute`/`on-accent` 盲区        |
-| 视觉回归基线  | 已完成（2026-10-05） | `visual.spec.ts` 10 张组件级基线随仓库提交（`darwin/`），时钟冻结 + `reducedMotion` + `animations:'disabled'` 三处钉死不确定项，CI 独立 job 比对 |
-| 提交信息门禁  | 已完成（2026-10-05） | `commitlint` + `.husky/commit-msg`：中文全角冒号「类型：描述」，半角与自由文本实测被挡（exit=1）                                                 |
+| 项            | 状态                 | 说明                                                                                                                                                                                                                           |
+| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 工程规范      | 已完成（2026-10-04） | ESLint flat（vue/ts/prettier 兼容）+ Prettier + husky/lint-staged（lint-staged + type-check 门禁）                                                                                                                             |
+| 单测基建      | 已完成（2026-10-04） | Vitest + happy-dom + @vue/test-utils；45 个用例（windowManager/vfs/notification/icons/layout/ui 契约）                                                                                                                         |
+| E2E 冒烟      | 已完成（2026-10-04） | Playwright chromium 6 条冒烟（壳层/Dock 语义/交通灯/拖拽/Spotlight/布局刷新还原），替代手工点测                                                                                                                                |
+| CI 门禁       | 已完成（2026-10-04） | `.github/workflows/ci.yml`：type-check → lint → unit → e2e；仓库暂无远端，CI 未实跑过，待首次 push 验证                                                                                                                        |
+| 设计 token 化 | 已完成（2026-10-04） | `src/styles/tokens.css`（Tailwind `@theme`）；全仓硬编码色值/字号/阴影/时长已收敛，computed style 断言验证（玻璃/交通灯/文件类型/字号层级）                                                                                    |
+| 基础组件收口  | 已完成（2026-10-04） | `src/ui/` 五个组件落地并被 WindowFrame/TopBar/file-manager 消费，props/emit 契约有单测                                                                                                                                         |
+| 无障碍门禁    | 已完成（2026-10-05） | axe 13 次扫描 serious/critical = 0（`BASELINE` 空表，只减不增；D2′ 另加网页应用三场景，扫描前统一等窗口过渡收尾，壳层就绪屏障收进 `gotoShell()`）+ 键盘/焦点契约 10 条 + 对比度含暗色×4 预设与中性 `ink-mute`/`on-accent` 盲区 |
+| 视觉回归基线  | 已完成（2026-10-05） | `visual.spec.ts` 10 张组件级基线随仓库提交（`darwin/`），时钟冻结 + `reducedMotion` + `animations:'disabled'` 三处钉死不确定项，CI 独立 job 比对                                                                               |
+| 提交信息门禁  | 已完成（2026-10-05） | `commitlint` + `.husky/commit-msg`：中文全角冒号「类型：描述」，半角与自由文本实测被挡（exit=1）                                                                                                                               |
 
 **实施期对规范的修正（回写此处）**
 

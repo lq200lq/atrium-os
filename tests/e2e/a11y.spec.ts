@@ -13,6 +13,13 @@ import { dockTile, gotoShell } from './helpers'
 const BASELINE: Record<string, string[]> = {}
 
 async function scan(page: Page, scenario: string): Promise<string[]> {
+  // axe 读的是即时计算样式：窗口入场动画没跑完时，半透明的玻璃层会把背景混淡，对比度读数随之漂移
+  // （settings 场景曾偶发 4.15:1 就是这么来的）。等过渡类撤下再扫，量到的才是稳定态。
+  await page.waitForFunction(
+    () => !document.querySelector('.win-enter-active, .win-leave-active'),
+    null,
+    { timeout: 5000 },
+  )
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()
@@ -81,6 +88,35 @@ test('设置窗口：角色切换与诊断区块', async ({ page }) => {
   const win = page.locator('section.absolute').filter({ hasText: '用户与角色' })
   await expect(win).toBeVisible()
   expectClean('settings', await scan(page, 'settings'))
+})
+
+/**
+ * 网页应用扫描面刻意只到「管理面板 + embed 窗口 chrome + 同源夹具」三处。
+ * axe 会下钻同源 iframe，所以这里不能改成扫「文档中心」窗口：那等于把 VitePress 自有页面的
+ * 问题记在壳层门禁头上——文档站的可访问性该由文档站自己修。
+ */
+test('网页应用：管理面板、添加弹窗与 embed 窗口', async ({ page }) => {
+  await gotoShell(page)
+  await page.locator(dockTile('应用中心')).click()
+  const win = page.locator('section.absolute').filter({ has: page.locator('[role="radiogroup"]') })
+  await win.locator('[role="radio"]', { hasText: '网页应用' }).click()
+  expectClean('web-apps-panel', await scan(page, 'web-apps-panel'))
+
+  await win.getByRole('button', { name: '添加网页应用' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  expectClean('web-app-dialog', await scan(page, 'web-app-dialog'))
+
+  await dialog.locator('input').nth(0).fill('夹具站')
+  await dialog.locator('input').nth(1).fill('http://localhost:5199/embed-demo.html')
+  await dialog.getByRole('button', { name: '确定' }).click()
+  await expect(dialog).toHaveCount(0)
+
+  await page.locator(dockTile('夹具站')).click()
+  await expect(
+    page.frameLocator('iframe[src$="/embed-demo.html"]').locator('#fixture-title'),
+  ).toHaveText('嵌入内容渲染成功')
+  expectClean('embed-window', await scan(page, 'embed-window'))
 })
 
 /**
