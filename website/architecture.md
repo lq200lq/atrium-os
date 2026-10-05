@@ -16,7 +16,11 @@ const layers = [
     title: '壳层',
     items: ['TopBar', 'Desktop', 'Dock', 'Spotlight', 'Widgets', 'NotificationCenter'],
   },
-  { name: 'windows', title: '窗口层', items: ['WindowFrame', 'ErrorBoundary'] },
+  {
+    name: 'windows',
+    title: '窗口层',
+    items: ['WindowFrame', 'ErrorBoundary', 'EmbedView（外部网页应用内容区）'],
+  },
   {
     name: 'apps',
     title: '应用层',
@@ -25,7 +29,7 @@ const layers = [
   {
     name: 'kernel',
     title: '内核',
-    items: ['stores', 'data', 'fs', 'bus', 'observability', 'icons', 'layout'],
+    items: ['stores', 'data', 'fs', 'bus', 'observability', 'icons', 'layout', 'webapp'],
   },
   { name: 'ui', title: '基础组件', items: ['18 个 Os* 组件', '消费语义 token'] },
 ]
@@ -40,6 +44,8 @@ const layers = [
 | `stores/appRegistry`     | 应用注册表，`accessibleApps`/`dockApps`/`byId` 派生                             |
 | `stores/session`         | 权限模型（权限点为主、角色为集合），`canAccessApp` 单一判定                     |
 | `stores/windowManager`   | 窗口生命周期、焦点、层叠、布局持久化，`open` 为鉴权单一 gate                    |
+| `stores/webApps`         | 用户添加的外部网页应用（`webapps-v1` 持久化），派生 `embed` 类目 manifest 注册  |
+| `webapp/url`             | 外部地址校验归一：正向协议白名单 `http:`/`https:`、剥凭证、限长（用户输入边界） |
 | `stores/settings`        | 用户偏好（Dock 固定项、语言），持久化                                           |
 | `stores/theme`           | 主题（壁纸/明暗/强调色），版本迁移                                              |
 | `stores/vfs`             | 虚拟文件系统，IndexedDB 持久化                                                  |
@@ -57,6 +63,7 @@ const layers = [
 - **失败可查**：错误不只 `console.warn`，落库并在界面回看；数据层错误 reject 供乐观回滚，不吞异常、不同步抛。
 - **token 硬约束**：颜色只走语义 token，暗色切换零组件改动。
 - **开闭原则**：相似能力收敛到基础组件参数化，业务代码不复制样式。
+- **内容区单一渲染路径（D2′）**：窗口内容一律经 `registry` 合成的组件渲染——DOM 应用给 `entry`，外部网页应用给 `embed` 由内置 `EmbedView` 承载 iframe。壳层材质、窗口动画、错误边界、i18n 只覆盖 DOM 侧；iframe 是唯一例外且只出现在那一处，`WindowFrame` 不为类目加分支。
 
 ## 可观测
 

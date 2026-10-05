@@ -52,6 +52,8 @@ test:unit / test:unit:watch / test:e2e
 
 覆盖率下限自 S12 起按目录分档（`vitest.config.ts`）：全局 75/72/78/78（stmts/branch/funcs/lines）之外，另设 `src/ui/**` 85/78/85/88 与 `src/kernel/**` 65/58/70/68 两块地板。分档而不是一刀切全局，是因为 `windows`/`i18n` 的覆盖结构与组件层不同，混在一个全局阈值里只会把地板架空。
 
+**跨源 frame 的断言口径（D2′ 外部网页应用）**：iframe 里是别人的文档，选择器与 axe 都进不去，因此「内容真的渲染了」这一条只能对**同源页面**断言。测试用 `public/embed-demo.html`（唯一的同源嵌入样本，纯静态文件，不是 mock server）配合 `page.frameLocator()` 拿到真信号；第三方站点只断言我们自己的 embed chrome（工具条、超时 warning、重试、新标签页出口）。axe 会**下钻同源 iframe**，所以无障碍场景只覆盖管理面板 + embed chrome + 同源 fixture，不把文档站正文纳入扫描面——VitePress 自有页面的问题该由文档站自己修，不该让壳层门禁继承一份不属于它的红。
+
 ### 2.4 CI
 
 `ci.yml` 三个 job，任一失败即挡合并：
@@ -305,10 +307,17 @@ src/
     feedback.ts       # 命令式反馈契约层（useFeedback/provideFeedback，S10）
     internal/         # 不对外暴露的共用件（control.ts 刻度映射、scale.ts 布局刻度、placement.ts 浮层定位、level.ts 分级配色/图标、text.ts 作用域取词（S11）、ControlShell 外框）
   components/         # 组合型组件（OsIcon 等，可依赖 ui/）
+  windows/            # 窗口 chrome：WindowFrame/WindowManager/ErrorBoundary + EmbedView（外部网页应用内容区）
+  kernel/
+    webapp/           # url.ts：外部应用地址校验归一（用户输入的安全边界，纯函数）
+    stores/           # windowManager/appRegistry/webApps/vfs/theme/session/settings/notification/icons
+public/               # Vite 静态目录：embed-demo.html（同源嵌入样本）、docs/（docs:embed 产物，gitignore）
 tests/
   unit/               # Vitest 单测
   e2e/                # Playwright 冒烟
 ```
+
+**`EmbedView` 为什么不在 `src/ui`**：它不是可复用 UI 原语，而是窗口内容区的一种实现——靠 `useWindowContext()` 反查所属窗口的 `manifest.embed`，只在 `appRegistry.register()` 合成组件时被用到。放进 `src/ui` 会让它进组件清单与 API 表生成面（`gen-api-tables` 扫 `src/ui/*.vue`），对外暴露一个「请不要再处开 iframe」的件；边界留在 `src/windows`，`src/ui` 的 API 面继续只装形态无关组件。
 
 **`src/ui` 的边界（S10 收尾定案，暂不拆包）**：对外只有 `@/ui` 这一个 API 面——`internal/*` 只允许 `src/ui` 自身引用，`check-tokens` 之外靠 review 守；业务应用按件路径（`@/ui/OsCard.vue`）引入是**包体预算**决定（单个应用平均只用 4~6 件，走 barrel 会把整包拉进首屏，见规划 §9 S9 修正条），不是第二套 API。是否独立发包（monorepo）等 S11 的 `OsConfigProvider` 把 API 面稳定后再评估——S11 已交付该件，API 面（组件 props + `config.ts` 契约 + `@/ui` 出口）至此稳定，结论仍是**维持单仓**：拆包只解决分发问题，本仓库的分包收益由 `manualChunks` 与包体预算门禁拿到（见规划 §8 定案）。
 

@@ -16,7 +16,7 @@
 **非目标（当前阶段）**
 
 - 后端服务与多端同步（VFS 预留 RemoteFS 适配器接口，不实现协议）
-- 微前端 / iframe 应用隔离（见决策 D1/D2）
+- 微前端与应用独立部署（见决策 D1；iframe 类目已由 D2′ 解禁，但仍是同仓 manifest 注册，不是子应用打包）
 - 多显示器、跨设备窗口漫游
 
 ## 2. 产品形态盘点（源自概念图）
@@ -169,22 +169,27 @@ src/
 │  ├─ NotificationCenter/
 │  └─ Spotlight/           #   全局搜索面板
 ├─ kernel/
-│  ├─ stores/              #   windowManager.ts appRegistry.ts vfs.ts theme.ts notification.ts
+│  ├─ stores/              #   windowManager.ts appRegistry.ts webApps.ts vfs.ts theme.ts notification.ts
 │  ├─ bus/                 #   commandBus.ts
+│  ├─ webapp/              #   url.ts：外部网页应用的地址校验归一（安全边界，纯函数）
 │  └─ composables/         #   useOS.ts useWindowDrag.ts useWindowResize.ts
 ├─ windows/
 │  ├─ WindowFrame.vue      #   标题栏、交通灯、边框、缩放把手
+│  ├─ EmbedView.vue        #   外部网页应用内容区（唯一 iframe 落点，D2′）
 │  └─ WindowManager.vue    #   遍历渲染 + KeepAlive + Suspense
 ├─ apps/
 │  ├─ ai-assistant/        #   每应用：manifest.ts + App.vue + 内部组件
 │  ├─ doc-editor/
 │  ├─ workflow-designer/
+│  ├─ docs-center/         #   内置 embed 应用样板：manifest 只声明 embed.url，无 App.vue
 │  ├─ file-manager/
 │  ├─ app-center/
 │  └─ settings/
 ├─ assets/                 # 壁纸、品牌资源
 ├─ styles/                 # 全局样式、CSS 变量
 └─ main.ts                 # 装 pinia/persistedstate，注册内置应用，挂载 DesktopRoot
+public/
+└─ docs/                   # docs:embed 同步的 VitePress 产物（构建期生成，gitignore）
 ```
 
 ## 7. 实施路线
@@ -198,17 +203,17 @@ src/
 
 ## 8. 关键决策
 
-| 编号 | 决策          | 结论与理由                                                                                                                                                      |
-| ---- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1   | 应用隔离方式  | **同仓组件 + manifest 懒加载**。通信直接、样式统一、可做毛玻璃与统一动画；微前端（wujie/module-federation）留作将来应用需独立部署时的演进方向                   |
-| D2   | 窗口内容渲染  | **纯 DOM**，不用 iframe。概念图的半透明材质、统一窗口动画依赖同文档渲染                                                                                         |
-| D3   | z 序管理      | 单调递增计数器（focus 时 `z = ++topZ`），避免数组重排与全量重渲染                                                                                               |
-| D4   | 单例/多实例   | 由 manifest `singleton` 声明；多实例以 `appId + payload.key` 去重复用                                                                                           |
-| D5   | 拖拽/缩放性能 | 跟手阶段走 transform，pointerup 回写 store，避免 pointermove 高频触发全树响应式更新                                                                             |
-| D6   | Dock 点击语义 | 聚焦中→最小化；存在最小化→还原；否则新开（P0 实测补）                                                                                                           |
-| D7   | 组件入 store  | `markRaw` 包裹异步组件，禁止组件对象被响应式化                                                                                                                  |
-| D8   | 持久化与挂载  | VFS 落库前 `toRaw`；IDB 不可用降级内存模式，挂载不被持久化 gate                                                                                                 |
-| D9   | 统一图标出口  | 不用 emoji；lucide-vue-next 经 `OsIcon` + `ICON_MAP` 收口渲染，`manifest.icon` 为类型安全图标名，文件类型图标（含配色）由共享 `fileIconName/fileIconClass` 派生 |
+| 编号 | 决策          | 结论与理由                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1   | 应用隔离方式  | **同仓组件 + manifest 懒加载**。通信直接、样式统一、可做毛玻璃与统一动画；微前端（wujie/module-federation）留作将来应用需独立部署时的演进方向                                                                                                                                                                                                                                                                                                                                                           |
+| D2′  | 窗口内容渲染  | **默认纯 DOM；iframe 只允许作为「外部网页应用」的内容区实现**（收窄自原 D2「纯 DOM，不用 iframe」）。半透明材质、统一窗口动画、标题栏与错误边界都依赖同文档渲染，因此**壳层与自研应用永远走 DOM**；需要承载用户提供的第三方站点时，唯一可行手段是 iframe，故把它限定在 `AppManifest.embed` 声明的类目里，由 `src/windows/EmbedView.vue` 一处实现，不参与壳层材质与动画。**代价（明确接受）**：frame 内文档不被我们的主题/动效/ErrorBoundary/i18n 覆盖，跨源内容读不到（标题、历史、滚动位置都不能回读） |
+| D3   | z 序管理      | 单调递增计数器（focus 时 `z = ++topZ`），避免数组重排与全量重渲染                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| D4   | 单例/多实例   | 由 manifest `singleton` 声明；多实例以 `appId + payload.key` 去重复用                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| D5   | 拖拽/缩放性能 | 跟手阶段走 transform，pointerup 回写 store，避免 pointermove 高频触发全树响应式更新                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| D6   | Dock 点击语义 | 聚焦中→最小化；存在最小化→还原；否则新开（P0 实测补）                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| D7   | 组件入 store  | `markRaw` 包裹异步组件，禁止组件对象被响应式化                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| D8   | 持久化与挂载  | VFS 落库前 `toRaw`；IDB 不可用降级内存模式，挂载不被持久化 gate                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| D9   | 统一图标出口  | 不用 emoji；lucide-vue-next 经 `OsIcon` + `ICON_MAP` 收口渲染，`manifest.icon` 为类型安全图标名，文件类型图标（含配色）由共享 `fileIconName/fileIconClass` 派生                                                                                                                                                                                                                                                                                                                                         |
 
 **开放问题**
 
@@ -217,13 +222,15 @@ src/
 
 ## 9. 风险与对策
 
-| 风险                        | 对策                                                                   |
-| --------------------------- | ---------------------------------------------------------------------- |
-| 多窗口 + KeepAlive 内存膨胀 | KeepAlive max 上限 + 最久未聚焦淘汰；应用卸载时经 onUnmounted 清理订阅 |
-| pointermove 高频更新卡顿    | 见 D5；必要时 useRafFn 合帧                                            |
-| 应用样式污染壳层            | 应用根组件 scoped + 命名前缀约定；全局样式只放 CSS 变量与 reset        |
-| 应用间隐式耦合              | 强制经 CommandBus/VFS；code review 检查 apps/ 之间无互相 import        |
-| 持久化数据版本演进          | persistedstate 键带版本号，启动时迁移或丢弃旧版                        |
+| 风险                        | 对策                                                                                                                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 多窗口 + KeepAlive 内存膨胀 | KeepAlive max 上限 + 最久未聚焦淘汰；应用卸载时经 onUnmounted 清理订阅                                                                                                                                 |
+| pointermove 高频更新卡顿    | 见 D5；必要时 useRafFn 合帧                                                                                                                                                                            |
+| 应用样式污染壳层            | 应用根组件 scoped + 命名前缀约定；全局样式只放 CSS 变量与 reset                                                                                                                                        |
+| 应用间隐式耦合              | 强制经 CommandBus/VFS；code review 检查 apps/ 之间无互相 import                                                                                                                                        |
+| 持久化数据版本演进          | persistedstate 键带版本号，启动时迁移或丢弃旧版                                                                                                                                                        |
+| 外部站点拒绝被嵌入          | X-Frame-Options/CSP frame-ancestors 拒绝在跨源 frame 里表现为 `about:blank` + 照常 `load`，**不可靠检测**；因此不做伪检测，加载超时给 warning + 「新标签页打开」出口，限制在文档与应用内明示           |
+| embed 内容越权              | 地址在写入边界（webApps.add）做正向协议白名单 http/https；`sandbox` 故意不给 `allow-top-navigation`（拦 frame-busting）；`src` 只做属性绑定，不进 `v-html`/标题插值，本阶段不注册任何 postMessage 监听 |
 
 ## 10. 实施状态
 
@@ -238,8 +245,11 @@ src/
 | 后续迭代路线         | 已规划（2026-10-04） | P0~P3 与打底完成后的脚手架方向路线（S1 应用接入契约与生成器 / S2 权限模型与 settings / S3 组件纵深 / S4 数据访问层 / S5 主题与 i18n / S6 文档站·版本·可观测）详见《WebOS脚手架迭代路线.md》，该文档为后续迭代的设计依据                                                                                                                                     |
 | 对标 Ant Design 纵深 | 进行中（2026-10-05） | S1~S6 之后以 Ant Design 的设计/研发/组件体系为参照另文规划 S7~S12（设计语言成文与 token 刻度、组件契约、布局与展示件、反馈与导航件、配置层与文档自动化、a11y 与质量线），详见《WebOS对标AntDesign迭代规划.md》；S7~S11 已完成，逐阶段状态见该文档 §9                                                                                                        |
 
+| 外部网页应用类目 | 进行中（2026-10-05） | D2′ 落地：`AppManifest` 加 `embed` 与 `entry` 二选一（`register()` 合成内置 `EmbedView`，渲染路径仍一条），新增 `webApps` store（`webapps-v1`）持久化用户在应用中心「网页应用」分区添加的外部站点，内置 `docs-center` 以 `embed: { url: '/docs/' }` 指向同源文档站（`docs:embed` 把 VitePress 产物复制进 `public/docs/`）；跨源拒绝嵌入不做伪检测，走超时告警 + 新标签页出口 |
+
 **实施期对设计的修正（已回写本文档）**
 
 - D6：Dock 点击语义 = 聚焦中最小化 / 有最小化还原 / 否则新开（`restore` action）
 - D7：异步组件入 store 前 `markRaw`，避免组件对象被响应式化
 - D8：VFS 落库前 `toRaw`；IDB 不可用降级内存模式，挂载不被持久化阻塞（5.4 已述）
+- D2→D2′：需求「把外部站点当应用」推翻原「不用 iframe」；渲染改为单一入口 + `AppManifest.entry`/`embed` 二选一，iframe 只在 `EmbedView` 一处出现，壳层材质与动画不受影响（详见《WebOS应用开发指南.md》「外部网页应用」）
