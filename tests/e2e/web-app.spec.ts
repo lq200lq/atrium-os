@@ -112,3 +112,24 @@ test('内置文档中心：embed 类目样板渲染同源文档站首页', async
     page.frameLocator('iframe[src="/docs/index.html"]').getByText('企业级 Vue 3 前端脚手架'),
   ).toBeVisible()
 })
+
+test('访客角色不收窄 embed 类目：受限内置应用照旧隐藏，公开的两类仍在', async ({ page }) => {
+  // S2 的权限模型只管内置应用的准入，用户添加的站点 permissions 为空即公开。
+  // 这条断言的存在意义是防「新增类目顺手要求授权」：那样访客会连自己加的站点都打不开。
+  await addWebApp(page, FIXTURE_NAME, `http://localhost:5199${FIXTURE}`)
+
+  await page.locator(dockTile('设置')).click()
+  const settings = page.locator('section.absolute').filter({ hasText: '用户与角色' })
+  await settings.locator('button', { hasText: '访客' }).click()
+  // 角色真的切了才谈得上「没被收窄」——受限应用消失就是这枚哨兵
+  await expect(page.locator(dockTile('文件管理'))).toHaveCount(0)
+
+  await expect(page.locator(dockTile('文档中心'))).toBeVisible()
+  await expect(page.locator(dockTile(FIXTURE_NAME))).toBeVisible()
+
+  await page.locator(dockTile(FIXTURE_NAME)).click()
+  await expect(webWindow(page)).toBeVisible()
+  await expect(page.frameLocator(`iframe[src$="${FIXTURE}"]`).locator('#fixture-title')).toHaveText(
+    '嵌入内容渲染成功',
+  )
+})

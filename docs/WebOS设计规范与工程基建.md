@@ -61,7 +61,7 @@ docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 
 **扫描前等窗口过渡收尾**：axe 的对比度取的是即时计算样式，玻璃层入场动画跑到一半时背景被混淡，读数会漂移（`settings` 场景曾偶发 `color-contrast 4.15:1`，单独重跑又 9/9 全绿——典型的「门禁自己不稳定」而不是「产品有红」）。`scan()` 因此先 `waitForFunction` 到页面上不再有 `.win-enter-active/.win-leave-active` 再分析；这不是给断言放水，`animations: 'disabled'` 只管截图，管不到 axe。
 
-**就绪屏障收进 `gotoShell()`**：S10 记过一次同类竞态（`⌘K` 监听挂在 `App.vue` 的 `onMounted`，而 `goto()` 在 `load` 就返回，按键可能早于监听注册），当时只在 `shell.spec.ts` 一处补了屏障。D2′ 新增的 a11y Spotlight 场景又红了一次——它是按用例逐个 `gotoShell()` 的文件，绕过了那处局部屏障。根因只有一个，所以修在共用入口：`helpers.ts` 的 `gotoShell()` 现在 `goto()` 后固定 `expect(getByRole('banner')).toBeVisible()`，所有 spec（含 `page.reload()` 后走自动重试定位的用例）一并受益，没有屏障的老写法留着也不冲突——它只是重复了一次同一个等待。修完连跑 4 轮全套 83 条全绿。
+**就绪屏障收进 `gotoShell()`**：S10 记过一次同类竞态（`⌘K` 监听挂在 `App.vue` 的 `onMounted`，而 `goto()` 在 `load` 就返回，按键可能早于监听注册），当时只在 `shell.spec.ts` 一处补了屏障。D2′ 新增的 a11y Spotlight 场景又红了一次——它是按用例逐个 `gotoShell()` 的文件，绕过了那处局部屏障。根因只有一个，所以修在共用入口：`helpers.ts` 的 `gotoShell()` 现在 `goto()` 后固定 `expect(getByRole('banner')).toBeVisible()`，所有 spec（含 `page.reload()` 后走自动重试定位的用例）一并受益，没有屏障的老写法留着也不冲突——它只是重复了一次同一个等待。修完连跑 4 轮全套全绿（当时 83 条；随后补上的访客角色一条使现状增至 84 条）。
 
 ### 2.4 CI
 

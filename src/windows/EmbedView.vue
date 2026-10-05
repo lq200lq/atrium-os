@@ -14,7 +14,7 @@ import { useAppRegistry } from '@/kernel/stores/appRegistry'
  * 因此全仓别处不应再出现 <iframe>——应用要嵌外部站点就注册 embed manifest。
  */
 
-// 跨源被拒（X-Frame-Options / CSP frame-ancestors）时浏览器加载的是 about:blank，
+// 跨源被拒（X-Frame-Options / CSP frame-ancestors）时 frame 里只剩一个父页读不到的空文档，
 // 且 @load 照常触发，所以「加载失败」在原理上不可检测。这里只给超时提示 + 出口，不假装识别。
 const TIMEOUT_MS = 8000
 
