@@ -1,3 +1,5 @@
+import type { IconName } from '@/kernel/icons'
+
 /** 控件尺寸档位：数值来自 --control-height-* 刻度（24 / 28 / 32） */
 export type Size = 'sm' | 'md' | 'lg'
 
@@ -56,4 +58,53 @@ export interface TabItem {
 export interface RadioOption {
   value: string
   label: string
+}
+
+/** S9 布局件共用：间距档（4px 网格刻度名） */
+export type GapSize = '2xs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+
+export type SpaceDirection = 'row' | 'column'
+
+export type SpaceAlign = 'start' | 'center' | 'end' | 'stretch' | 'baseline'
+
+/** OsGrid 列数上限；按窗口宽度（w-narrow/mid/wide）降档 */
+export type GridColumns = 1 | 2 | 3 | 4 | 5 | 6
+
+/** OsCollapse 面板条目；内容经 `panel-<key>` 插槽提供 */
+export interface CollapseItem {
+  key: string
+  header: string
+}
+
+export type TypographyType = 'text' | 'title' | 'paragraph' | 'link'
+
+/** OsSegmented 选项；icon 缺省时只渲染 label */
+export interface SegmentedOption {
+  value: string
+  label: string
+  icon?: IconName
+}
+
+/** OsDescriptions 键值条目；提供 slot 名时用该插槽自定义值 */
+export interface DescriptionItem {
+  key: string
+  label: string
+  value?: string
+  slot?: string
+}
+
+/** OsTree 节点：key 为展开/选中/勾选状态的唯一标识 */
+export interface TreeNode {
+  key: string
+  label: string
+  children?: TreeNode[]
+  disabled?: boolean
+  /** 显式声明为叶子；不提供 children 且非叶子时配合 loadData 走懒加载 */
+  isLeaf?: boolean
+}
+
+/** OsTextarea 自适应高度边界（行数）；提供 autosize 对象时按此钳制 */
+export interface TextareaAutosize {
+  minRows?: number
+  maxRows?: number
 }

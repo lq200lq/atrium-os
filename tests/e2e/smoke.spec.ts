@@ -110,7 +110,7 @@ test('组件陈列：页签切换与表格渲染', async ({ page }) => {
   await page.locator(dockTile('组件陈列')).click()
   const win = page.locator('section.absolute').filter({ has: page.locator('[role="tablist"]') })
   await expect(win).toBeVisible()
-  await expect(win.locator('[role="tab"]')).toHaveCount(4)
+  await expect(win.locator('[role="tab"]')).toHaveCount(5)
 
   await win.locator('[role="tab"]', { hasText: '展示' }).click()
   await expect(win.locator('thead th', { hasText: '姓名' })).toBeVisible()

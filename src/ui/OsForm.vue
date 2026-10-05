@@ -2,13 +2,13 @@
 import { reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { FormField, Status } from './types'
-import { controlStatusClass } from './internal/control'
 import OsButton from './OsButton.vue'
 import OsInput from './OsInput.vue'
 import OsSelect from './OsSelect.vue'
 import OsSwitch from './OsSwitch.vue'
 import OsCheckbox from './OsCheckbox.vue'
 import OsRadio from './OsRadio.vue'
+import OsTextarea from './OsTextarea.vue'
 
 export type { FieldType, FormField } from './types'
 
@@ -121,15 +121,15 @@ defineExpose({ validate, errors })
             :status="fieldStatus(field.key)"
             @update:model-value="setField(field.key, $event)"
           />
-          <textarea
+          <OsTextarea
             v-else-if="field.type === 'textarea'"
-            class="w-full rounded-control border px-sm py-xs text-ui text-ink"
-            :class="controlStatusClass(fieldStatus(field.key))"
+            :model-value="String(valueOf(field.key) ?? '')"
             :placeholder="field.placeholder"
             :disabled="disabled"
-            rows="3"
-            :value="String(valueOf(field.key) ?? '')"
-            @input="setField(field.key, ($event.target as HTMLTextAreaElement).value)"
+            :status="fieldStatus(field.key)"
+            autosize
+            :rows="3"
+            @update:model-value="setField(field.key, $event)"
           />
           <OsSelect
             v-else-if="field.type === 'select'"

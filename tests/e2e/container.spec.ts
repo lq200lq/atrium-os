@@ -11,6 +11,15 @@ test('窗口压窄到 w-narrow 时，数据看板筛选条换行铺满', async (
 
   const body = page.locator('.cq-window').first()
   await expect(body).toBeVisible()
+  // 开窗动画给窗口体套了 scale，落定后 rect 才等于布局位置（同 control-height.spec 的处理）
+  await expect
+    .poll(async () =>
+      body.evaluate((el) => {
+        const t = getComputedStyle(el.closest('section') ?? el).transform
+        return /none|matrix\(1,\s*0,\s*0,\s*1,\s*0(,\s*0)?\)/.test(t)
+      }),
+    )
+    .toBe(true)
   const search = body.locator('div.w-44')
   const select = body.locator('div.w-32')
 

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { createFixtureDataSource } from '@/kernel/data/fixtureDataSource'
 import type { SortSpec } from '@/kernel/data/types'
 import OsButton from '@/ui/OsButton.vue'
+import OsCard from '@/ui/OsCard.vue'
+import OsDescriptions, { type DescriptionItem } from '@/ui/OsDescriptions.vue'
 import OsDialog from '@/ui/OsDialog.vue'
 import OsForm, { type FormField } from '@/ui/OsForm.vue'
 import OsInput from '@/ui/OsInput.vue'
@@ -141,10 +143,24 @@ const columns: TableColumn<Employee>[] = [
   { key: 'salary', title: '薪资', sortable: true, align: 'right', width: '100px' },
   { key: 'joinedAt', title: '入职日期', sortable: true, width: '120px' },
 ]
+
+// 统计头只从既有响应式状态派生，不引入新的数据流
+const statItems = computed<DescriptionItem[]>(() => [
+  { key: 'total', label: '记录总数', value: String(total.value) },
+  { key: 'shown', label: '本页行数', value: String(rows.value.length) },
+  { key: 'dept', label: '部门筛选', value: dept.value || '全部部门' },
+  { key: 'keyword', label: '关键字', value: keyword.value || '（无）' },
+])
 </script>
 
 <template>
   <div class="flex h-full flex-col text-ui">
+    <OsCard class="m-sm shrink-0" :padded="false">
+      <template #title>统计概览</template>
+      <div class="px-md py-xs">
+        <OsDescriptions :items="statItems" :column="2" />
+      </div>
+    </OsCard>
     <div class="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2">
       <div class="w-44 w-narrow:w-full">
         <OsInput v-model="keyword" placeholder="搜索姓名/职位" @enter="reload" />

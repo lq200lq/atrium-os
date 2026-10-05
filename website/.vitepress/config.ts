@@ -30,6 +30,8 @@ export default defineConfig({
             { text: '总览', link: '/components/' },
             { text: 'OsTable 表格', link: '/components/table' },
             { text: 'OsForm 表单', link: '/components/form' },
+            { text: '布局与容器', link: '/components/layout' },
+            { text: '展示与数据', link: '/components/display' },
             { text: '反馈与展示', link: '/components/feedback' },
           ],
         },

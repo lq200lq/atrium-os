@@ -190,22 +190,56 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 `src/ui/internal/ControlShell.vue` 收口 Input/Select 共用的控件外框（尺寸/状态/禁用/loading 指示只在此处派生一次），差异靠 props（`filled` 决定实心面还是透明面）。
 
-### 4.2 组件清单
+### 4.2 组件清单（32 件：`src/ui` 31 件经 `@/ui` 出口，`OsIcon` 在 `src/components`）
 
-| 组件               | 契约                                                                                                           | 替换现状                                            |
-| ------------------ | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `OsIcon`（已收口） | `name: IconName; size; strokeWidth`                                                                            | 全仓图标                                            |
-| `OsButton`         | `variant: primary/ghost/danger; size: sm/md/lg; disabled; loading`                                             | 各应用/文件管理散落按钮                             |
-| `OsInput`          | `modelValue; placeholder; size/disabled/status/clearable; prefix/suffix 插槽; @enter/@esc/@clear`              | 对话框输入（Spotlight/AI 输入为定制组合件，不强推） |
-| `OsSelect`         | `options; placeholder; size/disabled/status; loading`                                                          | 散落自绘下拉                                        |
-| `OsTooltip`        | `text; placement: top/bottom/left/right`                                                                       | 壳层 title 属性替代                                 |
-| `OsDialog`         | `title; confirmText/cancelText; loading; maskClosable=true; @confirm/@cancel`（默认插槽为内容，`v-if` 控显隐） | file-manager 新建/重命名弹窗                        |
-| `OsTrafficLights`  | `@close/@minimize/@maximize`                                                                                   | 窗口标题栏三钮                                      |
-| `OsBadge`          | 计数型 `count; max=9` \| 圆点型 `dot; status: BadgeStatus`（两者不混用）                                       | 通知未读角标、状态指示                              |
-| `OsForm`           | `fields: FormField[]; modelValue; @submit`（schema 驱动 + 校验）                                               | 应用内联表单                                        |
-| `OsTable`          | `columns: TableColumn<T>; rows; loading/error/empty 三态; 远端分页排序`                                        | data-board、file-manager                            |
+按职责分四类；S9 新增件标 ★。
+
+**布局与结构**
+
+| 组件               | 契约                                                                                       | 落点                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `OsGrid` ★         | `columns: 1..6（默认 3）; gap: GapSize（默认 md）`                                         | 窗口内多栏；列数按**窗口宽度**（`w-narrow/mid/wide`）降档，非视口 |
+| `OsSpace` ★        | `direction: row/column; size: GapSize; align: start/center/end/stretch/baseline; wrap`     | 替代散落的 `flex gap-*` 硬写，间距只走间距刻度                    |
+| `OsDivider` ★      | `vertical; dashed`（默认插槽可放内嵌文案）                                                 | 分组分隔，不再手写 `border-t`                                     |
+| `OsCard` ★         | `title（或 title 插槽）; extra 插槽; footer 插槽; bordered=true; padded=true`              | data-board 统计概览、gallery 分区                                 |
+| `OsDescriptions` ★ | `items: DescriptionItem[]; title; column: 1\|2`；`item.slot` 或 `value-<key>` 插槽自定义值 | 只读详情（窗口/实体属性），与"详情=新建字段的子集"一致            |
+| `OsCollapse` ★     | `items: CollapseItem[]; accordion; v-model: string[]`；`header-<key>` / `panel-<key>` 插槽 | settings 高级设置、诊断信息折叠                                   |
+
+**录入**
+
+| 组件              | 契约                                                                                                         | 落点                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- |
+| `OsButton`        | `variant: primary/ghost/danger; size: sm/md/lg; disabled; loading`                                           | 各应用/文件管理散落按钮                             |
+| `OsInput`         | `modelValue; placeholder; size/disabled/status/clearable; prefix/suffix 插槽; @enter/@esc/@clear`            | 对话框输入（Spotlight/AI 输入为定制组合件，不强推） |
+| `OsTextarea` ★    | `rows=3; autosize: boolean \| { minRows, maxRows }; showCount; maxLength; placeholder; size/disabled/status` | 长文本录入，计数走 `caption` 字阶                   |
+| `OsInputNumber` ★ | `step=1; min; max; precision; placeholder; size/disabled/status; v-model: number \| undefined`               | 阈值/步长类数值，禁用态同时掉原生 `disabled`        |
+| `OsSelect`        | `options; placeholder; size/disabled/status; loading`                                                        | 散落自绘下拉                                        |
+| `OsSegmented` ★   | `options: SegmentedOption[]（value/label/icon?）; label; size; disabled; block; v-model: string`             | 视图切换（表格/卡片等），替代散落 tab 胶囊          |
+| `OsForm`          | `fields: FormField[]; modelValue; @submit`（schema 驱动 + 校验）                                             | 应用内联表单                                        |
+
+**展示**
+
+| 组件             | 契约                                                                                                        | 替换现状                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `OsTypography` ★ | `type: text/title/paragraph/link; strong; status; disabled; ellipsis; rows: 1..4; expandable; href`         | 散落 `text-[13px]` 直写字阶         |
+| `OsTag` ★        | `status: BadgeStatus; bordered; closable; icon; @close`（文本走默认插槽）                                   | 状态标签、部门/类型标签             |
+| `OsAvatar` ★     | `src \| text \| icon: IconName`（三者取一）`; size: Size`                                                   | file-manager 用户、通知来源         |
+| `OsBadge`        | 计数型 `count; max=9` \| 圆点型 `dot; status: BadgeStatus`（两者不混用）                                    | 通知未读角标、状态指示              |
+| `OsTable`        | `columns: TableColumn<T>; rows; loading/error/empty 三态; 远端分页排序`                                     | data-board、file-manager            |
+| `OsTree` ★       | `data: TreeNode[]; selectable; checkable; loadData; v-model:expandedKeys/selectedKeys/checkedKeys; @select` | file-manager 目录树（VFS 行为不变） |
+
+**壳层与反馈**
+
+| 组件               | 契约                                                                                                           | 替换现状                     |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `OsIcon`（已收口） | `name: IconName; size; strokeWidth`                                                                            | 全仓图标                     |
+| `OsTooltip`        | `text; placement: top/bottom/left/right`                                                                       | 壳层 title 属性替代          |
+| `OsDialog`         | `title; confirmText/cancelText; loading; maskClosable=true; @confirm/@cancel`（默认插槽为内容，`v-if` 控显隐） | file-manager 新建/重命名弹窗 |
+| `OsTrafficLights`  | `@close/@minimize/@maximize`                                                                                   | 窗口标题栏三钮               |
 
 （其余 `OsCheckbox/OsRadio/OsSwitch/OsPagination/OsSkeleton/OsTabs/OsToast/OsDrawer/OsEmpty` 同源于 `@/ui` 出口。）
+
+受控/非控一条路：`OsCollapse`/`OsTree`/`OsSegmented`/`OsInputNumber`/`OsTextarea` 一律用 `defineModel`，未绑 v-model 时自动退化为内部状态，不写"受控就报错"的分支。
 
 开闭原则：基础组件只通过 props/slot 扩展表现，新场景优先加 variant，不在业务侧复制样式。
 
@@ -213,10 +247,10 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 ```text
 src/
-  ui/                 # 形态无关基础组件（18 件）
-    types.ts          # 通用契约：Size/Status/CommonProps + 数据结构类型（S8）
+  ui/                 # 形态无关基础组件（31 件）
+    types.ts          # 通用契约：Size/Status/CommonProps + 数据结构类型（S8/S9）
     index.ts          # 唯一出口（组件 + 类型具名导出，S8）
-    internal/         # 不对外暴露的共用件（control.ts 刻度映射、ControlShell 外框）
+    internal/         # 不对外暴露的共用件（control.ts 刻度映射、scale.ts 布局刻度、ControlShell 外框）
   components/         # 组合型组件（OsIcon 等，可依赖 ui/）
 tests/
   unit/               # Vitest 单测

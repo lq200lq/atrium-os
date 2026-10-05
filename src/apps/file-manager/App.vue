@@ -11,6 +11,7 @@ import OsButton from '@/ui/OsButton.vue'
 import OsDialog from '@/ui/OsDialog.vue'
 import OsForm, { type FormField } from '@/ui/OsForm.vue'
 import OsTable, { type TableColumn } from '@/ui/OsTable.vue'
+import OsTree, { type TreeNode } from '@/ui/OsTree.vue'
 
 interface Row extends Record<string, unknown> {
   id: string
@@ -44,6 +45,29 @@ const nameField: FormField[] = [
 ]
 
 const inTrash = computed(() => isUnderTrash(cwd.value))
+
+// 目录树只铺目录；文件留在右侧列表。平铺 nodes 经 ls getter 递归成嵌套数据，
+// 随 vfs store 响应式重建，无需订阅 vfs:changed 单独刷新
+function dirTree(dir: string): TreeNode[] {
+  return vfs
+    .ls(dir)
+    .filter((n) => n.type === 'dir')
+    .map((n) => ({ key: n.path, label: n.name, children: dirTree(n.path) }))
+}
+
+const treeData = computed<TreeNode[]>(() => [
+  { key: HOME, label: '我的文件', children: dirTree(HOME) },
+  {
+    key: TRASH_ROOT,
+    label: vfs.trash.length ? `回收站（${vfs.trash.length}）` : '回收站',
+    children: dirTree(TRASH_ROOT),
+  },
+])
+const treeExpanded = ref<string[]>([])
+
+function onTreeSelect(node: TreeNode) {
+  navigate(node.key)
+}
 
 function toRow(node: FsNode): Row {
   const isDir = node.type === 'dir'
@@ -177,24 +201,13 @@ function onRestore() {
 
 <template>
   <div class="relative flex h-full text-ui">
-    <aside class="w-36 shrink-0 space-y-1 border-r border-line bg-surface-sunken/60 p-2">
-      <button
-        class="flex h-control w-full items-center justify-between rounded-control px-sm text-left text-ink hover:bg-surface"
-        :class="{ 'bg-accent-soft text-accent-strong': cwd === HOME }"
-        @click="navigate(HOME)"
-      >
-        我的文件
-      </button>
-      <button
-        class="flex h-control w-full items-center justify-between rounded-control px-sm text-left text-ink hover:bg-surface"
-        :class="{ 'bg-accent-soft text-accent-strong': inTrash }"
-        @click="navigate(TRASH_ROOT)"
-      >
-        回收站
-        <span v-if="vfs.trash.length" class="rounded-chip bg-line px-2xs text-caption text-ink">
-          {{ vfs.trash.length }}
-        </span>
-      </button>
+    <aside class="w-44 shrink-0 overflow-y-auto border-r border-line bg-surface-sunken/60 p-2">
+      <OsTree
+        v-model:expanded-keys="treeExpanded"
+        :data="treeData"
+        :selected-keys="[cwd]"
+        @select="onTreeSelect"
+      />
     </aside>
 
     <div class="flex min-w-0 flex-1 flex-col">

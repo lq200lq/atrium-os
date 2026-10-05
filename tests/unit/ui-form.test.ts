@@ -33,4 +33,14 @@ describe('OsForm', () => {
     await w.find('input').setValue('李四')
     expect(w.emitted('update:modelValue')?.[0]?.[0]).toMatchObject({ name: '李四' })
   })
+
+  it('textarea 字段收口为 OsTextarea（控件全部出自 src/ui）并回写', async () => {
+    const taFields: FormField[] = [{ key: 'note', label: '备注', type: 'textarea' }]
+    const w = mount(OsForm, { props: { fields: taFields, modelValue: { note: '' } } })
+    const ta = w.find('textarea')
+    expect(ta.exists()).toBe(true)
+    expect(ta.attributes('rows')).toBe('3')
+    await ta.setValue('多行说明')
+    expect(w.emitted('update:modelValue')?.at(-1)?.[0]).toMatchObject({ note: '多行说明' })
+  })
 })
