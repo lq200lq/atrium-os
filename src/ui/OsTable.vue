@@ -123,7 +123,7 @@ function toggleRow(row: T) {
             <th
               v-for="col in columns"
               :key="col.key"
-              class="px-3 py-2 font-medium text-ink-mute"
+              class="px-3 py-2 font-strong text-ink-mute"
               :class="[
                 alignCls(col.align),
                 col.sortable && 'cursor-pointer select-none hover:text-ink',
@@ -139,7 +139,7 @@ function toggleRow(row: T) {
               </span>
             </th>
             <!-- 逃生口：行操作列表头 -->
-            <th v-if="$slots.actions" class="w-24 px-3 py-2 text-right font-medium text-ink-mute">
+            <th v-if="$slots.actions" class="w-24 px-3 py-2 text-right font-strong text-ink-mute">
               {{ t('common.actions') }}
             </th>
           </tr>
@@ -153,7 +153,7 @@ function toggleRow(row: T) {
               <OsEmpty icon="x" :description="error">
                 <template #action>
                   <button
-                    class="rounded-md border border-line px-3 py-1 text-ui text-ink hover:bg-surface-hover"
+                    class="inline-flex h-control-sm items-center rounded-control border border-line px-sm text-ui text-ink hover:bg-surface-hover"
                     @click="emit('retry')"
                   >
                     {{ t('common.retry') }}

@@ -1,6 +1,13 @@
-/* 原始值层（深色）：仅覆盖与浅色不同的 --raw-*；语义层与工具类零改动。
- * 玻璃材质在深底重新取值（降低白透明、抬高不透明度），避免发灰；状态/文件色整体提亮以保证对比度。 */
+/* 原始值层（深色）：仅覆盖与浅色不同的 --raw-*；语义层、派生公式与工具类零改动。
+ * 玻璃材质在深底重新取值（降低白透明、抬高不透明度），避免发灰；状态/文件色整体提亮以保证对比度。
+ * 深底的浅底派生色用 transparent 作基（保持叠加在玻璃上的半透明质感），强调文字方向改为提亮。 */
 :root[data-theme='dark'] {
+  /* 混合锚点（深主题） */
+  --raw-mix-base: transparent; /* 浅底改为半透明叠加，不吃容器色 */
+  --raw-mix-lighten: #ffffff;
+  --raw-mix-darken: #000000;
+  --raw-mix-ink: #ffffff; /* 深底上的强调文字：提亮 */
+
   /* 文本墨色（反转明度） */
   --raw-ink-strong: #f1f5f9;
   --raw-ink: #e2e8f0;
@@ -15,6 +22,12 @@
   --raw-on-accent: #ffffff;
   --raw-scrim: rgba(0, 0, 0, 0.55);
 
+  /* 中性填充四档（深底用白 alpha） */
+  --raw-fill: rgba(226, 232, 240, 0.16);
+  --raw-fill-secondary: rgba(226, 232, 240, 0.1);
+  --raw-fill-tertiary: rgba(226, 232, 240, 0.06);
+  --raw-fill-quaternary: rgba(226, 232, 240, 0.03);
+
   /* 玻璃材质（深底：低白透明 + 高不透明度） */
   --raw-glass-bar: rgba(30, 41, 59, 0.55);
   --raw-glass-raise: rgba(30, 41, 59, 0.62);
@@ -24,14 +37,39 @@
   --raw-glass-border: rgba(148, 163, 184, 0.18);
   --raw-glass-border-active: rgba(148, 163, 184, 0.34);
 
-  /* 强调色：strong/soft 由当前 --raw-accent 派生，随预设自动适配深底 */
-  --raw-accent-strong: color-mix(in oklab, var(--raw-accent) 55%, #ffffff);
-  --raw-accent-soft: color-mix(in oklab, var(--raw-accent) 20%, transparent);
+  /* 阴影浓度（深底需要更浓的黑才能读出场） */
+  --raw-shadow-strong: rgba(0, 0, 0, 0.55);
+  --raw-shadow-pop: rgba(0, 0, 0, 0.5);
+  --raw-shadow-mid: rgba(0, 0, 0, 0.35);
+  --raw-shadow-faint: rgba(0, 0, 0, 0.3);
+  --raw-shadow-weakest: rgba(0, 0, 0, 0.2);
 
-  /* 状态色（提亮） */
+  /* 强调色：strong/soft 由当前 --raw-accent 派生，随预设自动适配深底 */
+  --raw-accent: #38bdf8;
+  --raw-accent-bg: color-mix(in oklab, var(--raw-accent) 20%, transparent);
+  --raw-accent-bg-hover: color-mix(in oklab, var(--raw-accent) 28%, transparent);
+  --raw-accent-border: color-mix(in oklab, var(--raw-accent) 45%, transparent);
+  --raw-accent-text: color-mix(in oklab, var(--raw-accent) 60%, #ffffff);
+
+  /* 状态色（提亮）+ 深底浅底派生 */
   --raw-danger: #fb7185;
   --raw-warning: #fbbf24;
   --raw-success: #34d399;
+
+  --raw-danger-bg: color-mix(in oklab, var(--raw-danger) 18%, transparent);
+  --raw-danger-bg-hover: color-mix(in oklab, var(--raw-danger) 26%, transparent);
+  --raw-danger-border: color-mix(in oklab, var(--raw-danger) 45%, transparent);
+  --raw-danger-text: color-mix(in oklab, var(--raw-danger) 60%, #ffffff);
+
+  --raw-warning-bg: color-mix(in oklab, var(--raw-warning) 18%, transparent);
+  --raw-warning-bg-hover: color-mix(in oklab, var(--raw-warning) 26%, transparent);
+  --raw-warning-border: color-mix(in oklab, var(--raw-warning) 45%, transparent);
+  --raw-warning-text: color-mix(in oklab, var(--raw-warning) 70%, #ffffff);
+
+  --raw-success-bg: color-mix(in oklab, var(--raw-success) 18%, transparent);
+  --raw-success-bg-hover: color-mix(in oklab, var(--raw-success) 26%, transparent);
+  --raw-success-border: color-mix(in oklab, var(--raw-success) 45%, transparent);
+  --raw-success-text: color-mix(in oklab, var(--raw-success) 60%, #ffffff);
 
   /* 文件类型着色（提亮） */
   --raw-file-dir: #fbbf24;
@@ -40,4 +78,15 @@
   --raw-file-pptx: #fb923c;
   --raw-file-pdf: #fb7185;
   --raw-file-other: #94a3b8;
+}
+
+/* 暗色下的强调色预设：只改 seed，派生层自动跟随 */
+:root[data-theme='dark'][data-accent='violet'] {
+  --raw-accent: #a78bfa;
+}
+:root[data-theme='dark'][data-accent='emerald'] {
+  --raw-accent: #34d399;
+}
+:root[data-theme='dark'][data-accent='rose'] {
+  --raw-accent: #fb7185;
 }

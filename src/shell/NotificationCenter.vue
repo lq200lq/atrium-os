@@ -29,10 +29,10 @@ function runAction(n: Notice) {
 <template>
   <aside
     v-if="ui.notificationsOpen"
-    class="fixed right-3 top-12 z-[9998] flex max-h-[60vh] w-80 flex-col overflow-hidden rounded-xl border border-glass-border-active bg-glass-pop shadow-pop backdrop-blur-xl"
+    class="fixed right-3 top-12 z-panel flex max-h-[60vh] w-80 flex-col overflow-hidden rounded-surface border border-glass-border-active bg-glass-pop shadow-pop backdrop-blur-xl"
   >
     <div class="flex items-center justify-between border-b border-line px-4 py-2 text-ui">
-      <span class="font-medium text-ink"
+      <span class="font-strong text-ink"
         >{{ t('notification.title') }} ({{ notif.items.length }})</span
       >
       <button class="text-ink-mute hover:text-ink" @click="notif.clearAll()">
@@ -43,19 +43,19 @@ function runAction(n: Notice) {
       <li
         v-for="n in notif.items"
         :key="n.id"
-        class="flex items-start gap-2 border-b border-line-soft px-4 py-2.5 text-ui"
+        class="flex items-start gap-2 border-b border-line-soft px-4 py-sm text-ui"
       >
         <div class="min-w-0 flex-1">
-          <p class="font-medium text-ink">{{ n.title }}</p>
+          <p class="font-strong text-ink">{{ n.title }}</p>
           <p v-if="n.body" class="truncate text-ink-mute">{{ n.body }}</p>
           <button
             v-if="n.action"
-            class="mt-1 rounded border border-accent/40 px-2 py-0.5 text-caption text-accent-strong hover:bg-accent-soft"
+            class="mt-1 rounded-control border border-accent/40 px-xs py-2xs text-caption text-accent-strong hover:bg-accent-soft"
             @click="runAction(n)"
           >
             {{ n.action.label }}
           </button>
-          <p class="mt-0.5 text-caption text-ink-mute">{{ fmt(n.time) }}</p>
+          <p class="mt-2xs text-caption text-ink-mute">{{ fmt(n.time) }}</p>
         </div>
         <button
           class="text-ink-mute hover:text-ink"

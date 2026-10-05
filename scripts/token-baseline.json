@@ -1,0 +1,35 @@
+{
+  "src/apps/ai-assistant/App.vue": {
+    "palette-class": 6
+  },
+  "src/apps/ai-assistant/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/apps/app-center/App.vue": {
+    "palette-class": 1
+  },
+  "src/apps/app-center/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/apps/component-gallery/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/apps/data-board/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/apps/doc-editor/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/apps/file-manager/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/apps/settings/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/shell/Dock.vue": {
+    "palette-class": 1
+  },
+  "src/shell/TopBar.vue": {
+    "palette-class": 1
+  }
+}

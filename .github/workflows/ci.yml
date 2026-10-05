@@ -17,6 +17,8 @@ jobs:
       - run: npm ci
       - run: npm run type-check
       - run: npm run lint
+      # 设计 token 审计：源码不得出现裸色值/裸圆角/小数间距/裸层级（早失败）
+      - run: npm run check:tokens
       - run: npm run test:unit:coverage
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e

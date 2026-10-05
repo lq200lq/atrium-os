@@ -1,11 +1,64 @@
-@theme {
+/* ==========================================================================
+   设计刻度层（S7）
+   --------------------------------------------------------------------------
+   结构：@theme（Tailwind 可见的刻度与语义名）→ :root（派生公式，一处定义）
+        → @utility（Tailwind 4 无命名空间的层级/控件高度/禁用态）
+   规则：⓪ @theme static：刻度变量全量落进产物（Tailwind 默认会摇掉未被
+   │      引用的变量），否则运行时（E2E 对比度实测、文档站色板、调试面板）读不到。
+   ① 一切视觉值从这里取，源码不得出现裸色值/裸圆角/小数间距。
+        ② 明暗切换只改 theme-light.css / theme-dark.css 的 `--raw-*` seed 与
+           混合锚点，本文件的派生公式与工具类名保持稳定。
+        ③ 强调色预设只覆盖 `--raw-accent`（seed），hover/active/bg/border/text
+           全部由公式派生——换品牌色不需要再手写任何衍生色。
+   ========================================================================== */
+
+@theme static {
+  /* ── 字阶：正文四档（既有）+ 标题三档（heading-1/2/3，含行高） ── */
   --text-micro: 10px;
   --text-caption: 12px;
   --text-ui: 13px;
   --text-title: 14px;
+  --text-heading-3: 14px;
+  --text-heading-3--line-height: 22px;
+  --text-heading-2: 16px;
+  --text-heading-2--line-height: 24px;
+  --text-heading-1: 20px;
+  --text-heading-1--line-height: 28px;
 
-  /* 语义色一律指向 --raw-* 原始值层（见 theme-light.css / theme-dark.css），
-   * 明暗切换只改原始层，工具类与语义名保持稳定。 */
+  /* 展示档：桌面标语、Widgets 时钟、磁贴名（刻度上限，业务侧不得再往上加） */
+  --text-display-3: 24px;
+  --text-display-3--line-height: 32px;
+  --text-display-2: 36px;
+  --text-display-2--line-height: 44px;
+  --text-display-1: 48px;
+  --text-display-1--line-height: 56px;
+
+  /* 行高刻度：新组件必须显式声明，避免继承浏览器 normal 造成漂移 */
+  --leading-body: 20px;
+  --leading-tight: 18px;
+
+  /* 字重：只用两档（对齐 antd 400 / 600）；强调靠色彩与描边不靠加粗 */
+  --font-weight-regular: 400;
+  --font-weight-strong: 600;
+
+  /* ── 间距：4px 网格六级（禁止小数档，如 p-1.5） ── */
+  --spacing-2xs: 4px;
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  /* ── 圆角：按组件类别分档，相邻元素不得混档 ── */
+  --radius-chip: 4px; /* 标签、徽标、提示气泡 */
+  --radius-control: 6px; /* 按钮、输入、选择 */
+  --radius-surface: 8px; /* 卡片、对话框、抽屉、通知 */
+  --radius-panel: 12px; /* 窗口体 */
+  --radius-dock: 16px; /* Dock、Widgets、tint 磁贴 */
+  --radius-full: 9999px; /* 圆点、头像（禁用于控件本体） */
+
+  /* ── 文本与表面（既有语义名保持不变，指向 --raw-* 原始层） ── */
   --color-ink-strong: var(--raw-ink-strong);
   --color-ink: var(--raw-ink);
   --color-ink-mute: var(--raw-ink-mute);
@@ -18,6 +71,12 @@
   --color-on-accent: var(--raw-on-accent);
   --color-scrim: var(--raw-scrim);
 
+  /* 中性填充四档（alpha，叠在着色表面上仍能自然混合） */
+  --color-fill: var(--raw-fill);
+  --color-fill-secondary: var(--raw-fill-secondary);
+  --color-fill-tertiary: var(--raw-fill-tertiary);
+  --color-fill-quaternary: var(--raw-fill-quaternary);
+
   --color-glass-bar: var(--raw-glass-bar);
   --color-glass-raise: var(--raw-glass-raise);
   --color-glass-base: var(--raw-glass-base);
@@ -26,12 +85,47 @@
   --color-glass-border: var(--raw-glass-border);
   --color-glass-border-active: var(--raw-glass-border-active);
 
+  /* ── 语义色：每个语义 6 级（seed / hover / active / bg / bg-hover / border / text） ── */
   --color-accent: var(--raw-accent);
-  --color-accent-strong: var(--raw-accent-strong);
-  --color-accent-soft: var(--raw-accent-soft);
+  --color-accent-hover: var(--raw-accent-hover);
+  --color-accent-active: var(--raw-accent-active);
+  --color-accent-bg: var(--raw-accent-bg);
+  --color-accent-bg-hover: var(--raw-accent-bg-hover);
+  --color-accent-border: var(--raw-accent-border);
+  --color-accent-text: var(--raw-accent-text);
+  /* 兼容名：strong=文字/图标强调，soft=选中浅底（S8 起新代码用 -text / -bg） */
+  --color-accent-strong: var(--raw-accent-text);
+  --color-accent-soft: var(--raw-accent-bg);
+
   --color-danger: var(--raw-danger);
+  --color-danger-hover: var(--raw-danger-hover);
+  --color-danger-active: var(--raw-danger-active);
+  --color-danger-bg: var(--raw-danger-bg);
+  --color-danger-bg-hover: var(--raw-danger-bg-hover);
+  --color-danger-border: var(--raw-danger-border);
+  --color-danger-text: var(--raw-danger-text);
+
   --color-warning: var(--raw-warning);
+  --color-warning-hover: var(--raw-warning-hover);
+  --color-warning-active: var(--raw-warning-active);
+  --color-warning-bg: var(--raw-warning-bg);
+  --color-warning-bg-hover: var(--raw-warning-bg-hover);
+  --color-warning-border: var(--raw-warning-border);
+  --color-warning-text: var(--raw-warning-text);
+
   --color-success: var(--raw-success);
+  --color-success-hover: var(--raw-success-hover);
+  --color-success-active: var(--raw-success-active);
+  --color-success-bg: var(--raw-success-bg);
+  --color-success-bg-hover: var(--raw-success-bg-hover);
+  --color-success-border: var(--raw-success-border);
+  --color-success-text: var(--raw-success-text);
+
+  /* info 跟随品牌强调色（与 antd 默认 colorInfo == colorPrimary 一致） */
+  --color-info: var(--raw-accent);
+  --color-info-bg: var(--raw-accent-bg);
+  --color-info-border: var(--raw-accent-border);
+  --color-info-text: var(--raw-accent-text);
 
   --color-traffic-close: var(--raw-traffic-close);
   --color-traffic-min: var(--raw-traffic-min);
@@ -44,13 +138,141 @@
   --color-file-pdf: var(--raw-file-pdf);
   --color-file-other: var(--raw-file-other);
 
-  --shadow-window: 0 25px 50px -12px rgba(15, 23, 42, 0.3);
-  --shadow-window-dim: 0 10px 15px -3px rgba(15, 23, 42, 0.15);
-  --shadow-pop: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
-  --shadow-dock: 0 20px 25px -5px rgba(15, 23, 42, 0.2);
+  /* ── 阴影：几何集中定义，浓度由 --raw-shadow-* 分层（明暗自适应） ── */
+  --shadow-raise:
+    0 1px 2px var(--raw-shadow-faint), 0 2px 6px var(--raw-shadow-weakest); /* 轻抬升（卡片） */
+  --shadow-window: 0 25px 50px -12px var(--raw-shadow-strong); /* 活动窗口 */
+  --shadow-window-dim: 0 10px 15px -3px var(--raw-shadow-mid); /* 非活动窗口 */
+  --shadow-pop: 0 25px 50px -12px var(--raw-shadow-pop); /* 弹层 */
+  --shadow-dock: 0 20px 25px -5px var(--raw-shadow-mid); /* Dock / Widgets */
 
+  /* ── 动效：三档时长 + 四个具名缓动（禁止随手写 cubic-bezier） ── */
   --duration-quick: 120ms;
   --duration-base: 180ms;
   --duration-slow: 260ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  --ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* ============================== 派生公式 ==================================
+ * 只在此处写一次。theme-light/dark 只改 seed（--raw-accent 等）与四个混合锚点：
+ *   --raw-mix-base    浅底基色（浅主题=白，暗主题=容器面）
+ *   --raw-mix-lighten hover 方向
+ *   --raw-mix-darken  active/按下方向
+ *   --raw-mix-ink     浅底上的强调文字方向（浅主题压暗、暗主题提亮）
+ * ======================================================================== */
+:root {
+  /* 强调色六级 */
+  --raw-accent-hover: color-mix(in oklab, var(--raw-accent) 84%, var(--raw-mix-lighten));
+  --raw-accent-active: color-mix(in oklab, var(--raw-accent) 78%, var(--raw-mix-darken));
+  --raw-accent-bg: color-mix(in oklab, var(--raw-accent) 12%, var(--raw-mix-base));
+  --raw-accent-bg-hover: color-mix(in oklab, var(--raw-accent) 20%, var(--raw-mix-base));
+  --raw-accent-border: color-mix(in oklab, var(--raw-accent) 38%, var(--raw-mix-base));
+  --raw-accent-text: color-mix(in oklab, var(--raw-accent) 76%, var(--raw-mix-ink));
+
+  --raw-danger-hover: color-mix(in oklab, var(--raw-danger) 84%, var(--raw-mix-lighten));
+  --raw-danger-active: color-mix(in oklab, var(--raw-danger) 78%, var(--raw-mix-darken));
+  --raw-danger-bg: color-mix(in oklab, var(--raw-danger) 12%, var(--raw-mix-base));
+  --raw-danger-bg-hover: color-mix(in oklab, var(--raw-danger) 20%, var(--raw-mix-base));
+  --raw-danger-border: color-mix(in oklab, var(--raw-danger) 38%, var(--raw-mix-base));
+  --raw-danger-text: color-mix(in oklab, var(--raw-danger) 76%, var(--raw-mix-ink));
+
+  --raw-warning-hover: color-mix(in oklab, var(--raw-warning) 84%, var(--raw-mix-lighten));
+  --raw-warning-active: color-mix(in oklab, var(--raw-warning) 78%, var(--raw-mix-darken));
+  --raw-warning-bg: color-mix(in oklab, var(--raw-warning) 14%, var(--raw-mix-base));
+  --raw-warning-bg-hover: color-mix(in oklab, var(--raw-warning) 22%, var(--raw-mix-base));
+  --raw-warning-border: color-mix(in oklab, var(--raw-warning) 40%, var(--raw-mix-base));
+  --raw-warning-text: color-mix(
+    in oklab,
+    var(--raw-warning) 64%,
+    var(--raw-mix-ink)
+  ); /* 琥珀色相明度高，压到 64% 才过 AA 4.5 */
+
+  --raw-success-hover: color-mix(in oklab, var(--raw-success) 84%, var(--raw-mix-lighten));
+  --raw-success-active: color-mix(in oklab, var(--raw-success) 78%, var(--raw-mix-darken));
+  --raw-success-bg: color-mix(in oklab, var(--raw-success) 12%, var(--raw-mix-base));
+  --raw-success-bg-hover: color-mix(in oklab, var(--raw-success) 20%, var(--raw-mix-base));
+  --raw-success-border: color-mix(in oklab, var(--raw-success) 38%, var(--raw-mix-base));
+  --raw-success-text: color-mix(in oklab, var(--raw-success) 76%, var(--raw-mix-ink));
+
+  /* 焦点环：一处定义，全站 :focus-visible 消费（见 main.css） */
+  --raw-focus-ring: color-mix(in oklab, var(--raw-accent) 45%, transparent);
+  --raw-focus-width: 2px;
+
+  /* ── 与明暗无关的刻度（放这里，theme-*.css 只留颜色与混合锚点） ── */
+  --control-height-sm: 24px; /* 紧凑控件：表格内联、工具条 */
+  --control-height-md: 28px; /* 缺省控件：表单、对话框 */
+  --control-height-lg: 32px; /* 主行动：落地页式大按钮 */
+  --opacity-disabled: 0.4; /* 禁用态唯一浓度 */
+
+  /* 层级刻度：窗口层由 windowManager 在 desktop 与 panel 之间运行时分配 */
+  --z-desktop: 5; /* Widgets 等桌面件 */
+  --z-window: 10; /* 窗口层基值 */
+  --z-panel: 900; /* 右键菜单、下拉、气泡、通知中心面板 */
+  --z-toast: 1200; /* 吐司 */
+  --z-overlay: 1400; /* Spotlight、遮罩 */
+  --z-float: 1600; /* 抽屉、对话框浮层 */
+  --z-shell: 1800; /* 顶栏、Dock */
+}
+
+/* ============================ 自定义工具类 ==============================
+ * Tailwind 4 没有 z-index / 控件高度 / 禁用态的 @theme 命名空间，用 @utility。
+ * 层级刻度：窗口层由 windowManager 运行时在 desktop 与 panel 之间动态分配。 */
+@utility z-desktop {
+  z-index: var(--z-desktop); /* 5：Widgets 等桌面件（窗口之下） */
+}
+@utility z-window {
+  z-index: var(--z-window); /* 10：窗口层基值 */
+}
+@utility z-panel {
+  z-index: var(--z-panel); /* 900：右键菜单、下拉、气泡、通知中心面板 */
+}
+@utility z-toast {
+  z-index: var(--z-toast); /* 1200：吐司 */
+}
+@utility z-overlay {
+  z-index: var(--z-overlay); /* 1400：Spotlight、遮罩 */
+}
+@utility z-float {
+  z-index: var(--z-float); /* 1600：抽屉、对话框浮层 */
+}
+@utility z-shell {
+  z-index: var(--z-shell); /* 1800：顶栏、Dock（最上层壳层） */
+}
+
+@utility h-control-sm {
+  height: var(--control-height-sm);
+}
+@utility h-control {
+  height: var(--control-height-md);
+}
+@utility h-control-lg {
+  height: var(--control-height-lg);
+}
+
+/* 禁用态唯一写法（替代散落的 disabled:opacity-40） */
+@utility is-disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* ========================= 窗口级响应式 =================================
+ * 本系统不做视口断点（桌面形态，自适应单位是**窗口**而不是屏幕）。
+ * 应用根节点挂 cq-window，内部用 w-narrow / w-mid / w-wide 三档变形。
+ * container query 的宽度必须是静态值（浏览器不接受 var()），故 px 字面量
+ * 只允许出现在此处；--bp-window-* 同一组数值供 E2E 与 JS 断言。 */
+@theme static {
+  --bp-window-narrow: 480px;
+  --bp-window-mid: 800px;
+}
+
+@utility cq-window {
+  container-type: inline-size;
+  container-name: window;
+}
+
+@custom-variant w-narrow (@container window (max-width: 479.98px));
+@custom-variant w-mid (@container window (min-width: 480px) and (max-width: 799.98px));
+@custom-variant w-wide (@container window (min-width: 800px));

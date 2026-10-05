@@ -29,7 +29,7 @@ function reload() {
     class="flex h-full flex-col items-center justify-center gap-3 p-6 text-center"
   >
     <OsIcon name="alert-triangle" :size="28" class="text-danger" />
-    <p class="text-ui font-medium text-ink">{{ t('errorboundary.title') }}</p>
+    <p class="text-ui font-strong text-ink">{{ t('errorboundary.title') }}</p>
     <p class="max-w-full truncate text-caption text-ink-mute" :title="message">{{ message }}</p>
     <OsButton size="sm" @click="reload">{{ t('errorboundary.reload') }}</OsButton>
   </div>

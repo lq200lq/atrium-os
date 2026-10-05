@@ -53,7 +53,7 @@ const handles: { dir: ResizeDir; cls: string }[] = [
   <section
     v-show="win.status !== 'minimized'"
     :class="[
-      'absolute flex flex-col overflow-hidden rounded-xl border backdrop-blur-xl',
+      'absolute flex flex-col overflow-hidden rounded-panel border backdrop-blur-xl',
       'transition-[left,top,width,height] duration-base',
       active
         ? 'border-glass-border-active bg-glass-strong shadow-window'
@@ -74,7 +74,7 @@ const handles: { dir: ResizeDir; cls: string }[] = [
         @maximize="wm.toggleMax(win.id)"
       />
       <div
-        class="flex min-w-0 flex-1 items-center justify-center gap-1.5 text-ui font-medium text-ink"
+        class="flex min-w-0 flex-1 items-center justify-center gap-xs text-ui font-strong text-ink"
       >
         <OsIcon v-if="manifest" :name="manifest.icon" :size="14" class="text-ink-mute" />
         <span class="truncate">{{ displayTitle }}</span>
@@ -82,7 +82,7 @@ const handles: { dir: ResizeDir; cls: string }[] = [
       <div class="w-14" />
     </header>
 
-    <div class="min-h-0 flex-1 overflow-hidden bg-glass-base">
+    <div class="cq-window min-h-0 flex-1 overflow-hidden bg-glass-base">
       <ErrorBoundary :app-id="win.appId">
         <Suspense>
           <KeepAlive :max="8">

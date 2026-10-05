@@ -44,16 +44,18 @@ const todos = ref([
 </script>
 
 <template>
-  <div class="pointer-events-none absolute right-4 top-14 z-[5] hidden w-60 flex-col gap-3 xl:flex">
+  <div
+    class="pointer-events-none absolute right-4 top-14 z-desktop hidden w-60 flex-col gap-3 xl:flex"
+  >
     <div
-      class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
+      class="pointer-events-auto rounded-dock border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
     >
-      <p class="text-4xl font-light tabular-nums drop-shadow">{{ clock }}</p>
+      <p class="text-display-2 font-regular tabular-nums drop-shadow">{{ clock }}</p>
       <p class="mt-1 text-ui opacity-90">{{ dateLine }}</p>
     </div>
 
     <div
-      class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
+      class="pointer-events-auto rounded-dock border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
     >
       <div class="mb-2 grid grid-cols-7 gap-1 text-center text-micro opacity-70">
         <span v-for="(w, i) in weekdays" :key="i">{{ w }}</span>
@@ -62,8 +64,8 @@ const todos = ref([
         <span
           v-for="(c, i) in cells"
           :key="i"
-          class="flex h-6 items-center justify-center rounded-md"
-          :class="c.today ? 'bg-surface text-accent-strong font-semibold' : 'opacity-80'"
+          class="flex h-6 items-center justify-center rounded-chip"
+          :class="c.today ? 'bg-surface text-accent-strong font-strong' : 'opacity-80'"
         >
           {{ c.day || '' }}
         </span>
@@ -71,17 +73,17 @@ const todos = ref([
     </div>
 
     <div
-      class="pointer-events-auto rounded-2xl border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
+      class="pointer-events-auto rounded-dock border border-glass-border bg-glass-bar p-4 text-white shadow-dock backdrop-blur-xl"
     >
-      <p class="mb-2 text-ui font-medium">{{ t('widget.today') }}</p>
-      <ul class="space-y-1.5">
+      <p class="mb-2 text-ui font-strong">{{ t('widget.today') }}</p>
+      <ul class="space-y-2xs">
         <li v-for="(todo, i) in todos" :key="i">
           <button
             class="flex w-full items-center gap-2 text-left text-caption"
             @click="todo.done = !todo.done"
           >
             <span
-              class="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-glass-border-active text-micro"
+              class="flex h-4 w-4 shrink-0 items-center justify-center rounded-chip border border-glass-border-active text-micro"
               :class="todo.done ? 'bg-glass-strong text-accent-strong' : ''"
             >
               <OsIcon v-if="todo.done" name="check" :size="10" :stroke-width="3" />

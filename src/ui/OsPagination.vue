@@ -33,7 +33,7 @@ function go(p: number) {
   <div class="flex items-center justify-end gap-1 text-ui text-ink">
     <span class="mr-2 text-caption text-ink-mute">{{ t('pagination.total', { n: total }) }}</span>
     <button
-      class="rounded border border-line px-2 py-0.5 disabled:opacity-40"
+      class="inline-flex h-control-sm items-center rounded-control border border-line px-xs disabled:is-disabled"
       :disabled="page <= 1"
       @click="go(page - 1)"
     >
@@ -42,7 +42,7 @@ function go(p: number) {
     <button
       v-for="p in pages"
       :key="p"
-      class="min-w-7 rounded border px-2 py-0.5"
+      class="inline-flex h-control-sm min-w-7 items-center justify-center rounded-control border px-xs"
       :class="
         p === page ? 'border-accent bg-accent text-on-accent' : 'border-line hover:bg-surface-hover'
       "
@@ -51,7 +51,7 @@ function go(p: number) {
       {{ p }}
     </button>
     <button
-      class="rounded border border-line px-2 py-0.5 disabled:opacity-40"
+      class="inline-flex h-control-sm items-center rounded-control border border-line px-xs disabled:is-disabled"
       :disabled="page >= totalPages"
       @click="go(page + 1)"
     >

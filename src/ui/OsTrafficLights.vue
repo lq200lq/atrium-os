@@ -6,7 +6,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex items-center gap-1.5">
+  <div class="flex items-center gap-xs">
     <button
       class="h-3 w-3 rounded-full bg-traffic-close hover:brightness-90"
       :title="t('window.close')"

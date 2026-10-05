@@ -64,7 +64,7 @@ onUnmounted(() => {
 <template>
   <div class="flex h-full flex-col text-ui">
     <div class="flex items-center gap-3 border-b border-line px-4 py-2 text-ink">
-      <span class="truncate font-medium text-ink">{{ node?.name ?? '未关联文件' }}</span>
+      <span class="truncate font-strong text-ink">{{ node?.name ?? '未关联文件' }}</span>
       <span class="flex-1" />
       <span v-if="savedAt" class="text-success">已保存 {{ savedAt }}</span>
       <span v-else-if="node" class="text-ink-mute">编辑中…</span>
@@ -80,7 +80,7 @@ onUnmounted(() => {
     <textarea
       v-else
       v-model="content"
-      class="min-h-0 flex-1 resize-none bg-transparent p-5 leading-relaxed text-ink outline-none"
+      class="min-h-0 flex-1 resize-none bg-transparent p-5 leading-relaxed text-ink"
       placeholder="开始输入…"
       @input="onInput"
     />

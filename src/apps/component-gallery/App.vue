@@ -109,7 +109,7 @@ const drawerOpen = ref(false)
     <!-- 基础 -->
     <div v-if="tab === 'basic'" class="space-y-5 p-4">
       <section>
-        <h3 class="mb-2 text-title font-medium text-ink">OsButton</h3>
+        <h3 class="mb-2 text-title font-strong text-ink">OsButton</h3>
         <div class="flex flex-wrap items-center gap-2">
           <OsButton variant="primary">{{ t('gallery.primary') }}</OsButton>
           <OsButton>{{ t('gallery.secondary') }}</OsButton>
@@ -119,14 +119,14 @@ const drawerOpen = ref(false)
         </div>
       </section>
       <section>
-        <h3 class="mb-2 text-title font-medium text-ink">OsInput</h3>
+        <h3 class="mb-2 text-title font-strong text-ink">OsInput</h3>
         <OsInput v-model="text" :placeholder="t('gallery.inputPlaceholder')" class="max-w-60" />
         <p class="mt-1 text-caption text-ink-mute">
           {{ t('gallery.currentValue', { v: text || t('gallery.emptyValue') }) }}
         </p>
       </section>
       <section>
-        <h3 class="mb-2 text-title font-medium text-ink">OsBadge / OsTrafficLights</h3>
+        <h3 class="mb-2 text-title font-strong text-ink">OsBadge / OsTrafficLights</h3>
         <div class="flex items-center gap-4">
           <span class="inline-flex items-center gap-1"
             >{{ t('gallery.badgeNotice') }} <OsBadge :count="5"
@@ -155,7 +155,7 @@ const drawerOpen = ref(false)
         />
       </section>
       <section>
-        <h3 class="mb-2 text-title font-medium text-ink">{{ t('gallery.formTitle') }}</h3>
+        <h3 class="mb-2 text-title font-strong text-ink">{{ t('gallery.formTitle') }}</h3>
         <OsForm
           v-model="formModel"
           :fields="formFields"
@@ -169,7 +169,7 @@ const drawerOpen = ref(false)
     <div v-else-if="tab === 'display'" class="space-y-5 p-4">
       <section>
         <div class="mb-2 flex items-center gap-2">
-          <h3 class="text-title font-medium text-ink">OsTable</h3>
+          <h3 class="text-title font-strong text-ink">OsTable</h3>
           <OsButton size="sm" @click="reload">{{ t('gallery.simulateLoad') }}</OsButton>
           <OsTooltip :text="t('gallery.hoverTipText')">
             <OsButton size="sm">{{ t('gallery.hoverTip') }}</OsButton>
@@ -178,7 +178,7 @@ const drawerOpen = ref(false)
             t('gallery.selectedRows', { n: selected.length })
           }}</span>
         </div>
-        <div class="h-56 rounded-lg border border-line">
+        <div class="h-56 rounded-surface border border-line">
           <OsTable
             v-model:selected="selected"
             v-model:page="page"
@@ -190,9 +190,10 @@ const drawerOpen = ref(false)
             :page-size="10"
           >
             <template #role="{ value }">
-              <span class="rounded bg-accent-soft px-2 py-0.5 text-caption text-accent-strong">{{
-                value
-              }}</span>
+              <span
+                class="rounded-chip bg-accent-soft px-2 py-2xs text-caption text-accent-strong"
+                >{{ value }}</span
+              >
             </template>
             <template #actions="{ row }">
               <OsButton
@@ -211,11 +212,11 @@ const drawerOpen = ref(false)
       </section>
       <section class="grid grid-cols-2 gap-4">
         <div>
-          <h3 class="mb-2 text-title font-medium text-ink">OsEmpty</h3>
+          <h3 class="mb-2 text-title font-strong text-ink">OsEmpty</h3>
           <OsEmpty :description="t('gallery.emptyText')" />
         </div>
         <div>
-          <h3 class="mb-2 text-title font-medium text-ink">OsSkeleton</h3>
+          <h3 class="mb-2 text-title font-strong text-ink">OsSkeleton</h3>
           <OsSkeleton :rows="4" />
         </div>
       </section>

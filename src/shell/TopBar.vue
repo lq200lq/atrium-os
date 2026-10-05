@@ -25,22 +25,22 @@ const date = () =>
 
 <template>
   <header
-    class="fixed inset-x-0 top-0 z-[9999] flex h-11 items-center gap-3 border-b border-glass-border bg-glass-bar px-4 backdrop-blur-xl"
+    class="fixed inset-x-0 top-0 z-shell flex h-11 items-center gap-3 border-b border-glass-border bg-glass-bar px-4 backdrop-blur-xl"
   >
     <div class="flex shrink-0 items-center gap-2 whitespace-nowrap">
       <div
-        class="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow"
+        class="flex h-6 w-6 items-center justify-center rounded-control bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow"
       >
         <OsIcon name="boxes" :size="14" />
       </div>
-      <span class="text-ui font-semibold text-ink-strong">{{ t('brand.slogan') }}</span>
+      <span class="text-ui font-strong text-ink-strong">{{ t('brand.slogan') }}</span>
     </div>
 
-    <nav class="flex shrink-0 items-center gap-0.5">
+    <nav class="flex shrink-0 items-center gap-2xs">
       <button
         v-for="m in menus"
         :key="m"
-        class="whitespace-nowrap rounded px-2 py-0.5 text-ui text-ink hover:bg-glass-raise"
+        class="inline-flex h-control-sm items-center whitespace-nowrap rounded-chip px-xs text-ui text-ink hover:bg-glass-raise"
       >
         {{ t(`topbar.menus.${m}`) }}
       </button>
@@ -53,7 +53,7 @@ const date = () =>
       >
         <OsIcon name="search" :size="14" class="text-ink-mute" />
         <span class="flex-1 truncate">{{ t('topbar.search') }}</span>
-        <kbd class="rounded border border-line px-1 text-micro text-ink-mute">⌘K</kbd>
+        <kbd class="rounded-chip border border-line px-1 text-micro text-ink-mute">⌘K</kbd>
       </button>
     </div>
 

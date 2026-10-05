@@ -20,7 +20,7 @@ const model = defineModel<string>({ default: '' })
   <select
     v-model="model"
     :disabled="disabled"
-    class="w-full rounded-md border border-line bg-surface px-2 py-1.5 text-ui text-ink outline-none focus:border-accent disabled:opacity-40"
+    class="h-control w-full rounded-control border border-line bg-surface px-sm text-ui text-ink focus:border-accent disabled:is-disabled"
   >
     <option v-if="placeholder" value="" disabled>
       {{ placeholder }}

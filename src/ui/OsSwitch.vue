@@ -9,7 +9,7 @@ const model = defineModel<boolean>({ required: true })
 <template>
   <label
     class="inline-flex cursor-pointer items-center gap-2 text-ui text-ink"
-    :class="{ 'cursor-not-allowed opacity-40': disabled }"
+    :class="disabled && 'is-disabled'"
   >
     <button
       type="button"

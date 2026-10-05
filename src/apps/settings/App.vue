@@ -77,7 +77,7 @@ function resetLayout() {
   <div class="h-full overflow-y-auto text-ui text-ink">
     <!-- 用户与角色 -->
     <section class="border-b border-line p-4">
-      <h2 class="mb-1 flex items-center gap-1.5 text-title font-medium">
+      <h2 class="mb-1 flex items-center gap-xs text-title font-strong">
         <OsIcon name="user" :size="15" class="text-accent-strong" />
         {{ t('settings.account.title') }}
       </h2>
@@ -86,7 +86,7 @@ function resetLayout() {
         <button
           v-for="u in USERS"
           :key="u.id"
-          class="flex items-center justify-between rounded-lg border px-3 py-2 text-left transition"
+          class="flex items-center justify-between rounded-surface border px-3 py-2 text-left transition"
           :class="
             session.currentUserId === u.id
               ? 'border-accent bg-accent-soft'
@@ -95,7 +95,7 @@ function resetLayout() {
           @click="session.setUser(u.id)"
         >
           <span>
-            <span class="block font-medium">{{ t(`settings.users.${u.id}.name`) }}</span>
+            <span class="block font-strong">{{ t(`settings.users.${u.id}.name`) }}</span>
             <span class="block text-caption text-ink-mute">{{
               t(`settings.users.${u.id}.desc`)
             }}</span>
@@ -115,7 +115,7 @@ function resetLayout() {
 
     <!-- 外观 -->
     <section class="border-b border-line p-4">
-      <h2 class="mb-3 flex items-center gap-1.5 text-title font-medium">
+      <h2 class="mb-3 flex items-center gap-xs text-title font-strong">
         <OsIcon name="sparkles" :size="15" class="text-accent-strong" />
         {{ t('settings.appearance.title') }}
       </h2>
@@ -159,7 +159,7 @@ function resetLayout() {
 
     <!-- Dock 固定项 -->
     <section class="border-b border-line p-4">
-      <h2 class="mb-1 flex items-center gap-1.5 text-title font-medium">
+      <h2 class="mb-1 flex items-center gap-xs text-title font-strong">
         <OsIcon name="boxes" :size="15" class="text-accent-strong" />
         {{ t('settings.dock.title') }}
       </h2>
@@ -168,7 +168,7 @@ function resetLayout() {
         <label
           v-for="app in registry.accessibleApps"
           :key="app.id"
-          class="flex cursor-pointer items-center gap-2 rounded-lg border border-line px-3 py-2 hover:bg-surface-hover"
+          class="flex cursor-pointer items-center gap-2 rounded-surface border border-line px-3 py-2 hover:bg-surface-hover"
         >
           <input
             type="checkbox"
@@ -186,7 +186,7 @@ function resetLayout() {
 
     <!-- 窗口 -->
     <section class="border-b border-line p-4">
-      <h2 class="mb-3 flex items-center gap-1.5 text-title font-medium">
+      <h2 class="mb-3 flex items-center gap-xs text-title font-strong">
         <OsIcon name="puzzle" :size="15" class="text-accent-strong" />
         {{ t('settings.window.title') }}
       </h2>
@@ -200,19 +200,19 @@ function resetLayout() {
 
     <!-- 诊断：错误日志回看 -->
     <section class="border-b border-line p-4">
-      <h2 class="mb-1 flex items-center gap-1.5 text-title font-medium">
+      <h2 class="mb-1 flex items-center gap-xs text-title font-strong">
         <OsIcon name="activity" :size="15" class="text-accent-strong" />
         {{ t('settings.diagnostics.title') }}
       </h2>
       <p class="mb-3 text-caption text-ink-mute">{{ t('settings.diagnostics.hint') }}</p>
-      <div v-if="errorLog.entries.length" class="flex flex-col gap-1.5">
+      <div v-if="errorLog.entries.length" class="flex flex-col gap-2xs">
         <div
           v-for="e in errorLog.entries"
           :key="e.id"
-          class="rounded-lg border border-line bg-surface-sunken px-3 py-2 text-caption"
+          class="rounded-surface border border-line bg-surface-sunken px-3 py-2 text-caption"
         >
           <div class="flex items-center gap-2">
-            <span class="rounded bg-danger/15 px-1.5 py-0.5 text-danger">
+            <span class="rounded-chip bg-danger/15 px-2xs py-2xs text-danger">
               {{ t(`settings.diagnostics.scope.${e.scope}`) }}
             </span>
             <span v-if="e.appId" class="text-ink-mute">{{ e.appId }}</span>
@@ -235,7 +235,7 @@ function resetLayout() {
 
     <!-- 系统信息 -->
     <section class="p-4">
-      <h2 class="mb-3 flex items-center gap-1.5 text-title font-medium">
+      <h2 class="mb-3 flex items-center gap-xs text-title font-strong">
         <OsIcon name="shield" :size="15" class="text-accent-strong" />
         {{ t('settings.system.title') }}
       </h2>

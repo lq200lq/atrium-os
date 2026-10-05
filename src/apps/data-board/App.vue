@@ -146,10 +146,10 @@ const columns: TableColumn<Employee>[] = [
 <template>
   <div class="flex h-full flex-col text-ui">
     <div class="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2">
-      <div class="w-44">
+      <div class="w-44 w-narrow:w-full">
         <OsInput v-model="keyword" placeholder="搜索姓名/职位" @enter="reload" />
       </div>
-      <div class="w-32">
+      <div class="w-32 w-narrow:w-full">
         <OsSelect v-model="dept" :options="deptOptions" placeholder="" />
       </div>
       <OsButton size="sm" @click="reload">查询</OsButton>

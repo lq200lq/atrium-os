@@ -24,7 +24,7 @@ function close() {
 <template>
   <Teleport to="body">
     <Transition name="drawer-fade">
-      <div v-if="open" class="fixed inset-0 z-[9996] bg-scrim" @pointerdown.self="close">
+      <div v-if="open" class="fixed inset-0 z-float bg-scrim" @pointerdown.self="close">
         <Transition name="drawer-slide">
           <aside
             v-if="open"
@@ -35,9 +35,9 @@ function close() {
             aria-modal="true"
           >
             <header
-              class="flex h-11 shrink-0 items-center justify-between border-b border-line px-4"
+              class="flex h-11 shrink-0 items-center justify-between border-b border-line px-md"
             >
-              <span class="text-title font-medium text-ink">{{ title }}</span>
+              <span class="text-title font-strong text-ink">{{ title }}</span>
               <button
                 class="text-ink-mute hover:text-ink"
                 :title="t('common.close')"
@@ -46,10 +46,10 @@ function close() {
                 <OsIcon name="x" :size="16" />
               </button>
             </header>
-            <div class="min-h-0 flex-1 overflow-y-auto p-4 text-ui text-ink">
+            <div class="min-h-0 flex-1 overflow-y-auto p-md text-ui text-ink">
               <slot />
             </div>
-            <footer v-if="$slots.footer" class="shrink-0 border-t border-line p-3">
+            <footer v-if="$slots.footer" class="shrink-0 border-t border-line p-sm">
               <slot name="footer" />
             </footer>
           </aside>

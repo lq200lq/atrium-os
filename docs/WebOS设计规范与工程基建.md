@@ -54,6 +54,30 @@ test:unit / test:unit:watch / test:e2e
 
 ## 3. 设计 token 体系
 
+### 3.0 设计价值观（S7 成文，作为一切取舍的仲裁依据）
+
+四条价值取自企业级设计系统的共识，并按 WebOS 桌面形态重新解释。**两条决策规则**：① 两个方案冲突时，选让用户状态更「确定」的那个；② 不产生信息的装饰一律删掉。
+
+| 价值观            | 在 WebOS 里的含义                                                                                                      | 落点示例                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 自然 Natural      | 沿用操作系统与既有企业软件的既成模式，不发明新交互：窗口有交通灯、Dock 承载常驻、⌘K 唤起搜索                           | 窗口拖拽/缩放走 pointer 事件与 macOS 手感一致；不做「双击标题栏才折叠」这类奇招          |
+| 确定 Certain      | 用户永远知道「我在哪 / 我刚做了什么 / 下一步是什么」。桌面形态没有页面跳转，状态必须由**窗口、Dock、通知三处冗余表达** | 鉴权拒绝：通知中心留痕 + 可点去设置的出口；加载/空/错误三态由组件内建，不靠文案提醒      |
+| 有意义 Meaningful | 视觉强调只留给可操作的东西。选中、hover、焦点、禁用各有唯一一种表达方式，避免强调互相稀释                              | 一个界面只允许一个主行动（primary 按钮不并排两个）；强调靠色彩与描边，不靠加粗字号       |
+| 可生长 Growing    | 从单个表单到密集表格到多窗口控制台，同一套刻度与契约都成立——这是「脚手架」而非「页面集合」的定义                       | 新应用 1 个目录 0 处壳层改动（S1）；新组件必须复用同一份 size/status/disabled 契约（S8） |
+
+**Do / Don't（与门禁脚本一一对应，违反即 `npm run check:tokens` 失败）**
+
+- **Do** 间距吸附 4px 网格（命名档 `2xs/xs/sm/md/lg/xl/2xl`）；**Don't** 用小数档（`p-1.5`=6px、`py-0.5`=2px）——它们不在网格上。
+- **Do** 圆角按组件类别取档（控件 `rounded-control`、表面 `rounded-surface`、窗口 `rounded-panel`）；**Don't** 让相邻元素混半径——`rounded-panel` 的窗口体里不应出现 `rounded-dock` 的按钮。
+- **Do** 颜色一律读语义 token；**Don't** 硬编码 `#fff` / `rgba(...)`——hex 只是巧合，角色才是本体。
+- **Do** 用 `font-regular(400)` / `font-strong(600)` 两档；**Don't** 用 `font-medium`、`font-bold` 或斜体制造层级——层级靠字号、颜色与描边。
+- **Do** 焦点走全局 `:focus-visible` 环；**Don't** 写 `outline-none` 把键盘用户的路标抹掉。
+- **Do** 禁用态写 `disabled:is-disabled`；**Don't** 各组件自己 `disabled:opacity-40`。
+- **Do** 时长走 `duration-quick/base/slow`、缓动走 `ease-out/in/in-out/out-back`；**Don't** 随手写 `cubic-bezier(...)` 和 `duration-[137ms]`。
+- **Do** 层级用刻度名（`z-desktop/window/panel/toast/overlay/float/shell`）；**Don't** 用 `z-[9999]` 互相压层。
+- **Do** 预设色（文件类型色、tint 磁贴）只用于分类信息；**Don't** 为一个新界面临时造一个强调色——那通常说明布局该改，而不是缺色。
+- **Don't** 用「等待确认」的死态：任何失败/受限都必须给可操作出口（重试、去设置、返回）。
+
 ### 3.1 三层消费模型
 
 ```text
@@ -92,10 +116,54 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 | `--color-traffic-close/min/max`                           | #ff5f57 / #febc2e / #28c840                                           | 交通灯                                                                                  |
 | `--color-file-dir/docx/xlsx/pptx/pdf/other`               | amber-500 / sky-500 / emerald-500 / orange-500 / rose-500 / slate-400 | 文件类型（唯一允许的彩色例外），工具类 `text-file-*`                                    |
 
-圆角不另立 token：直接用 Tailwind 圆角刻度，`rounded-md/lg/xl/2xl` = 6/8/12/16px（钮/输入、卡片、窗口、Dock）。
-阴影 `--shadow-window`（活跃）/ `--shadow-window-dim`（非活动）/ `--shadow-pop`（弹层）/ `--shadow-dock`（Dock 与 Widgets 卡片）。
-动效 `--duration-quick` 120ms / `--duration-base` 180ms / `--duration-slow` 260ms；`--ease-out` cubic-bezier(0.22,1,0.36,1)。窗口开合 = base + ease-out。
-字号层级（工具类 `text-micro/caption/ui/title`）：10（角标）/ 12（辅助）/ 13（正文 UI）/ 14（标题、输入）。
+圆角与阴影/动效/字号的具体刻度见 3.4；下表只列「角色 → 值」。
+
+| 角色               | 值                                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 控件圆角           | `rounded-control` 6px                                                                                                                     |
+| 表面（卡片/弹层）  | `rounded-surface` 8px                                                                                                                     |
+| 窗口体 / Dock·磁贴 | `rounded-panel` 12px / `rounded-dock` 16px                                                                                                |
+| 阴影分层           | `shadow-raise`（轻抬升）/ `shadow-window`（活动）/ `shadow-window-dim`（非活动）/ `shadow-pop`（弹层）/ `shadow-dock`                     |
+| 动效               | `duration-quick` 120ms / `base` 180ms / `slow` 260ms；缓动 `ease-out`/`ease-in`/`ease-in-out`/`ease-out-back`。窗口开合 = base + ease-out |
+| 字号               | `text-micro` 10 / `caption` 12 / `ui` 13（正文）/ `title` 14 / `heading-3` 14·22 / `heading-2` 16·24 / `heading-1` 20·28                  |
+
+### 3.4 刻度体系（S7 落地）
+
+本节把「有颜色 token」升级为「有刻度体系」。所有刻度定义在 `src/styles/tokens.css`（`@theme` + 一处派生公式 + `@utility`），`theme-light.css` / `theme-dark.css` **只放 seed 与混合锚点**，不放规则。
+
+| 维度   | 刻度                                                                                                                | 说明                                                                                                                                                                                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 间距   | `2xs` 4 / `xs` 8 / `sm` 12 / `md` 16 / `lg` 24 / `xl` 32 / `2xl` 48                                                 | 4px 网格。Tailwind 数字档（`p-3`）因基准是 4px 也合法；**小数档违法**                                                                                                                                                          |
+| 圆角   | `chip` 4 / `control` 6 / `surface` 8 / `panel` 12 / `dock` 16 / `full`                                              | 按组件类别而非按数值取档；相邻元素不得混档                                                                                                                                                                                     |
+| 字阶   | 正文四档 + `heading-1/2/3`（含行高）                                                                                | 标题档自带 line-height；正文档行高用 `leading-body`(20) / `leading-tight`(18) 显式声明                                                                                                                                         |
+| 字重   | `font-regular` 400 / `font-strong` 600                                                                              | 只有两档。选中/激活的视觉线索来自**色彩与描边**，不是加粗                                                                                                                                                                      |
+| 控件高 | `h-control-sm` 24 / `h-control` 28 / `h-control-lg` 32                                                              | Button/Input/Select 同一档位表；并排控件必须等高（桌面密度取 28 而非 antd 的 32）                                                                                                                                              |
+| 语义色 | 每个语义 6 级：seed / `hover` / `active` / `bg` / `bg-hover` / `border` / `text`                                    | 由 `color-mix(in oklab, …)` **一处派生**，明暗与 4 套强调色预设只换 seed——`--color-accent-strong`/`-soft` 是 `-text`/`-bg` 的兼容别名                                                                                          |
+| 中性   | `fill` / `fill-secondary` / `fill-tertiary` / `fill-quaternary`（alpha）                                            | alpha 而非实色：叠在玻璃或着色表面上仍自然混合（hover 底、选中底、禁用底）                                                                                                                                                     |
+| 层级   | `z-desktop` 5 / `z-window` 10 / `z-panel` 900 / `z-toast` 1200 / `z-overlay` 1400 / `z-float` 1600 / `z-shell` 1800 | 窗口层由 `windowManager` 在 desktop 与 panel 之间运行时分配，不再写 `z-[9999]`。相对序按语义重排为「面板 < 吐司 < 遮罩(Spotlight) < 浮层(抽屉/对话框) < 壳层」——对话框应压过 Spotlight 遮罩，与旧的 `9996<9997<9998≈9999` 不同 |
+| 焦点   | `--raw-focus-ring` / `--raw-focus-width`，main.css 全局 `:focus-visible` 基线                                       | 组件不再出现 `outline-none`；鼠标点击不套环（用 `:focus-visible` 而非 `:focus`）                                                                                                                                               |
+| 禁用   | `disabled:is-disabled`（opacity `.4` + `cursor: not-allowed`）                                                      | 禁用态唯一写法，`--opacity-disabled` 一处可调                                                                                                                                                                                  |
+| 阴影   | 几何写在 `--shadow-*`，浓度取 `--raw-shadow-strong/pop/mid/faint/weakest`                                           | 暗色只换浓度即可读出场，不必为暗色另写一套阴影                                                                                                                                                                                 |
+
+**窗口级响应式**：本系统不做视口断点（桌面形态，自适应单位是**窗口**而不是屏幕）。落地方式：
+
+- `WindowFrame` 的应用体挂 `cq-window`（`container-type: inline-size` + `container-name: window`），应用内部据此按窗口宽度变形，与浏览器窗口大小无关。
+- 三档变体 `w-narrow`（<480px）/ `w-mid`（480~800）/ `w-wide`（≥800），数值同时以 `--bp-window-narrow/mid` 存在刻度层。**container query 的宽度必须是静态值**（浏览器不接受 `var()`），所以这两个 px 字面量只允许出现在 `tokens.css`，属规范认可的例外。
+- 参考实现：data-board 筛选条 `w-44 w-narrow:w-full`——窄窗口下搜索/筛选控件铺满换行。E2E `tests/e2e/container.spec.ts` 把窗口体压到 360px 后断言真的换行铺满。
+
+**刻度变量必须全量落进产物**：`@theme` 写成 `@theme static`。Tailwind 4 默认把未被工具类引用的主题变量摇掉，那样运行时（对比度实测、文档站色板、调试面板）就读不到 `--color-*-bg/-text` 了。代价是 CSS 多约 2KB，换来刻度层可被程序检视。
+
+**语义色派生的实测校准**：`warning-text` 的 seed 占比从与其他语义相同的 76% 压到 64%——琥珀色相本身明度高，76% 时「浅底 + 深字」只有 4.46:1，差 0.04 不过 AA。对比度门禁见 `tests/e2e/contrast.spec.ts`（明暗 × 四套强调色 × 五语义 = 8 条用例，阈值 4.5:1，用 canvas 把 `color-mix`/`oklab` 归一到 sRGB 后按 WCAG 公式算）。
+
+**门禁**：`npm run check:tokens`（`scripts/check-tokens.mjs`）扫描 `src/**.{vue,ts}`，命中「颜色字面量 / 圆角裸档 / 小数间距 / 层级裸值 / outline-none / 禁用自写 opacity / 字重越界 / 字号越界 / 魔法时长与缓动 / 组件内自定义变量 / 调色板类」即失败。已接入 `build:check`、CI 与单测（`tests/unit/tokenAudit.test.ts`，含「真实仓库无违规」这条断言）。
+
+- **例外机制**：行内写 `data-token-allow="理由"`，无理由或理由短于 4 字符不算豁免。用于规范 3.1 的两类例外（中性面、per-app 品牌色）。
+- **色板棘轮（ratchet）**：调色板类（`bg-violet-500`、`text-slate-600` 这类 Tailwind 原色阶）按文件+数量存基线，**只减不增**——新增即失败，收敛后用 `node scripts/check-tokens.mjs --update-baseline` 降低基线。这样既守住「不再漂新色值」，又不必一次性重写 per-app 品牌磁贴。
+
+**本阶段推翻的旧决定（回写）**
+
+- 原 3.3 写「圆角不另立 token，直接用 `rounded-md/lg/xl/2xl`」。S7 推翻：数值刻度无法表达「这是控件还是这是窗口」，同屏出现 `rounded-md` 与 `rounded-lg` 时无人知道差别的依据是什么，漂移（`rounded` 与 `rounded-md` 混用）也因此测不出来。改为语义档后，**半径错用可被静态扫描**，且暗色/密度调整只需改一处。旧四档数值（6/8/12/16）原样保留，只是改了名字并补了 `chip`/`full`。
+- 原字号四档无行高与标题档；S7 补 `heading-*` 与 `leading-*`，但**不给既有 `text-ui/caption` 等档追设 line-height**——那会整体改变行高（现状接近 `normal`≈1.2，设成 1.5 会把 44px 顶栏等固定高度挤爆），属可控风险而非收益，改为新组件显式声明 leading。
 
 ## 4. 基础组件契约（src/ui/）
 

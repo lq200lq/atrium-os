@@ -21,8 +21,8 @@ const model = defineModel<string>({ required: true })
     <label
       v-for="opt in options"
       :key="opt.value"
-      class="inline-flex items-center gap-1.5"
-      :class="{ 'cursor-not-allowed opacity-40': disabled }"
+      class="inline-flex items-center gap-xs"
+      :class="disabled && 'is-disabled'"
     >
       <input
         type="radio"

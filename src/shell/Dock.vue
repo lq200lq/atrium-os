@@ -26,7 +26,7 @@ function onDockClick(app: RegisteredApp) {
 
 <template>
   <nav
-    class="fixed bottom-3 left-1/2 z-[9999] flex -translate-x-1/2 items-end gap-2 rounded-2xl border border-glass-border bg-glass-bar px-3 py-2 shadow-dock backdrop-blur-xl"
+    class="fixed bottom-3 left-1/2 z-shell flex -translate-x-1/2 items-end gap-2 rounded-dock border border-glass-border bg-glass-bar px-3 py-2 shadow-dock backdrop-blur-xl"
   >
     <button
       v-for="app in registry.dockApps"
@@ -37,7 +37,7 @@ function onDockClick(app: RegisteredApp) {
     >
       <span
         :class="[
-          'flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-2xl shadow-md transition-transform group-hover:-translate-y-1 group-hover:scale-105',
+          'flex h-12 w-12 items-center justify-center rounded-dock bg-gradient-to-br text-display-3 shadow-md transition-transform group-hover:-translate-y-1 group-hover:scale-105',
           app.tint ?? 'from-slate-400 to-slate-500',
         ]"
       >

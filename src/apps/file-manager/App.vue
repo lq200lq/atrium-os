@@ -179,19 +179,19 @@ function onRestore() {
   <div class="relative flex h-full text-ui">
     <aside class="w-36 shrink-0 space-y-1 border-r border-line bg-surface-sunken/60 p-2">
       <button
-        class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-ink hover:bg-surface"
+        class="flex h-control w-full items-center justify-between rounded-control px-sm text-left text-ink hover:bg-surface"
         :class="{ 'bg-accent-soft text-accent-strong': cwd === HOME }"
         @click="navigate(HOME)"
       >
         我的文件
       </button>
       <button
-        class="flex w-full items-center justify-between rounded-md px-3 py-1.5 text-left text-ink hover:bg-surface"
+        class="flex h-control w-full items-center justify-between rounded-control px-sm text-left text-ink hover:bg-surface"
         :class="{ 'bg-accent-soft text-accent-strong': inTrash }"
         @click="navigate(TRASH_ROOT)"
       >
         回收站
-        <span v-if="vfs.trash.length" class="rounded bg-line px-1.5 text-caption text-ink">
+        <span v-if="vfs.trash.length" class="rounded-chip bg-line px-2xs text-caption text-ink">
           {{ vfs.trash.length }}
         </span>
       </button>
@@ -202,7 +202,10 @@ function onRestore() {
         <nav class="flex min-w-0 flex-1 items-center gap-1 text-ink">
           <template v-for="(c, i) in crumbs" :key="c.path">
             <span v-if="i > 0" class="text-ink-mute">/</span>
-            <button class="truncate rounded px-1 hover:bg-surface-hover" @click="navigate(c.path)">
+            <button
+              class="truncate rounded-chip px-1 hover:bg-surface-hover"
+              @click="navigate(c.path)"
+            >
               {{ c.name }}
             </button>
           </template>

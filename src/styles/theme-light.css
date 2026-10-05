@@ -1,6 +1,13 @@
-/* 原始值层（浅色）：语义 token 在 tokens.css 中引用这些 --raw-* 变量。
- * 暗色由 theme-dark.css 的 :root[data-theme='dark'] 覆盖同名 --raw-*，语义层与工具类无需改动。 */
+/* 原始值层（浅色）：tokens.css 的语义层与派生公式消费这里的 seed 与混合锚点。
+ * 暗色由 theme-dark.css 覆盖同名 --raw-*，语义层、派生公式与工具类无需改动。
+ * 本文件只放「值」，不放「规则」——派生规则一律在 tokens.css 写一次。 */
 :root {
+  /* ── 派生公式的四个混合锚点（浅主题） ── */
+  --raw-mix-base: #ffffff; /* 浅底基色 */
+  --raw-mix-lighten: #ffffff; /* hover 方向 */
+  --raw-mix-darken: #000000; /* active/按下方向 */
+  --raw-mix-ink: #000000; /* 浅底上的强调文字：压暗 */
+
   /* 文本墨色 */
   --raw-ink-strong: #1e293b;
   --raw-ink: #334155;
@@ -15,6 +22,12 @@
   --raw-on-accent: #ffffff;
   --raw-scrim: rgba(15, 23, 42, 0.25);
 
+  /* 中性填充四档（alpha：叠在着色表面/玻璃上仍自然混合） */
+  --raw-fill: rgba(15, 23, 42, 0.15);
+  --raw-fill-secondary: rgba(15, 23, 42, 0.08);
+  --raw-fill-tertiary: rgba(15, 23, 42, 0.045);
+  --raw-fill-quaternary: rgba(15, 23, 42, 0.025);
+
   /* 玻璃材质（浅底：白高透明） */
   --raw-glass-bar: rgba(255, 255, 255, 0.28);
   --raw-glass-raise: rgba(255, 255, 255, 0.45);
@@ -24,12 +37,15 @@
   --raw-glass-border: rgba(255, 255, 255, 0.4);
   --raw-glass-border-active: rgba(255, 255, 255, 0.6);
 
-  /* 强调色（缺省 sky，可被 :root[data-accent=*] 预设覆盖） */
-  --raw-accent: #0ea5e9;
-  --raw-accent-strong: #0369a1;
-  --raw-accent-soft: #e0f2fe;
+  /* 阴影浓度（几何在 tokens.css 的 --shadow-* 里） */
+  --raw-shadow-strong: rgba(15, 23, 42, 0.3);
+  --raw-shadow-pop: rgba(15, 23, 42, 0.25);
+  --raw-shadow-mid: rgba(15, 23, 42, 0.15);
+  --raw-shadow-faint: rgba(15, 23, 42, 0.06);
+  --raw-shadow-weakest: rgba(15, 23, 42, 0.04);
 
-  /* 状态色 */
+  /* 语义色 seed（唯一需要为每个预设改的地方；六级派生见 tokens.css） */
+  --raw-accent: #0ea5e9;
   --raw-danger: #f43f5e;
   --raw-warning: #f59e0b;
   --raw-success: #10b981;
@@ -48,19 +64,13 @@
   --raw-file-other: #94a3b8;
 }
 
-/* 强调色预设：与明暗无关，仅覆盖 --raw-accent*，故 data-theme 与 data-accent 可自由组合 */
+/* 强调色预设：只覆盖 seed，hover/active/bg/border/text 全部由公式跟着走 */
 :root[data-accent='violet'] {
   --raw-accent: #8b5cf6;
-  --raw-accent-strong: #6d28d9;
-  --raw-accent-soft: #ede9fe;
 }
 :root[data-accent='emerald'] {
   --raw-accent: #10b981;
-  --raw-accent-strong: #047857;
-  --raw-accent-soft: #d1fae5;
 }
 :root[data-accent='rose'] {
   --raw-accent: #f43f5e;
-  --raw-accent-strong: #be123c;
-  --raw-accent-soft: #ffe4e6;
 }

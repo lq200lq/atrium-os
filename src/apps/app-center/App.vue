@@ -30,7 +30,7 @@ const apps = computed(() => {
     <div class="border-b border-line p-3">
       <input
         v-model="q"
-        class="w-full rounded-full border border-line bg-surface-sunken px-4 py-1.5 outline-none focus:border-accent focus:bg-surface"
+        class="h-control w-full rounded-full border border-line bg-surface-sunken px-md focus:border-accent focus:bg-surface"
         :placeholder="t('appCenter.search')"
       />
     </div>
@@ -38,12 +38,12 @@ const apps = computed(() => {
       <button
         v-for="app in apps"
         :key="app.id"
-        class="flex flex-col items-center gap-1.5 rounded-xl p-3 hover:bg-accent-soft"
+        class="flex flex-col items-center gap-2xs rounded-surface p-3 hover:bg-accent-soft"
         @click="wm.open(app.id)"
       >
         <span
           :class="[
-            'flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl shadow',
+            'flex h-14 w-14 items-center justify-center rounded-dock bg-gradient-to-br text-display-3 shadow',
             app.tint ?? 'from-slate-400 to-slate-500',
           ]"
         >

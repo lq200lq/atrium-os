@@ -29,8 +29,8 @@ function onContext(e: MouseEvent) {
     @contextmenu.prevent="onContext"
   >
     <div class="wallpaper-slogan absolute left-12 top-[36%] text-white drop-shadow-lg">
-      <p class="text-5xl italic tracking-wide">{{ t('brand.slogan') }}</p>
-      <p class="mt-3 text-2xl italic tracking-widest">{{ t('brand.tagline') }}</p>
+      <p class="text-display-1 italic tracking-wide">{{ t('brand.slogan') }}</p>
+      <p class="mt-3 text-display-3 italic tracking-widest">{{ t('brand.tagline') }}</p>
     </div>
     <ContextMenu v-if="menu" :x="menu.x" :y="menu.y" @close="menu = null" />
   </div>

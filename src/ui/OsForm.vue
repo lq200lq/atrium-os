@@ -112,7 +112,7 @@ defineExpose({ validate, errors })
       <label
         v-if="field.type !== 'checkbox'"
         class="shrink-0 text-ink"
-        :class="layout === 'horizontal' && 'pt-1.5 text-right'"
+        :class="layout === 'horizontal' && 'pt-2xs text-right'"
         :style="layout === 'horizontal' ? { width: labelWidth } : undefined"
       >
         {{ field.label }}<span v-if="field.required" class="text-danger">*</span>
@@ -130,7 +130,7 @@ defineExpose({ validate, errors })
           />
           <textarea
             v-else-if="field.type === 'textarea'"
-            class="w-full rounded-md border border-line px-3 py-1.5 text-ui text-ink outline-none focus:border-accent"
+            class="w-full rounded-control border border-line px-sm py-xs text-ui text-ink focus:border-accent"
             :placeholder="field.placeholder"
             :disabled="disabled"
             rows="3"

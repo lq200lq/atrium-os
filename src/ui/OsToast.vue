@@ -33,13 +33,13 @@ function hide() {
     <Transition name="toast">
       <div
         v-if="visible"
-        class="pointer-events-auto fixed bottom-20 left-1/2 z-[9999] flex w-72 -translate-x-1/2 items-start gap-2 rounded-xl border border-glass-border-active bg-glass-pop px-4 py-3 shadow-pop backdrop-blur-xl"
+        class="pointer-events-auto fixed bottom-20 left-1/2 z-toast flex w-72 -translate-x-1/2 items-center gap-2 rounded-surface border border-glass-border-active bg-glass-pop px-4 py-3 shadow-pop backdrop-blur-xl"
         role="status"
         @click="hide"
       >
-        <OsIcon name="bell" :size="16" class="mt-0.5 text-accent-strong" />
+        <OsIcon name="bell" :size="16" class="shrink-0 text-accent-strong" />
         <div class="min-w-0 flex-1 text-ui">
-          <p class="font-medium text-ink">{{ visible.title }}</p>
+          <p class="font-strong text-ink">{{ visible.title }}</p>
           <p v-if="visible.body" class="truncate text-caption text-ink-mute">{{ visible.body }}</p>
         </div>
       </div>

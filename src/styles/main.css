@@ -9,6 +9,15 @@ body,
   height: 100%;
 }
 
+/* 焦点可见性基线（S7）：键盘焦点一律走 token 环，组件不再自行 outline-none。
+ * 用 :focus-visible 而非 :focus，避免鼠标点击输入框时也套一圈。 */
+@layer base {
+  :focus-visible {
+    outline: var(--raw-focus-width) solid var(--raw-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
 body {
   margin: 0;
   overflow: hidden;

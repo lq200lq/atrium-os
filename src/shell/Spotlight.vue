@@ -105,18 +105,18 @@ function onKey(e: KeyboardEvent) {
 <template>
   <div
     v-if="ui.spotlightOpen"
-    class="fixed inset-0 z-[9997] flex items-start justify-center bg-scrim pt-28 backdrop-blur-sm"
+    class="fixed inset-0 z-overlay flex items-start justify-center bg-scrim pt-28 backdrop-blur-sm"
     @pointerdown.self="ui.closeOverlays()"
   >
     <div
-      class="w-[520px] max-w-[92vw] overflow-hidden rounded-2xl border border-glass-border-active bg-glass-pop shadow-pop"
+      class="w-[520px] max-w-[92vw] overflow-hidden rounded-panel border border-glass-border-active bg-glass-pop shadow-pop"
     >
       <div class="flex items-center gap-2 border-b border-line px-4 py-3">
         <OsIcon name="search" :size="16" class="text-ink-mute" />
         <input
           ref="inputEl"
           v-model="query"
-          class="flex-1 bg-transparent text-title text-ink outline-none placeholder:text-ink-mute"
+          class="flex-1 bg-transparent text-title text-ink placeholder:text-ink-mute"
           :placeholder="t('spotlight.placeholder')"
           @keydown="onKey"
         />
@@ -132,7 +132,7 @@ function onKey(e: KeyboardEvent) {
           >
             <OsIcon :name="h.icon" :size="18" :class="h.iconCls" />
             <span class="min-w-0 flex-1">
-              <span class="block truncate text-ui font-medium text-ink">{{ h.label }}</span>
+              <span class="block truncate text-ui font-strong text-ink">{{ h.label }}</span>
               <span class="block truncate text-caption text-ink-mute">{{ h.sub }}</span>
             </span>
           </button>

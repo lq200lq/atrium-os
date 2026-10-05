@@ -49,12 +49,12 @@ onUnmounted(() => {
 <template>
   <ul
     ref="root"
-    class="fixed z-[9000] w-44 rounded-lg border border-glass-border-active bg-glass-pop py-1 text-ui text-ink shadow-pop backdrop-blur-xl"
+    class="fixed z-panel w-44 rounded-surface border border-glass-border-active bg-glass-pop py-1 text-ui text-ink shadow-pop backdrop-blur-xl"
     :style="pos"
   >
     <li v-for="it in items" :key="it.key">
       <button
-        class="w-full px-4 py-1.5 text-left hover:bg-accent-soft hover:text-accent-strong"
+        class="w-full px-4 py-xs text-left hover:bg-accent-soft hover:text-accent-strong"
         @click="runItem(it)"
       >
         {{ t(it.key) }}

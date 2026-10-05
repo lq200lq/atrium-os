@@ -13,8 +13,8 @@ withDefaults(
   <button
     :disabled="disabled"
     :class="[
-      'rounded-md transition disabled:opacity-40',
-      size === 'sm' ? 'px-2.5 py-1' : 'px-3 py-1.5',
+      'inline-flex items-center justify-center rounded-control transition disabled:is-disabled',
+      size === 'sm' ? 'h-control-sm px-xs' : 'h-control px-sm',
       variant === 'primary' && 'bg-accent text-white hover:brightness-110',
       variant === 'ghost' && 'border border-line text-ink hover:bg-surface-hover',
       variant === 'danger' && 'border border-danger/30 text-danger hover:bg-danger/10',
