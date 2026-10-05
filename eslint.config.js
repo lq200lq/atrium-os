@@ -13,6 +13,8 @@ export default tseslint.config(
       'test-results',
       'website/.vitepress/dist',
       'website/.vitepress/cache',
+      // docs:embed 复制进来的文档站产物（压缩 JS），与上面两行同类：构建产物不参与 lint
+      'public/docs',
     ],
   },
   js.configs.recommended,

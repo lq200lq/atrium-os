@@ -5,6 +5,9 @@ export default defineConfig({
   title: 'WebOS 脚手架',
   description:
     '企业级 Vue 3 前端脚手架：应用接入契约、权限模型、组件纵深、数据层、主题国际化、文档站与可观测',
+  // base 定为 /docs/：文档站产物由 `npm run docs:embed` 同步进 public/docs/，
+  // 供「文档中心」应用同源 iframe 嵌入（决策 D2′）。dev/preview 也一并挂在 /docs/ 下。
+  base: '/docs/',
   cleanUrls: true,
   themeConfig: {
     nav: [

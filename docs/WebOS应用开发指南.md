@@ -85,7 +85,7 @@ export const manifest: AppManifest = {
   id: 'docs-center',
   name: '文档中心',
   icon: 'book-open',
-  embed: { url: '/docs/' }, // 与 entry 二选一
+  embed: { url: '/docs/index.html' }, // 与 entry 二选一（同源入口要带扩展名，见下）
   window: { w: 900, h: 640, minW: 520, minH: 360 },
   singleton: true,
   order: 45,
@@ -98,6 +98,7 @@ export const manifest: AppManifest = {
 - **地址是用户输入，校验在写入边界**：`src/kernel/webapp/url.ts` 的 `normalizeWebUrl()` 用**正向协议白名单**（只放 `http:`/`https:`——注意 `new URL('javascript:alert(1)')` 是能解析成功的，反向黑名单会漏），剥掉 URL 里的用户名/口令，要求 hostname 非空、总长 ≤2048。UI 校验只是体验，store 才是防线。
 - **sandbox 的确切取值是有意的**：给 `allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-presentation`，**唯独不给 `allow-top-navigation`**——这是本类目唯一真正的防护（拦住外部页面把整个 WebOS 顶掉）。`allow-scripts` + `allow-same-origin` 只对**同源**文档构成逃逸，而用户填的地址按构造是第三方；本仓唯一的同源嵌入是 E2E fixture `public/embed-demo.html`，它等同于未沙箱，仅限测试用。
 - **跨源就是一条硬边界，不假装能翻越**：frame 内文档读不到，因此标题恒为 `manifest.name`、没有前进/后退、没有 URL 回读；暗色主题不会注入 frame。被 X-Frame-Options / CSP `frame-ancestors` 拒绝时浏览器加载的是 `about:blank` 且**照常触发 `load`**，无法可靠检测，所以 `EmbedView` 只做「8 秒未就绪 → warning + 重试 + 新标签页打开」，并在界面明示这一限制，而不是谎称识别出了拒绝。
+- **同源入口必须写带扩展名的真路径**（实测边界）：`docs-center` 的地址是 `/docs/index.html`，不是 `/docs/` 或 `/docs/tokens`。Vite dev 的 SPA fallback 会把未知路径落回本应用 `index.html`，无扩展名深链在 frame 里拿到的会是 **WebOS 壳层自己**——于是壳套壳。为此 `main.ts` 判断 `window.self !== window.top`：被嵌入时壳层不挂载，只留一行说明。用户手填一个指向本站根路径的地址也会撞上同一条，所以这道判断是系统性的，不是给文档应用打的补丁。
 - **固定 `singleton: true`**：同一站点开两个窗口是重复状态，脚手架层不给这个选项；不同的网页应用之间仍各开各的窗。
 - 用户添加的应用 `permissions` 为空（公开）：角色模型管的是内置应用的准入，自己添加的应用再给自己设门槛没有意义。名称也不走 `nameKey`——用户输入的名称是数据，本地化它没有意义（`useAppName()` 缺省回退 `name`）。
 

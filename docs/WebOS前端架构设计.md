@@ -245,7 +245,7 @@ public/
 | 后续迭代路线         | 已规划（2026-10-04） | P0~P3 与打底完成后的脚手架方向路线（S1 应用接入契约与生成器 / S2 权限模型与 settings / S3 组件纵深 / S4 数据访问层 / S5 主题与 i18n / S6 文档站·版本·可观测）详见《WebOS脚手架迭代路线.md》，该文档为后续迭代的设计依据                                                                                                                                     |
 | 对标 Ant Design 纵深 | 进行中（2026-10-05） | S1~S6 之后以 Ant Design 的设计/研发/组件体系为参照另文规划 S7~S12（设计语言成文与 token 刻度、组件契约、布局与展示件、反馈与导航件、配置层与文档自动化、a11y 与质量线），详见《WebOS对标AntDesign迭代规划.md》；S7~S11 已完成，逐阶段状态见该文档 §9                                                                                                        |
 
-| 外部网页应用类目 | 进行中（2026-10-05） | D2′ 落地：`AppManifest` 加 `embed` 与 `entry` 二选一（`register()` 合成内置 `EmbedView`，渲染路径仍一条），新增 `webApps` store（`webapps-v1`）持久化用户在应用中心「网页应用」分区添加的外部站点，内置 `docs-center` 以 `embed: { url: '/docs/' }` 指向同源文档站（`docs:embed` 把 VitePress 产物复制进 `public/docs/`）；跨源拒绝嵌入不做伪检测，走超时告警 + 新标签页出口 |
+| 外部网页应用类目 | 进行中（2026-10-05） | D2′ 落地：`AppManifest` 加 `embed` 与 `entry` 二选一（`register()` 合成内置 `EmbedView`，渲染路径仍一条），新增 `webApps` store（`webapps-v1`）持久化用户在应用中心「网页应用」分区添加的外部站点，内置 `docs-center` 以 `embed: { url: '/docs/index.html' }` 指向同源文档站（`docs:embed` 把 VitePress 产物复制进 `public/docs/`；同源入口必须带扩展名，故壳层加了「被嵌入即拒绝挂载」的反嵌套判断）；跨源拒绝嵌入不做伪检测，走超时告警 + 新标签页出口 |
 
 **实施期对设计的修正（已回写本文档）**
 

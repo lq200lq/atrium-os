@@ -31,7 +31,12 @@
 dev / build / preview / type-check
 lint / lint:fix / format
 test:unit / test:unit:watch / test:e2e
+docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 ```
+
+**文档站同源嵌入链（`docs:embed`）**：VitePress 的 `base` 定为 `/docs/`，`scripts/embed-docs.mjs` 把它构建进 `website/.vitepress/dist` 后整份复制到 `public/docs/`（gitignore 的构建产物）。选「复制静态产物」而不是代理另一个 dev 端口，是因为 `public/` 由 Vite 静态服务，dev / `vite preview` / `dist/` 三处同源可达且零新依赖；代价是**改文档要重跑一次 `docs:embed`，没有 HMR**（写作时仍用 `docs:dev`，它同样挂在 `/docs/`）。脚本总是重建 dist——曾按「dist 已存在就跳过」写过，结果拷到了一份旧 base 的产物，坑就写在这里。`pretest:e2e` 带 `--if-missing`，本地反复跑 E2E 不会被文档构建拖慢，CI 是干净克隆故必然实跑。
+
+> 一个只有实测才能发现的边界：Vite dev 的 SPA fallback 会把**未知路径**落回本应用 `index.html`，所以同源入口必须写 `/docs/index.html` 这类带扩展名的真文件路径；`/docs/tokens` 这种无扩展名深链在 dev 下拿到的是 WebOS 壳层本身。iframe 里出现壳层就是「壳套壳」，因此壳层启动时判断 `window.self !== window.top` 拒绝在 frame 内挂载（见《WebOS应用开发指南.md》§6）。
 
 ### 2.2 提交规范
 
