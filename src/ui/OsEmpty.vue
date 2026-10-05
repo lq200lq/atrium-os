@@ -5,7 +5,9 @@ import type { IconName } from '@/kernel/icons'
 
 withDefaults(
   defineProps<{
+    /** 顶部图标（固定 34px、弱化墨色），缺省 boxes */
     icon?: IconName
+    /** 描述文字，空串回退 common.empty；自定义操作走 action 具名插槽 */
     description?: string
   }>(),
   { icon: 'boxes', description: '' },

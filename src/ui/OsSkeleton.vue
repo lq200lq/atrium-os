@@ -3,6 +3,7 @@ withDefaults(
   defineProps<{
     /** text：多行文本骨架；rect：单块矩形；circle：头像圆 */
     variant?: 'text' | 'rect' | 'circle'
+    /** 行数，仅 text 变体消费（rect/circle 忽略）；末行自动收窄为 2/3 宽 */
     rows?: number
   }>(),
   { variant: 'text', rows: 3 },

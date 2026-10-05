@@ -22,13 +22,13 @@ export function useOS() {
         const appId = cmd.slice(0, -OPEN_SUFFIX.length)
         if (!registry.byId(appId)) {
           console.warn(`[os] 未知应用: ${appId}`)
-          useNotification().push('命令未执行', `未知应用：${appId}`)
+          useNotification().push('命令未执行', `未知应用：${appId}`, undefined, 'warning')
           return false
         }
         return wm.open(appId, payload) !== null
       }
       const ok = commandBus.exec(cmd, payload)
-      if (!ok) useNotification().push('命令未执行', `未注册的命令：${cmd}`)
+      if (!ok) useNotification().push('命令未执行', `未注册的命令：${cmd}`, undefined, 'warning')
       return ok
     },
 

@@ -2,8 +2,10 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
+  OsAlert,
   OsAvatar,
   OsBadge,
+  OsBreadcrumb,
   OsButton,
   OsCard,
   OsCheckbox,
@@ -12,17 +14,24 @@ import {
   OsDialog,
   OsDivider,
   OsDrawer,
+  OsDropdown,
   OsEmpty,
   OsForm,
   OsGrid,
   OsInput,
   OsInputNumber,
+  OsMenu,
   OsPagination,
+  OsPopconfirm,
+  OsProgress,
   OsRadio,
+  OsResult,
   OsSegmented,
   OsSelect,
   OsSkeleton,
   OsSpace,
+  OsSpin,
+  OsSteps,
   OsSwitch,
   OsTable,
   OsTabs,
@@ -32,21 +41,30 @@ import {
   OsTypography,
   OsTrafficLights,
   OsTree,
+  type BreadcrumbItem,
   type CollapseItem,
   type DescriptionItem,
   type FormField,
+  type MenuItem,
+  type ProgressStatus,
   type RadioOption,
+  type ResultStatus,
   type SegmentedOption,
   type Size,
   type Status,
+  type StepItem,
   type TableColumn,
   type TreeNode,
 } from '@/ui'
 import { useNotification } from '@/kernel/stores/notification'
+import { useWindowManager } from '@/kernel/stores/windowManager'
+import { useFeedback } from '@/ui/feedback'
 import CrashProbe from './CrashProbe.vue'
 
 const { t } = useI18n()
 const notif = useNotification()
+const win = useWindowManager()
+const feedback = useFeedback()
 const tab = ref('basic')
 const crash = ref(false)
 const tabs = computed(() => [
@@ -54,6 +72,7 @@ const tabs = computed(() => [
   { key: 'input', label: t('gallery.tabs.input') },
   { key: 'layout', label: t('gallery.tabs.layout') },
   { key: 'display', label: t('gallery.tabs.display') },
+  { key: 'nav', label: t('gallery.tabs.nav') },
   { key: 'feedback', label: t('gallery.tabs.feedback') },
 ])
 
@@ -149,6 +168,33 @@ function reload() {
 const dialogOpen = ref(false)
 const drawerOpen = ref(false)
 
+// 反馈件（S10-A）
+const alertVisible = ref(true)
+const spinOverlay = ref(true)
+const progressPct = ref(40)
+const progressStatus = ref<ProgressStatus | undefined>(undefined)
+function bumpProgress() {
+  progressStatus.value = undefined
+  progressPct.value = Math.min(100, progressPct.value + 10)
+}
+const resultStatus = ref<string>('success')
+const resultStatusOptions = computed<SegmentedOption[]>(() => [
+  { value: 'success', label: t('result.success.title') },
+  { value: 'error', label: t('result.error.title') },
+  { value: '403', label: t('result.forbidden.title') },
+  { value: 'warning', label: t('result.warning.title') },
+])
+
+// 命令式确认与通知是同一条链：confirm 决议后用同一入口回写，不另设对话框状态
+async function askFeedback() {
+  const ok = await feedback.confirm({
+    title: t('gallery.feedbackApiDialog'),
+    content: t('gallery.feedbackApiConfirmDesc'),
+  })
+  if (ok) feedback.success(t('gallery.feedbackApiYes'))
+  else feedback.info(t('gallery.feedbackApiNo'))
+}
+
 // 布局与展示（S9-A）
 const collapseItems = computed<CollapseItem[]>(() => [
   { key: 'intro', header: t('gallery.collapseIntro') },
@@ -219,6 +265,74 @@ function loadTreeChildren(node: TreeNode): Promise<TreeNode[]> {
       )
     }, 600)
   })
+}
+
+// 导航件（S10-B）
+const navMenuSelected = ref<string[]>(['nav-new-doc'])
+const verticalMenu = computed<MenuItem[]>(() => [
+  {
+    key: 'file',
+    label: t('topbar.menus.file'),
+    icon: 'folder',
+    children: [
+      { key: 'nav-new-dir', label: t('gallery.navNewDir'), icon: 'folder' },
+      { key: 'nav-new-doc', label: t('gallery.navNewDoc'), icon: 'file-text' },
+    ],
+  },
+  { key: 'edit', label: t('topbar.menus.edit'), icon: 'notebook-pen' },
+  { key: 'view', label: t('topbar.menus.view'), icon: 'boxes' },
+  { key: 'delete', label: t('common.delete'), icon: 'trash-2', danger: true },
+  { key: 'share', label: t('gallery.navShareAction'), icon: 'shield', disabled: true },
+])
+const horizontalMenu = computed<MenuItem[]>(() => [
+  {
+    key: 'file',
+    label: t('topbar.menus.file'),
+    children: [
+      { key: 'nav-new-dir', label: t('gallery.navNewDir') },
+      { key: 'nav-new-doc', label: t('gallery.navNewDoc') },
+    ],
+  },
+  { key: 'edit', label: t('topbar.menus.edit') },
+  { key: 'window', label: t('topbar.menus.window') },
+  { key: 'help', label: t('topbar.menus.help') },
+])
+const dropdownItems = computed<MenuItem[]>(() => [
+  { key: 'nav-new-dir', label: t('gallery.navNewDir'), icon: 'folder' },
+  { key: 'nav-new-doc', label: t('gallery.navNewDoc'), icon: 'file-text' },
+  { key: 'settings', label: t('topbar.menus.app'), icon: 'settings' },
+  { key: 'delete', label: t('common.delete'), icon: 'trash-2', danger: true },
+])
+const dropdownEcho = ref('')
+function onNavDropdownClick(key: string) {
+  dropdownEcho.value = dropdownItems.value.find((i) => i.key === key)?.label ?? key
+}
+
+const breadcrumbItems = computed<BreadcrumbItem[]>(() => [
+  { key: 'work', label: t('gallery.bcWork'), icon: 'boxes' },
+  { key: 'project', label: t('gallery.bcProject') },
+  { key: 'archive', label: t('gallery.bcArchive') },
+  { key: 'tech', label: t('gallery.bcTech') },
+  { key: 'team', label: t('gallery.bcTeam') },
+  { key: 'file', label: t('gallery.bcFile') },
+])
+const breadcrumbEcho = ref('')
+function onBreadcrumbClick(item: BreadcrumbItem) {
+  breadcrumbEcho.value = item.label
+}
+
+const stepCurrent = ref(1)
+const stepError = ref(false)
+const stepItems = computed<StepItem[]>(() => [
+  { title: t('gallery.stepInfo'), description: t('gallery.stepDescInfo') },
+  { title: t('gallery.stepUpload'), description: t('gallery.stepDescUpload') },
+  { title: t('gallery.stepSubmit'), description: t('gallery.stepDescSubmit') },
+])
+function stepPrev() {
+  stepCurrent.value = Math.max(0, stepCurrent.value - 1)
+}
+function stepNext() {
+  stepCurrent.value = Math.min(stepItems.value.length - 1, stepCurrent.value + 1)
 }
 </script>
 
@@ -638,6 +752,71 @@ function loadTreeChildren(node: TreeNode): Promise<TreeNode[]> {
       </section>
     </div>
 
+    <!-- 导航 -->
+    <div v-else-if="tab === 'nav'" class="space-y-5 p-4">
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsDropdown</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.dropdownHint') }}</p>
+        <OsSpace size="lg" align="center" wrap>
+          <OsDropdown :items="dropdownItems" @click="onNavDropdownClick">
+            <OsButton variant="primary">{{ t('gallery.dropdownTrigger') }}</OsButton>
+          </OsDropdown>
+          <OsDropdown
+            :items="dropdownItems"
+            trigger="hover"
+            placement="right-start"
+            @click="onNavDropdownClick"
+          >
+            <OsButton>{{ t('gallery.dropdownHoverTrigger') }}</OsButton>
+          </OsDropdown>
+          <span v-if="dropdownEcho" class="text-caption text-ink-mute">
+            {{ t('gallery.dropdownClicked', { v: dropdownEcho }) }}
+          </span>
+        </OsSpace>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsMenu</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.menuHint') }}</p>
+        <div class="flex flex-wrap gap-lg">
+          <div class="w-64">
+            <h4 class="mb-2xs text-caption text-ink-mute">{{ t('gallery.menuVertical') }}</h4>
+            <OsMenu v-model:selected-keys="navMenuSelected" :items="verticalMenu" />
+          </div>
+          <div class="min-w-0">
+            <h4 class="mb-2xs text-caption text-ink-mute">{{ t('gallery.menuHorizontal') }}</h4>
+            <div class="rounded-surface border border-line bg-surface p-2xs">
+              <OsMenu :items="horizontalMenu" mode="horizontal" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsBreadcrumb</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.breadcrumbHint') }}</p>
+        <OsBreadcrumb :items="breadcrumbItems" :max-visible-items="3" @click="onBreadcrumbClick" />
+        <p class="mt-2xs text-caption text-ink-mute">
+          {{ t('gallery.currentValue', { v: breadcrumbEcho || t('gallery.bcFile') }) }}
+        </p>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsSteps</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.stepsHint') }}</p>
+        <OsSteps v-model:current="stepCurrent" :items="stepItems" :error="stepError" />
+        <OsSpace size="xs" align="center" wrap class="mt-sm">
+          <OsButton size="sm" :disabled="stepCurrent === 0" @click="stepPrev">
+            {{ t('gallery.stepPrev') }}
+          </OsButton>
+          <OsButton size="sm" :disabled="stepCurrent === stepItems.length - 1" @click="stepNext">
+            {{ t('gallery.stepNext') }}
+          </OsButton>
+          <OsSwitch v-model="stepError" :label="t('gallery.stepErrorToggle')" />
+        </OsSpace>
+      </section>
+    </div>
+
     <!-- 反馈 -->
     <div v-else class="space-y-5 p-4">
       <div class="flex flex-wrap gap-2">
@@ -675,6 +854,126 @@ function loadTreeChildren(node: TreeNode): Promise<TreeNode[]> {
           </div>
         </template>
       </OsDrawer>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsAlert</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.alertHint') }}</p>
+        <div class="flex flex-col gap-sm">
+          <OsAlert type="info" :message="t('gallery.alertInfo')" />
+          <OsAlert type="success" :message="t('gallery.alertSuccess')" />
+          <OsAlert type="warning" :message="t('gallery.alertWarning')" />
+          <OsAlert
+            v-if="alertVisible"
+            type="error"
+            banner
+            closable
+            :message="t('gallery.alertError')"
+            :description="t('gallery.alertDesc')"
+            @close="alertVisible = false"
+          >
+            <template #action>
+              <OsButton
+                size="sm"
+                @click="notif.push(t('gallery.alertError'), t('gallery.alertDesc'))"
+              >
+                {{ t('gallery.alertAction') }}
+              </OsButton>
+            </template>
+          </OsAlert>
+        </div>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsSpin</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.spinHint') }}</p>
+        <div class="flex flex-wrap items-start gap-lg">
+          <OsSpace size="lg" align="center">
+            <OsSpin size="sm" />
+            <OsSpin size="md" />
+            <OsSpin size="lg" :tip="t('gallery.spinTip')" />
+          </OsSpace>
+          <div class="w-64">
+            <OsSpin :loading="spinOverlay" :tip="t('gallery.spinTip')">
+              <div class="rounded-surface border border-line bg-surface p-md text-ui text-ink">
+                {{ t('gallery.cardBody') }}
+              </div>
+            </OsSpin>
+          </div>
+          <OsSwitch v-model="spinOverlay" :label="t('gallery.spinOverlay')" />
+        </div>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsProgress</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.progressHint') }}</p>
+        <OsSpace size="lg" align="center" wrap>
+          <div class="w-48">
+            <OsProgress :percent="progressPct" :status="progressStatus" />
+          </div>
+          <OsProgress type="circle" :percent="progressPct" :status="progressStatus" />
+          <OsButton size="sm" @click="bumpProgress">{{ t('gallery.progressAdd') }}</OsButton>
+          <OsButton size="sm" variant="danger" @click="progressStatus = 'exception'">
+            {{ t('gallery.progressException') }}
+          </OsButton>
+        </OsSpace>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsResult</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.resultHint') }}</p>
+        <OsSegmented
+          v-model="resultStatus"
+          :options="resultStatusOptions"
+          :label="t('gallery.resultDemo')"
+        />
+        <OsResult class="mt-sm" :status="resultStatus as ResultStatus">
+          <template v-if="resultStatus === 'error'" #default>
+            <p>{{ t('gallery.resultDetail') }}</p>
+          </template>
+          <template #extra>
+            <OsSpace size="xs">
+              <OsButton size="sm" @click="win.open('settings')">
+                {{ t('gallery.resultGoSettings') }}
+              </OsButton>
+              <OsButton size="sm" variant="primary" @click="resultStatus = 'success'">
+                {{ t('common.retry') }}
+              </OsButton>
+            </OsSpace>
+          </template>
+        </OsResult>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">OsPopconfirm</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.popconfirmHint') }}</p>
+        <OsPopconfirm
+          :title="t('gallery.popconfirmTitle')"
+          :description="t('gallery.popconfirmDesc')"
+          @confirm="notif.push(t('gallery.popconfirmDone'))"
+        >
+          <OsButton size="sm" variant="danger">{{ t('gallery.popconfirmTrigger') }}</OsButton>
+        </OsPopconfirm>
+      </section>
+
+      <section>
+        <h3 class="mb-2 text-title font-strong text-ink">useFeedback</h3>
+        <p class="mb-xs text-caption text-ink-mute">{{ t('gallery.feedbackApiHint') }}</p>
+        <OsSpace size="xs" wrap>
+          <OsButton size="sm" @click="feedback.success(t('gallery.feedbackApiSaved'))">
+            success
+          </OsButton>
+          <OsButton size="sm" @click="feedback.error(t('gallery.feedbackApiFailed'))">
+            error
+          </OsButton>
+          <OsButton size="sm" @click="feedback.warning(t('gallery.feedbackApiWarned'))">
+            warning
+          </OsButton>
+          <OsButton size="sm" @click="feedback.info(t('gallery.feedbackApiInfoed'))">info</OsButton>
+          <OsButton size="sm" variant="primary" @click="askFeedback">
+            {{ t('gallery.feedbackApiConfirm') }}
+          </OsButton>
+        </OsSpace>
+      </section>
     </div>
   </OsTabs>
 </template>

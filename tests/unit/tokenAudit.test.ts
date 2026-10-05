@@ -55,6 +55,16 @@ describe('设计 token 审计（S7 门禁）', () => {
     ]) {
       expect(rules.has(rule), `规则 ${rule} 应命中`).toBe(true)
     }
+    // S10 收紧：Tailwind 裸数字层级档（z-10）也要命中，不只 z-[...]
+    const zMatches = result.json.report
+      .flatMap((r) => r.violations)
+      .filter((v) => v.rule === 'z-literal')
+      .map((v) => v.match)
+    expect(zMatches).toContain('z-[9999]')
+    expect(
+      zMatches.some((m) => /^z-\d/.test(m)),
+      '裸数字档应命中 z-10',
+    ).toBe(true)
   })
 
   it('合规写法与带理由的例外不被误报', () => {

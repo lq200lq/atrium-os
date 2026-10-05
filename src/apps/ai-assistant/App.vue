@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
 import { useOS } from '@/kernel/composables/useOS'
 import { baseName } from '@/kernel/fs/types'
-import { useNotification } from '@/kernel/stores/notification'
+import { useFeedback } from '@/ui/feedback'
 import { useVfs } from '@/kernel/stores/vfs'
 
 interface Msg {
@@ -14,7 +14,7 @@ interface Msg {
 
 const vfs = useVfs()
 const os = useOS()
-const notif = useNotification()
+const feedback = useFeedback()
 const messages = ref<Msg[]>([
   {
     role: 'bot',
@@ -47,7 +47,7 @@ function generatePlan() {
       text: '方案已生成并保存到「我的文件」，可打开编辑：',
       doc: path,
     })
-    notif.push('文档已生成', baseName(path))
+    feedback.success('文档已生成', baseName(path))
   }, 400)
 }
 </script>

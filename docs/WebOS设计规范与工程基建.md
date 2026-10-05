@@ -190,9 +190,9 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 `src/ui/internal/ControlShell.vue` 收口 Input/Select 共用的控件外框（尺寸/状态/禁用/loading 指示只在此处派生一次），差异靠 props（`filled` 决定实心面还是透明面）。
 
-### 4.2 组件清单（32 件：`src/ui` 31 件经 `@/ui` 出口，`OsIcon` 在 `src/components`）
+### 4.2 组件清单（41 件：`src/ui` 40 件经 `@/ui` 出口，`OsIcon` 在 `src/components`）
 
-按职责分四类；S9 新增件标 ★。
+按职责分五类；S9 新增件标 ★，S10 新增件标 ◎。
 
 **布局与结构**
 
@@ -228,14 +228,30 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 | `OsTable`        | `columns: TableColumn<T>; rows; loading/error/empty 三态; 远端分页排序`                                     | data-board、file-manager            |
 | `OsTree` ★       | `data: TreeNode[]; selectable; checkable; loadData; v-model:expandedKeys/selectedKeys/checkedKeys; @select` | file-manager 目录树（VFS 行为不变） |
 
+**导航**
+
+| 组件             | 契约                                                                                                                     | 落点                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| `OsMenu` ◎       | `items: MenuItem[]（二级 children）; mode: vertical/horizontal; disabled; v-model:selectedKeys; focusFirst()`            | 下拉浮层内、侧栏命令面板；roving tabindex 键盘导航          |
+| `OsDropdown` ◎   | `items: MenuItem[]; trigger: click/hover; placement: Placement; disabled; v-model:open; @click(key)`                     | 内部复用 `OsMenu`，键盘不重抄一遍                           |
+| `OsBreadcrumb` ◎ | `items: BreadcrumbItem[]; maxVisibleItems; separator; @click(item)`（根 `<nav aria-label>`，末项 `aria-current="page"`） | file-manager 路径栏（超长折叠复用 `OsDropdown`）            |
+| `OsSteps` ◎      | `items: StepItem[]; error; v-model: current; @change(index)`（四态 wait/process/finish/error 由 current 推导）           | 分步流程；`w-narrow` 容器自动退化纵向（无 `vertical` prop） |
+
 **壳层与反馈**
 
-| 组件               | 契约                                                                                                           | 替换现状                     |
-| ------------------ | -------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `OsIcon`（已收口） | `name: IconName; size; strokeWidth`                                                                            | 全仓图标                     |
-| `OsTooltip`        | `text; placement: top/bottom/left/right`                                                                       | 壳层 title 属性替代          |
-| `OsDialog`         | `title; confirmText/cancelText; loading; maskClosable=true; @confirm/@cancel`（默认插槽为内容，`v-if` 控显隐） | file-manager 新建/重命名弹窗 |
-| `OsTrafficLights`  | `@close/@minimize/@maximize`                                                                                   | 窗口标题栏三钮               |
+| 组件               | 契约                                                                                                                               | 替换现状                                            |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `OsIcon`（已收口） | `name: IconName; size; strokeWidth`                                                                                                | 全仓图标                                            |
+| `OsTooltip`        | `text; placement: top/bottom/left/right`                                                                                           | 壳层 title 属性替代                                 |
+| `OsDialog`         | `title; confirmText/cancelText; loading; maskClosable=true; @confirm/@cancel`（默认插槽为内容，`v-if` 控显隐）                     | file-manager 新建/重命名弹窗                        |
+| `OsAlert` ◎        | `type: BadgeStatus; message; description; closable; showIcon; banner; @close`（`banner=true` 时 `role=alert`，否则 `role=status`） | settings 诊断说明、表格错误态提示                   |
+| `OsSpin` ◎         | `loading; size: Size; tip`（有默认插槽=容器遮罩，无插槽=内联指示器）                                                               | `OsTable` 的 loading 态、局部等待                   |
+| `OsProgress` ◎     | `percent; type: line/circle; status: ProgressStatus（缺省由 percent 推导）; strokeWidth; showInfo`                                 | 下载/生成类进度，替代裸宽度条                       |
+| `OsResult` ◎       | `status: success/error/403/warning; title; subtitle`（默认插槽=补充内容，`extra` 插槽=下一步出口）                                 | 窗口错误边界（`ErrorBoundary`）、403 落地、设置空态 |
+| `OsPopconfirm` ◎   | `title; description; okText/cancelText; placement; disabled; @confirm/@cancel`（浮层 `z-panel`，焦点进确认钮）                     | 表格行/工具栏的轻确认，不为小动作开 `OsDialog`      |
+| `OsTrafficLights`  | `@close/@minimize/@maximize`                                                                                                       | 窗口标题栏三钮                                      |
+
+命令式入口不是组件而是 `src/ui/feedback.ts` 的 `useFeedback()`：由壳层 `FeedbackHost` provide 上下文（`notify/success/error/warning/info/confirm`），通知数据仍只有 `useNotification` 一份。未挂宿主时 `useFeedback()` 直接抛错，不退化成模块级单例——避免 `ConfigProvider` 上下文读不到那一类问题在这里重演。
 
 （其余 `OsCheckbox/OsRadio/OsSwitch/OsPagination/OsSkeleton/OsTabs/OsToast/OsDrawer/OsEmpty` 同源于 `@/ui` 出口。）
 
@@ -247,17 +263,22 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 ```text
 src/
-  ui/                 # 形态无关基础组件（31 件）
-    types.ts          # 通用契约：Size/Status/CommonProps + 数据结构类型（S8/S9）
+  ui/                 # 形态无关基础组件（40 件）
+    types.ts          # 通用契约：Size/Status/CommonProps + 数据结构类型（S8/S9/S10）
     index.ts          # 唯一出口（组件 + 类型具名导出，S8）
-    internal/         # 不对外暴露的共用件（control.ts 刻度映射、scale.ts 布局刻度、ControlShell 外框）
+    feedback.ts       # 命令式反馈契约层（useFeedback/provideFeedback，S10）
+    internal/         # 不对外暴露的共用件（control.ts 刻度映射、scale.ts 布局刻度、placement.ts 浮层定位、level.ts 分级配色/图标、ControlShell 外框）
   components/         # 组合型组件（OsIcon 等，可依赖 ui/）
 tests/
   unit/               # Vitest 单测
   e2e/                # Playwright 冒烟
 ```
 
+**`src/ui` 的边界（S10 收尾定案，暂不拆包）**：对外只有 `@/ui` 这一个 API 面——`internal/*` 只允许 `src/ui` 自身引用，`check-tokens` 之外靠 review 守；业务应用按件路径（`@/ui/OsCard.vue`）引入是**包体预算**决定（单个应用平均只用 4~6 件，走 barrel 会把整包拉进首屏，见规划 §9 S9 修正条），不是第二套 API。是否独立发包（monorepo）等 S11 的 `OsConfigProvider` 把 API 面稳定后再评估。
+
 ## 6. 实施状态
+
+> 下表数字是 **S1~S6 打底完成时（2026-10-04）的基线快照**，不作为现状读数。当前组件数见 §4.2，各阶段增量与实测数（单测/E2E/包体）见《WebOS对标AntDesign迭代规划.md》§9。
 
 | 项            | 状态                 | 说明                                                                                                                                        |
 | ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |

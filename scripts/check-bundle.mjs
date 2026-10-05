@@ -39,7 +39,9 @@ for (const a of assets) {
 // 首屏总量 = index 入口 + 手动分包 vue/vendor（应用 chunk 为异步、不计入首屏）
 const entryNames = assets.filter((a) => /^(index|vue|vendor)-/.test(a.name))
 const entryTotal = entryNames.reduce((s, a) => s + a.kb, 0)
-console.log(`[bundle] 首屏总量（index+vue+vendor）：${fmt(entryTotal)} / 预算 ${MAX_ENTRY_TOTAL_KB}KB`)
+console.log(
+  `[bundle] 首屏总量（index+vue+vendor）：${fmt(entryTotal)} / 预算 ${MAX_ENTRY_TOTAL_KB}KB`,
+)
 if (entryTotal > MAX_ENTRY_TOTAL_KB) {
   console.error(`[bundle] ✗ 首屏总量 ${fmt(entryTotal)} 超过预算 ${MAX_ENTRY_TOTAL_KB}KB`)
   failed = true

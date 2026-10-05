@@ -5,3 +5,5 @@ playwright-report
 test-results
 package-lock.json
 *.tsbuildinfo
+# API 表由 scripts/gen-api-tables.mjs 生成；prettier 重排表格会让 docs:check 恒判漂移
+website/.generated

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onErrorCaptured, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import OsIcon from '@/components/OsIcon.vue'
 import OsButton from '@/ui/OsButton.vue'
+import OsResult from '@/ui/OsResult.vue'
 import { useErrorLog } from '@/kernel/observability/errorLog'
 
 const props = defineProps<{ appId?: string }>()
@@ -24,14 +24,13 @@ function reload() {
 </script>
 
 <template>
-  <div
-    v-if="message"
-    class="flex h-full flex-col items-center justify-center gap-3 p-6 text-center"
-  >
-    <OsIcon name="alert-triangle" :size="28" class="text-danger" />
-    <p class="text-ui font-strong text-ink">{{ t('errorboundary.title') }}</p>
-    <p class="max-w-full truncate text-caption text-ink-mute" :title="message">{{ message }}</p>
-    <OsButton size="sm" @click="reload">{{ t('errorboundary.reload') }}</OsButton>
+  <!-- 窗口体高度归窗口管理，错误态在可用区内居中；文案细节由 OsResult 承担 -->
+  <div v-if="message" class="flex h-full items-center justify-center">
+    <OsResult status="error" :title="t('errorboundary.title')" :subtitle="message" class="w-full">
+      <template #extra>
+        <OsButton size="sm" @click="reload">{{ t('errorboundary.reload') }}</OsButton>
+      </template>
+    </OsResult>
   </div>
   <slot v-else />
 </template>

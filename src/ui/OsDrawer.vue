@@ -4,15 +4,21 @@ import OsIcon from '@/components/OsIcon.vue'
 
 withDefaults(
   defineProps<{
+    /** 标题文字；空串时标题行仍渲染（含关闭按钮），不留空白 */
     title?: string
+    /** 贴靠侧；滑入轨迹按侧镜像（right 从右推入，left 从左推入） */
     placement?: 'right' | 'left'
+    /** 抽屉宽度，直接写进内联 style 的 CSS 长度值（如 '360px'、'40%'） */
     width?: string
   }>(),
   { title: '', placement: 'right', width: '360px' },
 )
 
 const open = defineModel<boolean>({ required: true })
-const emit = defineEmits<{ close: [] }>()
+const emit = defineEmits<{
+  /** × 按钮或遮罩点击时派发；先置 v-model 为 false 再发出 */
+  close: []
+}>()
 const { t } = useI18n()
 
 function close() {
@@ -29,7 +35,9 @@ function close() {
           <aside
             v-if="open"
             class="absolute top-0 flex h-full flex-col border-glass-border-active bg-glass-pop shadow-pop backdrop-blur-xl"
-            :class="[placement === 'right' ? 'right-0 border-l' : 'left-0 border-r']"
+            :class="[
+              placement === 'right' ? 'right-0 border-l' : 'left-0 border-r slide-from-left',
+            ]"
             :style="{ width }"
             role="dialog"
             aria-modal="true"
@@ -75,5 +83,10 @@ function close() {
 .drawer-slide-enter-from,
 .drawer-slide-leave-to {
   transform: translateX(100%);
+}
+/* 左侧贴靠时镜像滑入方向；双类选择器特异度高于上面的单类默认轨迹 */
+.slide-from-left.drawer-slide-enter-from,
+.slide-from-left.drawer-slide-leave-to {
+  transform: translateX(-100%);
 }
 </style>

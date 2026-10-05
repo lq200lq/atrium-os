@@ -4,16 +4,25 @@ import OsButton from './OsButton.vue'
 
 const props = withDefaults(
   defineProps<{
+    /** 标题文字（必填，无 i18n 回退）；对话框不自带关闭入口，退出靠 cancel/confirm 由父级收敛 */
     title: string
+    /** 确认按钮文案，空串回退 common.confirm */
     confirmText?: string
+    /** 取消按钮文案，空串回退 common.cancel */
     cancelText?: string
     /** 确认按钮 loading 态：提交中由调用方置 true */
     loading?: boolean
+    /** true 时 pointerdown 落在遮罩（非内容区）也派发 cancel；false 则仅按钮可退出 */
     maskClosable?: boolean
   }>(),
   { confirmText: '', cancelText: '', loading: false, maskClosable: true },
 )
-const emit = defineEmits<{ confirm: []; cancel: [] }>()
+const emit = defineEmits<{
+  /** 点击确认按钮派发；组件不会自行关闭，由父级据事件收敛 */
+  confirm: []
+  /** 点击取消按钮派发；maskClosable 为 true 时点遮罩同样派发 */
+  cancel: []
+}>()
 const { t } = useI18n()
 
 function onMaskClick() {
@@ -23,7 +32,7 @@ function onMaskClick() {
 
 <template>
   <div
-    class="absolute inset-0 z-20 flex items-center justify-center bg-scrim"
+    class="absolute inset-0 z-float flex items-center justify-center bg-scrim"
     @pointerdown.self="onMaskClick"
   >
     <div class="w-72 rounded-surface bg-surface p-md shadow-pop">

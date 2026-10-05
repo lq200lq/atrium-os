@@ -7,11 +7,14 @@ import { createVfsDataSource } from '@/kernel/data/vfsDataSource'
 import { baseName, formatSize, isUnderTrash, TRASH_ROOT, type FsNode } from '@/kernel/fs/types'
 import { fileIconClass, fileIconName } from '@/kernel/icons'
 import { useVfs } from '@/kernel/stores/vfs'
+import OsBreadcrumb from '@/ui/OsBreadcrumb.vue'
 import OsButton from '@/ui/OsButton.vue'
 import OsDialog from '@/ui/OsDialog.vue'
 import OsForm, { type FormField } from '@/ui/OsForm.vue'
 import OsTable, { type TableColumn } from '@/ui/OsTable.vue'
 import OsTree, { type TreeNode } from '@/ui/OsTree.vue'
+import { useFeedback } from '@/ui/feedback'
+import type { BreadcrumbItem } from '@/ui/types'
 
 interface Row extends Record<string, unknown> {
   id: string
@@ -29,6 +32,7 @@ interface Row extends Record<string, unknown> {
 
 const vfs = useVfs()
 const os = useOS()
+const feedback = useFeedback()
 const ds = createVfsDataSource()
 const HOME = '/我的文件'
 const cwd = ref(HOME)
@@ -127,10 +131,16 @@ const columns = computed<TableColumn<Row>[]>(() => [
       ]),
 ])
 
-const crumbs = computed(() => {
+// 路径栏数据：每段一个层级（key 即 cwd），交给 OsBreadcrumb 渲染；
+// 行为保持：点任意祖先层级切换 cwd，末项为当前目录
+const crumbs = computed<BreadcrumbItem[]>(() => {
   const parts = cwd.value.split('/').filter(Boolean)
-  return parts.map((name, i) => ({ name, path: `/${parts.slice(0, i + 1).join('/')}` }))
+  return parts.map((name, i) => ({ key: `/${parts.slice(0, i + 1).join('/')}`, label: name }))
 })
+
+function onCrumbClick(item: BreadcrumbItem) {
+  if (item.key) navigate(item.key)
+}
 
 const selectedPath = computed(() => (selected.value[0] as string | undefined) ?? null)
 
@@ -185,8 +195,18 @@ async function confirmDialog() {
 async function onDelete() {
   if (!selectedPath.value) return
   const path = selectedPath.value
+  const name = baseName(path)
+  // 破坏性动作先过命令式确认：反馈上下文由壳层的 FeedbackHost 提供，
+  // 确认态与通知都走同一条 store 队列，不在应用内另起一套对话框状态
+  const ok = await feedback.confirm({
+    title: '移入回收站',
+    content: `确定要将「${name}」移入回收站吗？可从回收站还原。`,
+    okText: '移入回收站',
+  })
+  if (!ok) return
   selected.value = []
   await ds.remove(path)
+  feedback.success('已移入回收站', name)
 }
 
 // 还原为回收站专有动作，不在通用 CRUD 契约内，直接走 vfs store
@@ -212,17 +232,7 @@ function onRestore() {
 
     <div class="flex min-w-0 flex-1 flex-col">
       <div class="flex items-center gap-2 border-b border-line px-4 py-2">
-        <nav class="flex min-w-0 flex-1 items-center gap-1 text-ink">
-          <template v-for="(c, i) in crumbs" :key="c.path">
-            <span v-if="i > 0" class="text-ink-mute">/</span>
-            <button
-              class="truncate rounded-chip px-1 hover:bg-surface-hover"
-              @click="navigate(c.path)"
-            >
-              {{ c.name }}
-            </button>
-          </template>
-        </nav>
+        <OsBreadcrumb :items="crumbs" class="min-w-0 flex-1" @click="onCrumbClick" />
         <template v-if="!inTrash">
           <OsButton size="sm" variant="primary" @click="openDialog('mkdir')">新建目录</OsButton>
           <OsButton size="sm" variant="primary" @click="openDialog('newfile')">新建文档</OsButton>

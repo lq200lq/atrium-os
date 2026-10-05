@@ -15,10 +15,18 @@ const COLUMNS_CLASS: Record<GridColumns, string> = {
   6: 'grid-cols-2 w-mid:grid-cols-3 w-wide:grid-cols-6',
 }
 
-withDefaults(defineProps<{ columns?: GridColumns; gap?: GapSize }>(), {
-  columns: 3,
-  gap: 'md',
-})
+withDefaults(
+  defineProps<{
+    /** 宽窗口（w-wide，≥800px）下的列数；narrow/mid 按 COLUMNS_CLASS 档位自动降档 */
+    columns?: GridColumns
+    /** 行列间隙，与 OsSpace size 同用 GapSize 刻度 */
+    gap?: GapSize
+  }>(),
+  {
+    columns: 3,
+    gap: 'md',
+  },
+)
 </script>
 
 <template>

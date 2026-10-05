@@ -20,6 +20,14 @@ const rows: Row[] = [
   { id: 3, name: '王五', age: 22 },
 ]
 
+const manyRows: Row[] = [
+  { id: 1, name: 'A', age: 30 },
+  { id: 2, name: 'B', age: 20 },
+  { id: 3, name: 'C', age: 40 },
+  { id: 4, name: 'D', age: 10 },
+  { id: 5, name: 'E', age: 50 },
+]
+
 describe('OsTable', () => {
   it('渲染表头与数据行', () => {
     const w = mount(OsTable, { props: { columns, rows } })
@@ -43,6 +51,25 @@ describe('OsTable', () => {
     await w.findAll('thead th')[1].trigger('click')
     expect(w.findAll('tbody tr')[0].text()).toContain('28') // 原顺序
     expect(w.emitted('sort-change')?.[0]).toEqual([{ key: 'age', order: 'asc' }])
+  })
+
+  it('本地模式给了 total 就按页截取表体行，页码变了行也变', async () => {
+    const w = mount(OsTable, {
+      props: { columns, rows: manyRows, total: 5, pageSize: 2, page: 1 },
+    })
+    expect(w.findAll('tbody tr')).toHaveLength(2)
+    expect(w.text()).toContain('A')
+    expect(w.text()).not.toContain('C')
+    await w.setProps({ page: 3 })
+    expect(w.findAll('tbody tr')).toHaveLength(1)
+    expect(w.text()).toContain('E')
+  })
+
+  it('remote 模式不截行：父级只传当页数据，截了会翻空', () => {
+    const w = mount(OsTable, {
+      props: { columns, rows: manyRows, remote: true, total: 5, pageSize: 2, page: 2 },
+    })
+    expect(w.findAll('tbody tr')).toHaveLength(5)
   })
 
   it('行选择派发 update:selected', async () => {

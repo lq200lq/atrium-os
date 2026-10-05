@@ -1,7 +1,9 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
+    /** 标题文字；仅作 title 插槽缺省内容（未提供插槽时显示）。title/extra 任一存在即渲染标题行 */
     title?: string
+    /** 是否描边（border-line）；关掉后阴影与圆角保留 */
     bordered?: boolean
     /** 内容区是否套用 md 内边距；嵌表格/图片等铺满件时关掉 */
     padded?: boolean

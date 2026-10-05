@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { i18n, setLocale, translate } from '@/i18n'
+import enUS from '@/i18n/locales/en-US'
+import zhCN from '@/i18n/locales/zh-CN'
 import { useSettings } from '@/kernel/stores/settings'
 
 const { idbStore } = vi.hoisted(() => ({ idbStore: new Map<string, unknown>() }))
@@ -66,4 +68,28 @@ describe('settings 语言偏好', () => {
     settings.setLang('fr-FR')
     expect(settings.lang).toBe('zh-CN')
   })
+})
+
+/** 递归收集叶子 key（值为字符串的节点） */
+function leafKeys(tree: unknown, prefix = ''): string[] {
+  if (!tree || typeof tree !== 'object') return prefix ? [prefix] : []
+  return Object.entries(tree as Record<string, unknown>).flatMap(([k, v]) =>
+    leafKeys(v, prefix ? `${prefix}.${k}` : k),
+  )
+}
+
+describe('文案可被消息编译器接受', () => {
+  // vue-i18n 的消息是运行期首次取词才编译的：`@` 开头会被当成 linked message 语法，
+  // 写坏了整棵子树直接进错误边界，而逐件挂载的单测碰不到，所以这里全量 t() 一遍。
+  for (const [locale, messages] of [
+    ['zh-CN', zhCN],
+    ['en-US', enUS],
+  ] as const) {
+    it(`${locale} 全部叶子消息可编译`, () => {
+      setLocale(locale)
+      const keys = leafKeys(messages)
+      expect(keys.length).toBeGreaterThan(50)
+      for (const key of keys) expect(() => i18n.global.t(key), key).not.toThrow()
+    })
+  }
 })

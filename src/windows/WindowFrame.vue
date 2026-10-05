@@ -100,7 +100,7 @@ const handles: { dir: ResizeDir; cls: string }[] = [
     <div
       v-for="h in handles"
       :key="h.dir"
-      :class="['absolute z-10', h.cls]"
+      :class="['absolute z-window', h.cls]"
       @pointerdown="start(h.dir)($event)"
     />
   </section>

@@ -2,11 +2,17 @@
 import type { Status } from './types'
 import { controlStatusClass } from './internal/control'
 
-withDefaults(defineProps<{ disabled?: boolean; label?: string; status?: Status }>(), {
-  disabled: false,
-  label: '',
-  status: 'default',
-})
+withDefaults(
+  defineProps<{
+    /** 禁用切换并落原生 disabled */
+    disabled?: boolean
+    /** 右侧说明文字；非空才渲染。button 非可标注元素，点击文本不会切换开关 */
+    label?: string
+    /** 非 default 时给开关本体加语义描边 + 状态环（default 态无描边，与 Input 家族不同） */
+    status?: Status
+  }>(),
+  { disabled: false, label: '', status: 'default' },
+)
 const model = defineModel<boolean>({ required: true })
 </script>
 

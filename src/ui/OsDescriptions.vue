@@ -5,7 +5,9 @@ export type { DescriptionItem } from './types'
 
 withDefaults(
   defineProps<{
+    /** 条目列表；每项值经 item.slot ?? `value-<key>` 具名插槽自定义，缺省渲染 item.value */
     items: DescriptionItem[]
+    /** 非空时渲染 h4 区块标题（进无障碍标题树）；空串不出标题 */
     title?: string
     /** 宽窗口下的列数（窄窗口恒为 1 列） */
     column?: 1 | 2

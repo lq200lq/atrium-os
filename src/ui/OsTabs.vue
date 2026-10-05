@@ -3,7 +3,10 @@ import type { TabItem } from './types'
 
 export type { TabItem } from './types'
 
-defineProps<{ tabs: TabItem[] }>()
+defineProps<{
+  /** 页签定义；点击把 key 写回 v-model，内容区经默认作用域插槽（回传 active）或 `tab-<key>` 具名插槽渲染 */
+  tabs: TabItem[]
+}>()
 const active = defineModel<string>({ required: true })
 </script>
 

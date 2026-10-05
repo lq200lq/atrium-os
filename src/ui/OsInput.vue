@@ -6,17 +6,29 @@ import ControlShell from './internal/ControlShell.vue'
 
 withDefaults(
   defineProps<{
+    /** 占位文字 */
     placeholder?: string
+    /** 高度/内边距走控件刻度（ControlShell） */
     size?: Size
+    /** is-disabled 唯一写法；同时落原生 disabled */
     disabled?: boolean
+    /** error/warning 描边 + 状态环，default 走中性描边 */
     status?: Status
+    /** 值非空时在后缀区显示 ×，点击清空 v-model 并派发 clear；与 suffix 插槽共存 */
     clearable?: boolean
   }>(),
   { placeholder: '', size: 'md', disabled: false, status: 'default', clearable: false },
 )
 
 const model = defineModel<string>({ default: '' })
-const emit = defineEmits<{ enter: []; esc: []; clear: [] }>()
+const emit = defineEmits<{
+  /** Enter 键按下时派发（keydown.enter），组件自身不做提交 */
+  enter: []
+  /** Esc 键按下时派发（keydown.esc） */
+  esc: []
+  /** 点击 clearable 的 × 时派发；发出前 v-model 已置为空串 */
+  clear: []
+}>()
 const { t } = useI18n()
 
 function onClear() {

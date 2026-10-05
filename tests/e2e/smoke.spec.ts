@@ -55,6 +55,9 @@ test('拖拽标题栏移动窗口', async ({ page }) => {
 })
 
 test('Spotlight 搜索并打开文档', async ({ page }) => {
+  // 就绪屏障：Vite 的模块图在 load 事件之后才完成挂载，直接按键会偶发抢在
+  // App.vue 注册 ⌘K 监听之前；先等顶栏出现再按键，稳定且不放松任何断言。
+  await expect(page.getByRole('banner')).toBeVisible()
   await page.keyboard.press('Control+k')
   const input = page.locator('input[placeholder="搜索应用与文件…"]')
   await expect(input).toBeVisible()
@@ -110,7 +113,8 @@ test('组件陈列：页签切换与表格渲染', async ({ page }) => {
   await page.locator(dockTile('组件陈列')).click()
   const win = page.locator('section.absolute').filter({ has: page.locator('[role="tablist"]') })
   await expect(win).toBeVisible()
-  await expect(win.locator('[role="tab"]')).toHaveCount(5)
+  // S10-B 新增「导航」页签后共 6 个（基础/录入/布局/展示/导航/反馈）
+  await expect(win.locator('[role="tab"]')).toHaveCount(6)
 
   await win.locator('[role="tab"]', { hasText: '展示' }).click()
   await expect(win.locator('thead th', { hasText: '姓名' })).toBeVisible()

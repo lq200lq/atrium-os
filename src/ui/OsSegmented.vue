@@ -8,10 +8,13 @@ export type { SegmentedOption } from './types'
 
 const props = withDefaults(
   defineProps<{
+    /** 分段定义（value/label/icon）；icon 为可选项，缺省该段只渲染 label */
     options: SegmentedOption[]
     /** 可访问名：radiogroup 缺少可见标题时必传 */
     label?: string
+    /** 段高走 h-control-* 刻度；字号/内边距不随档变化 */
     size?: Size
+    /** 整组禁用：各段原生 disabled，方向键导航同时失效 */
     disabled?: boolean
     /** true 时铺满容器，各段等宽 */
     block?: boolean

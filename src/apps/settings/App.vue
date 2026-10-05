@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
+import OsAlert from '@/ui/OsAlert.vue'
 import OsRadio from '@/ui/OsRadio.vue'
+import OsResult from '@/ui/OsResult.vue'
+import OsTag from '@/ui/OsTag.vue'
 import { useAppRegistry } from '@/kernel/stores/appRegistry'
 import { useSession, USERS } from '@/kernel/stores/session'
 import { useSettings } from '@/kernel/stores/settings'
@@ -198,13 +201,18 @@ function resetLayout() {
       </div>
     </section>
 
-    <!-- 诊断：错误日志回看 -->
+    <!-- 诊断：错误日志回看（说明走 OsAlert、级别走 OsTag、空态走 OsResult，不再手写 chip 与空文案） -->
     <section class="border-b border-line p-4">
       <h2 class="mb-1 flex items-center gap-xs text-title font-strong">
         <OsIcon name="activity" :size="15" class="text-accent-strong" />
         {{ t('settings.diagnostics.title') }}
       </h2>
-      <p class="mb-3 text-caption text-ink-mute">{{ t('settings.diagnostics.hint') }}</p>
+      <OsAlert
+        class="mb-3"
+        type="info"
+        :message="t('settings.diagnostics.summary', { n: errorLog.entries.length })"
+        :description="t('settings.diagnostics.hint')"
+      />
       <div v-if="errorLog.entries.length" class="flex flex-col gap-2xs">
         <div
           v-for="e in errorLog.entries"
@@ -212,16 +220,16 @@ function resetLayout() {
           class="rounded-surface border border-line bg-surface-sunken px-3 py-2 text-caption"
         >
           <div class="flex items-center gap-2">
-            <span class="rounded-chip bg-danger/15 px-2xs py-2xs text-danger">
-              {{ t(`settings.diagnostics.scope.${e.scope}`) }}
-            </span>
+            <OsTag status="error">{{ t(`settings.diagnostics.scope.${e.scope}`) }}</OsTag>
             <span v-if="e.appId" class="text-ink-mute">{{ e.appId }}</span>
             <span class="ml-auto text-ink-mute">{{ fmtTime(e.ts) }}</span>
           </div>
           <p class="mt-1 truncate text-ink" :title="e.stack || e.message">{{ e.message }}</p>
         </div>
       </div>
-      <p v-else class="text-caption text-ink-mute">{{ t('settings.diagnostics.empty') }}</p>
+      <OsResult v-else status="success" :title="t('settings.diagnostics.okTitle')">
+        {{ t('settings.diagnostics.okSubtitle') }}
+      </OsResult>
       <OsButton
         size="sm"
         variant="danger"

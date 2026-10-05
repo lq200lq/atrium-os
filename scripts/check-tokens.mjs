@@ -58,8 +58,8 @@ const RULES = [
   },
   {
     id: 'z-literal',
-    why: '层级只能用刻度：z-desktop/window/panel/toast/overlay/float/shell',
-    re: /\bz-\[[^\]]+\]/g,
+    why: '层级只能用刻度：z-desktop/window/sticky/panel/toast/overlay/float/shell（Tailwind 裸数字档 z-0~z-50 同样禁止）',
+    re: /\bz-\[[^\]]+\]|\bz-\d/g,
   },
   {
     id: 'focus-hidden',

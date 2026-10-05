@@ -64,10 +64,15 @@ export const useWindowManager = defineStore('windowManager', {
 
       // 鉴权落点：未授权不抛异常——通知中心留痕并给出「去设置切换角色」出口
       if (!useSession().canAccessApp(manifest)) {
-        useNotification().push('无权访问', `当前角色无法打开「${manifest.name}」`, {
-          label: '去设置切换角色',
-          appId: 'settings',
-        })
+        useNotification().push(
+          '无权访问',
+          `当前角色无法打开「${manifest.name}」`,
+          {
+            label: '去设置切换角色',
+            appId: 'settings',
+          },
+          'warning',
+        )
         return null
       }
 

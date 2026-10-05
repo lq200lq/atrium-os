@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { defineComponent, h } from 'vue'
 import { OsRadio, type RadioOption } from '@/ui'
 
 const options: RadioOption[] = [
@@ -25,10 +26,27 @@ describe('OsRadio', () => {
     expect(checked).toEqual([false, true])
   })
 
-  it('name 可分组，缺省同名互斥', () => {
+  it('name 可显式分组，缺省按实例生成唯一组名', () => {
     const w = mount(OsRadio, { props: { modelValue: 'a', options, name: 'lang' } })
     for (const i of w.findAll('input[type="radio"]')) {
       expect(i.attributes('name')).toBe('lang')
     }
+  })
+
+  it('同页两组不传 name 也各自独立（原生 radio 靠 name 互斥）', () => {
+    const TwoGroups = defineComponent({
+      setup: () => () =>
+        h('div', [
+          h(OsRadio, { modelValue: 'a', options }),
+          h(OsRadio, { modelValue: 'a', options }),
+        ]),
+    })
+    const names = mount(TwoGroups)
+      .findAll('input[type="radio"]')
+      .map((i) => i.attributes('name')!)
+    expect(names[0]).toMatch(/^os-radio-/)
+    expect(names[0]).toBe(names[1])
+    expect(names[2]).toBe(names[3])
+    expect(names[0]).not.toBe(names[2])
   })
 })

@@ -40,4 +40,30 @@ describe('OsToast', () => {
     await nextTick()
     expect(document.querySelectorAll('[role="status"] p')).toHaveLength(1)
   })
+
+  it('分级：缺省 info 走被动 status，error/warning 走 alert 抢播报', async () => {
+    setActivePinia(createPinia())
+    const notif = useNotification()
+    mount(OsToast)
+    notif.push('已同步', undefined, undefined, 'success')
+    await nextTick()
+    expect(document.body.querySelector('[role="status"]')).not.toBeNull()
+
+    document.body.innerHTML = ''
+    mount(OsToast)
+    notif.clearAll()
+    notif.push('同步失败', undefined, undefined, 'error')
+    await nextTick()
+    expect(document.body.querySelector('[role="alert"]')).not.toBeNull()
+  })
+
+  it('等级只取 internal/level 的语义刻度，不出现裸色值', async () => {
+    setActivePinia(createPinia())
+    const notif = useNotification()
+    mount(OsToast)
+    notif.push('空间不足', undefined, undefined, 'warning')
+    await nextTick()
+    const icon = document.body.querySelector('[role="alert"] svg') as SVGSVGElement
+    expect(icon.classList.contains('text-warning-text')).toBe(true)
+  })
 })

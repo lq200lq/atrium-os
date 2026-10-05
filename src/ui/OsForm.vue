@@ -14,16 +14,24 @@ export type { FieldType, FormField } from './types'
 
 const props = withDefaults(
   defineProps<{
+    /** 字段定义，驱动渲染与校验；可用 `field-<key>` 具名插槽完全自定义某字段控件 */
     fields: FormField[]
+    /** vertical/horizontal 纵向或左右排布；inline 时字段横向换行平铺、提交按钮跟在字段之后 */
     layout?: 'horizontal' | 'vertical' | 'inline'
+    /** 整体禁用：透传所有字段控件与提交按钮；不拦截暴露的 validate() 调用 */
     disabled?: boolean
+    /** 标签列宽（CSS 长度串），仅 horizontal 布局使用 */
     labelWidth?: string
+    /** 提交按钮文案，空串回退 common.submit；提供 actions 插槽时按钮整体被插槽替换 */
     submitText?: string
   }>(),
   { layout: 'vertical', disabled: false, labelWidth: '88px', submitText: '' },
 )
 
-const emit = defineEmits<{ submit: [values: Record<string, unknown>] }>()
+const emit = defineEmits<{
+  /** 全部字段校验通过后派发（载荷为表单值对象浅拷贝）；有失败项时不派发并就地显示错误文案 */
+  submit: [values: Record<string, unknown>]
+}>()
 const model = defineModel<Record<string, unknown>>({ required: true })
 const { t } = useI18n()
 

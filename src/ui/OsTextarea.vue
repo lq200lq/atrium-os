@@ -6,13 +6,21 @@ import { controlPaddingClass, controlStatusClass } from './internal/control'
 // 多行控件的高度属于 rows/autosize 语义，size 档在此只驱动内边距刻度（§3.4 控件高表仅列 Button/Input/Select）
 const props = withDefaults(
   defineProps<{
+    /** 初始行数；开 autosize 时充当高度下界（minRows 缺省回落到 rows） */
     rows?: number
+    /** 自适应高度：硬换行按行数立即生效，软换行由渲染后实测 scrollHeight 修正；对象形态给 minRows/maxRows 边界 */
     autosize?: boolean | TextareaAutosize
+    /** 右下角字数；不传但给了 maxLength 时同样显示（n / max 形式） */
     showCount?: boolean
+    /** 原生 maxlength 硬上限；提供即强制显示字数（见 showCount） */
     maxLength?: number
+    /** 占位文字 */
     placeholder?: string
+    /** 只驱动内边距刻度；多行件高度属于 rows/autosize 语义，不进控件高表 */
     size?: Size
+    /** is-disabled 唯一写法；同时落原生 disabled */
     disabled?: boolean
+    /** error/warning 描边 + 状态环，default 走中性描边 */
     status?: Status
   }>(),
   {

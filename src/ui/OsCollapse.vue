@@ -7,6 +7,7 @@ export type { CollapseItem } from './types'
 
 const props = withDefaults(
   defineProps<{
+    /** 面板定义；标题/内容可分别经 `header-<key>`、`panel-<key>` 具名插槽覆盖 */
     items: CollapseItem[]
     /** true 时同时只展开一项 */
     accordion?: boolean

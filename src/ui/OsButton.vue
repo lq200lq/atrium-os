@@ -5,9 +5,13 @@ import { controlHeightClass, controlPaddingClass } from './internal/control'
 
 withDefaults(
   defineProps<{
+    /** primary 实底 / ghost 描边（默认） / danger 红字描边；无 text 档 */
     variant?: 'primary' | 'ghost' | 'danger'
+    /** 高度与内边距同档联动（h-control-* + px-*） */
     size?: Size
+    /** 落原生 disabled，鼠标态走 is-disabled 唯一写法 */
     disabled?: boolean
+    /** 前置等宽 spinner（防文案跳动），自动禁用点击并置 aria-busy */
     loading?: boolean
   }>(),
   { variant: 'ghost', size: 'md', disabled: false, loading: false },

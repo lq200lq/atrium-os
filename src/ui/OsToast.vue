@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
 import { useNotification, type Notice } from '@/kernel/stores/notification'
+import { DEFAULT_LEVEL, LEVEL_FG, LEVEL_ICON, levelRole } from './internal/level'
 
 // 吐司不另起一套状态：直接消费 notification store，最新一条以瞬态浮层呈现，数秒后自动收起
 const notif = useNotification()
@@ -34,10 +35,14 @@ function hide() {
       <div
         v-if="visible"
         class="pointer-events-auto fixed bottom-20 left-1/2 z-toast flex w-72 -translate-x-1/2 items-center gap-2 rounded-surface border border-glass-border-active bg-glass-pop px-4 py-3 shadow-pop backdrop-blur-xl"
-        role="status"
+        :role="levelRole(visible.level ?? DEFAULT_LEVEL)"
         @click="hide"
       >
-        <OsIcon name="bell" :size="16" class="shrink-0 text-accent-strong" />
+        <OsIcon
+          :name="LEVEL_ICON[visible.level ?? DEFAULT_LEVEL]"
+          :size="16"
+          :class="['shrink-0', LEVEL_FG[visible.level ?? DEFAULT_LEVEL]]"
+        />
         <div class="min-w-0 flex-1 text-ui">
           <p class="font-strong text-ink">{{ visible.title }}</p>
           <p v-if="visible.body" class="truncate text-caption text-ink-mute">{{ visible.body }}</p>

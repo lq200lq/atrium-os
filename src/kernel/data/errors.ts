@@ -8,7 +8,7 @@ import { useErrorLog } from '../observability/errorLog'
 export function reportError(title: string, e: unknown): void {
   console.warn(`[data] ${title}`, e)
   try {
-    useNotification().push(title, e instanceof Error ? e.message : String(e))
+    useNotification().push(title, e instanceof Error ? e.message : String(e), undefined, 'error')
   } catch {
     /* 无活动 pinia 时仅保留 console.warn */
   }

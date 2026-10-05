@@ -55,6 +55,29 @@ export default {
     collapse: 'Collapse',
   },
   pagination: { total: '{n} in total', prev: 'Previous', next: 'Next' },
+  popconfirm: { title: 'Please confirm the action' },
+  dropdown: { aria: 'Option menu' },
+  breadcrumb: { aria: 'Breadcrumb', overflow: 'Show omitted levels' },
+  steps: {
+    status: { finish: 'Finished', process: 'In progress', wait: 'Waiting', error: 'Step error' },
+  },
+  progress: { aria: 'Progress' },
+  result: {
+    success: { title: 'Operation succeeded', subtitle: 'Your changes are saved and in effect.' },
+    error: {
+      title: 'Operation failed',
+      subtitle: 'Check the error details below and retry.',
+    },
+    forbidden: {
+      title: 'No access permission',
+      subtitle:
+        'The current role lacks the permissions this app requires. Switch users in Settings or contact an admin.',
+    },
+    warning: {
+      title: 'Unknown exception',
+      subtitle: 'The runtime state is abnormal. Please retry later.',
+    },
+  },
   validation: {
     required: '{label} is required',
     minLen: '{label} must be at least {min} characters',
@@ -121,8 +144,11 @@ export default {
     },
     diagnostics: {
       title: 'Diagnostics',
+      summary: '{n} entries in this session',
       hint: 'Runtime errors from apps and the shell are logged here for troubleshooting (last 50 only)',
-      empty: 'No errors recorded',
+      okTitle: 'All clear',
+      okSubtitle:
+        'No errors recorded. Crashes, data-source failures and global exceptions land here',
       clear: 'Clear log',
       scope: { app: 'App', window: 'Window', global: 'Global', data: 'Data' },
     },
@@ -133,6 +159,7 @@ export default {
       input: 'Input',
       layout: 'Layout',
       display: 'Display',
+      nav: 'Navigation',
       feedback: 'Feedback',
     },
     conventions: 'Common conventions',
@@ -221,5 +248,75 @@ export default {
     treeHint:
       'Single select, checkable with parent/child propagation + indeterminate, lazy loading and keyboard arrows',
     treeCheckedCount: '{n} checked',
+    alertHint:
+      'OsAlert in four semantics: info / success / warning / error — tint, text and border all come from the S7 derived semantic scale; the banner variant uses role=alert, is closable and emits the close event.',
+    alertInfo: 'This app already uses the latest component library.',
+    alertSuccess: 'Saved — 3 files synced.',
+    alertWarning: 'Storage is running low; consider emptying the recycle bin soon.',
+    alertError: 'Sync failed: 2 items rejected.',
+    alertDesc: 'The report conversion job failed repeatedly; the source file stays local.',
+    alertAction: 'Details',
+    spinHint:
+      'OsSpin has two shapes: the inline indicator scales its diameter from the control-height steps; wrapping content turns it into a container mask — the very contract OsTable loading now reuses.',
+    spinTip: 'Loading…',
+    spinOverlay: 'Toggle overlay loading',
+    progressHint:
+      'OsProgress line and circle: colors come from the semantic scale; success is auto-derived at 100%, while exception must be passed explicitly.',
+    progressAdd: '+10%',
+    progressException: 'Simulate failure',
+    resultHint:
+      'OsResult has four statuses: success / error / 403 forbidden / warning; 403 carries the auth-denial scenario, and the extra slot provides the “Open Settings” exit.',
+    resultDemo: 'Result status',
+    resultGoSettings: 'Open Settings',
+    resultDetail: 'Failed items: report generation ×2',
+    popconfirmHint:
+      'OsPopconfirm is a light confirm layer: click the trigger to open, click again / Esc / outside to close; focus moves into the confirm button on open and back to the trigger on close.',
+    popconfirmTrigger: 'Delete record',
+    popconfirmTitle: 'Delete this record?',
+    popconfirmDesc: 'It can be restored from the recycle bin within 30 days.',
+    popconfirmDone: 'Deletion confirmed (demo)',
+    feedbackApiHint:
+      'useFeedback gets its context from the shell FeedbackHost: the four level entries write into the same notification queue, confirm resolves a Promise, and no app keeps its own dialog state.',
+    feedbackApiSaved: 'Saved (success)',
+    feedbackApiFailed: 'Sync failed (error)',
+    feedbackApiWarned: 'Low space (warning)',
+    feedbackApiInfoed: 'New version (info)',
+    feedbackApiConfirm: 'Run confirm',
+    feedbackApiDialog: 'Run this demo action?',
+    feedbackApiConfirmDesc:
+      'A confirm dialog rendered by FeedbackHost — cancelling performs nothing.',
+    feedbackApiYes: 'You confirmed',
+    feedbackApiNo: 'You cancelled',
+    menuHint:
+      'OsMenu primitive: data-driven items, second-level submenus, danger and disabled semantics; vertical mode walks with up/down (inline submenus), horizontal mode switches groups with left/right; Enter/Space selects and the whole menu holds a single tab stop.',
+    menuVertical: 'Vertical menu',
+    menuHorizontal: 'Horizontal menu',
+    navNewDir: 'New folder',
+    navNewDoc: 'New document',
+    navShareAction: 'Share (disabled demo)',
+    dropdownHint:
+      'OsDropdown: a trigger slot plus a menu overlay that reuses OsMenu internally; click or hover triggers, placement via the shared overlay primitive; focus enters the first item on open, and Esc or an outside click closes and returns focus to the trigger.',
+    dropdownTrigger: 'More actions',
+    dropdownHoverTrigger: 'Hover to open',
+    dropdownClicked: 'Selected {v} (demo)',
+    breadcrumbHint:
+      'OsBreadcrumb: the last crumb is the current page and is inert (aria-current=page); separators render independently; middle levels beyond maxVisibleItems collapse into an ellipsis dropdown backed by OsDropdown.',
+    bcWork: 'Workbench',
+    bcProject: 'Projects',
+    bcArchive: 'Archive',
+    bcTech: 'Tech docs',
+    bcTeam: 'Architecture group',
+    bcFile: 'api-contract.md',
+    stepsHint:
+      'OsSteps: finish / process / error / wait states are derived from current (plus the error flag); clicking a step jumps and emits change; the narrow container query degrades the layout to vertical.',
+    stepInfo: 'Fill in info',
+    stepUpload: 'Upload files',
+    stepSubmit: 'Submit',
+    stepDescInfo: 'Complete the basics',
+    stepDescUpload: 'Drag or pick files',
+    stepDescSubmit: 'Generate the ticket',
+    stepPrev: 'Back',
+    stepNext: 'Next',
+    stepErrorToggle: 'Mark current step as error',
   },
 }

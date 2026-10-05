@@ -2,11 +2,17 @@
 import type { Status } from './types'
 import { controlStatusClass } from './internal/control'
 
-withDefaults(defineProps<{ disabled?: boolean; label?: string; status?: Status }>(), {
-  disabled: false,
-  label: '',
-  status: 'default',
-})
+withDefaults(
+  defineProps<{
+    /** 落原生 disabled，勾选框与 label 文本一并失效 */
+    disabled?: boolean
+    /** 相邻文案；input 可被 label 关联，点击文本等同勾选切换 */
+    label?: string
+    /** 非 default 时给勾选框加语义描边 + 状态环 */
+    status?: Status
+  }>(),
+  { disabled: false, label: '', status: 'default' },
+)
 const model = defineModel<boolean>({ required: true })
 </script>
 

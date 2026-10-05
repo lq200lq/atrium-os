@@ -1,8 +1,13 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ vertical?: boolean; dashed?: boolean }>(), {
-  vertical: false,
-  dashed: false,
-})
+withDefaults(
+  defineProps<{
+    /** 竖向分隔（self-stretch，高度跟随所在行）；有默认插槽文案时被忽略——带文案恒为横向 */
+    vertical?: boolean
+    /** 线条改虚线（border-dashed）；带文案时两侧线段同时变虚 */
+    dashed?: boolean
+  }>(),
+  { vertical: false, dashed: false },
+)
 </script>
 
 <template>

@@ -7,14 +7,21 @@ import ControlShell from './internal/ControlShell.vue'
 
 const props = withDefaults(
   defineProps<{
+    /** 步进量：↑/↓ 方向键与右侧上下钮共用；步进内部 toPrecision(12) 抹浮点尾差 */
     step?: number
+    /** 数值下界：提交与步进时钳制，到界时下钮禁用 */
     min?: number
+    /** 数值上界：提交与步进时钳制，到界时上钮禁用 */
     max?: number
     /** 显示与提交值保留的小数位 */
     precision?: number
+    /** 占位文字 */
     placeholder?: string
+    /** 高度/内边距走控件刻度（ControlShell） */
     size?: Size
+    /** 禁用输入、上下钮与步进键，同时落原生 disabled */
     disabled?: boolean
+    /** 与 OsInput 同一组语义刻度描边/状态环 */
     status?: Status
   }>(),
   {

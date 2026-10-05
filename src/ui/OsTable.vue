@@ -3,24 +3,32 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { SortOrder, TableColumn } from './types'
 import OsEmpty from './OsEmpty.vue'
-import OsSkeleton from './OsSkeleton.vue'
+import OsSpin from './OsSpin.vue'
 import OsPagination from './OsPagination.vue'
 
 export type { SortOrder, TableColumn } from './types'
 
 const props = withDefaults(
   defineProps<{
+    /** 列定义；col.slot 存在时单元格走同名具名插槽，否则直接渲染 row[col.key] */
     columns: TableColumn<T>[]
+    /** 数据行；本地排序只重排内部副本、不改写原数组；非 remote 且给了 total 时由组件按页截取 */
     rows: T[]
+    /** 行唯一键字段名：行 :key 与 v-model:selected 存的值都取该字段 */
     rowKey?: keyof T & string
+    /** 加载态，表格区内居中渲染 OsSpin（S10 loading 契约，非骨架屏） */
     loading?: boolean
+    /** 显示首列复选框；全选作用于当前展示行并把 key 写回 v-model:selected */
     selectable?: boolean
     /** 排序/分页由远端驱动时为 true：表格只做展示与事件派发，不本地排序 */
     remote?: boolean
+    /** 空状态文案，空串回退 common.empty；error/loading 态不消费 */
     emptyText?: string
     /** 非空字符串时进入 error 三态，覆盖 loading/empty；配合 @retry 重试 */
     error?: string
+    /** 每页条数：透传给页脚 OsPagination，并在本地模式（非 remote）下决定表体每页截取多少行 */
     pageSize?: number
+    /** 传入（非 undefined）才渲染分页页脚；本地模式下同时启用按页截取，远端模式仅出页码不截行 */
     total?: number
   }>(),
   {
@@ -38,9 +46,13 @@ const props = withDefaults(
 const { t } = useI18n()
 
 const emit = defineEmits<{
+  /** 点击 sortable 列表头派发；order 循环 asc→desc→null，本地模式同时重排展示，remote 模式仅通知父级 */
   'sort-change': [payload: { key: string; order: SortOrder }]
+  /** 单击数据行派发；选择列与 actions 列的点击已 stop，不会触发 */
   'row-click': [row: T]
+  /** 双击数据行派发；紧随其前的 row-click 也会发出 */
   'row-dblclick': [row: T]
+  /** error 三态下点击内建重试按钮派发；组件自身不重新请求 */
   retry: []
 }>()
 
@@ -53,7 +65,7 @@ const sortOrder = ref<SortOrder>(null)
 const alignCls = (a?: string) =>
   a === 'center' ? 'text-center' : a === 'right' ? 'text-right' : 'text-left'
 
-const displayRows = computed(() => {
+const sortedRows = computed(() => {
   if (props.remote || !sortKey.value || !sortOrder.value) return props.rows
   const dir = sortOrder.value === 'asc' ? 1 : -1
   const k = sortKey.value
@@ -66,6 +78,17 @@ const displayRows = computed(() => {
     if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir
     return String(av).localeCompare(String(bv), 'zh-CN') * dir
   })
+})
+
+/**
+ * 展示行。本地模式（非 remote）且给了 total 时按 v-model:page 截取当前页——
+ * 否则页脚能翻页、表体却永远显示全部行，「分页」是假的。remote 模式不截：
+ * 父级只传当页数据，再截会把远端第二页起的内容清空。
+ */
+const displayRows = computed(() => {
+  if (props.remote || props.total === undefined) return sortedRows.value
+  const start = (page.value - 1) * props.pageSize
+  return sortedRows.value.slice(start, start + props.pageSize)
 })
 
 const allChecked = computed(
@@ -106,7 +129,7 @@ function toggleRow(row: T) {
   <div class="flex h-full flex-col text-ui">
     <div class="min-h-0 flex-1 overflow-auto">
       <table class="w-full border-collapse">
-        <thead class="sticky top-0 z-10 bg-surface-sunken/95 backdrop-blur">
+        <thead class="sticky top-0 z-sticky bg-surface-sunken/95 backdrop-blur">
           <tr class="border-b border-line">
             <th v-if="selectable" class="w-9 px-2 py-2">
               <input type="checkbox" :checked="allChecked" @change="toggleAll" />
@@ -158,7 +181,10 @@ function toggleRow(row: T) {
               :colspan="columns.length + (selectable ? 1 : 0) + ($slots.actions ? 1 : 0)"
               class="p-4"
             >
-              <OsSkeleton :rows="4" />
+              <!-- loading 态消费 S10 中性 loading 契约（OsSpin），不再自写 -->
+              <div class="flex justify-center">
+                <OsSpin />
+              </div>
             </td>
           </tr>
           <template v-else>

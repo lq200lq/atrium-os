@@ -27,13 +27,19 @@ const STATUS_CLASS: Record<'error' | 'warning', string> = {
 
 const props = withDefaults(
   defineProps<{
+    /** 字阶与语义标签；只渲染 p（link 且有 href 时为 a），不产出 h* 标题，进标题树请用容器标题 */
     type?: TypographyType
     /** link 型的跳转目标 */
     href?: string
+    /** 在字阶之上追加 font-strong（600）；title 档自带加粗，无需重复开启 */
     strong?: boolean
+    /** 仅叠加 is-disabled 样式（降透明度 + not-allowed 光标），不拦截链接点击等交互 */
     disabled?: boolean
+    /** 非 default 时用 error/warning 语义色覆盖前景，优先级高于 link 的 accent 色 */
     status?: Status
+    /** 行裁剪（line-clamp，档位在 1–4）；配合 expandable 展开后解除裁剪 */
     ellipsis?: boolean
+    /** 裁剪行数；仅在 ellipsis 开启时生效 */
     rows?: 1 | 2 | 3 | 4
     /** 省略后追加「展开/收起」切换 */
     expandable?: boolean

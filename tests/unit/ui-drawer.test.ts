@@ -28,12 +28,21 @@ describe('OsDrawer', () => {
     expect(document.body.querySelector('[role="dialog"]')).toBeNull()
   })
 
-  it('placement 决定贴边方向', async () => {
+  it('placement 决定贴边方向与滑入方向', async () => {
     mount(OsDrawer, { props: { modelValue: true, placement: 'left' } })
     await nextTick()
     const panel = document.body.querySelector('[role="dialog"]') as HTMLElement
     expect(panel.classList.contains('left-0')).toBe(true)
     expect(panel.classList.contains('border-r')).toBe(true)
+    // 滑入轨迹必须镜像，否则左抽屉从右侧推进来
+    expect(panel.classList.contains('slide-from-left')).toBe(true)
+
+    document.body.innerHTML = ''
+    mount(OsDrawer, { props: { modelValue: true, placement: 'right' } })
+    await nextTick()
+    const right = document.body.querySelector('[role="dialog"]') as HTMLElement
+    expect(right.classList.contains('right-0')).toBe(true)
+    expect(right.classList.contains('slide-from-left')).toBe(false)
   })
 
   it('footer 插槽存在时才渲染底部区', async () => {

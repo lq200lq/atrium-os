@@ -210,6 +210,7 @@
   /* 层级刻度：窗口层由 windowManager 在 desktop 与 panel 之间运行时分配 */
   --z-desktop: 5; /* Widgets 等桌面件 */
   --z-window: 10; /* 窗口层基值 */
+  --z-sticky: 20; /* 容器内粘性叠层：粘性表头、内层遮罩（不占全局七层） */
   --z-panel: 900; /* 右键菜单、下拉、气泡、通知中心面板 */
   --z-toast: 1200; /* 吐司 */
   --z-overlay: 1400; /* Spotlight、遮罩 */
@@ -225,6 +226,9 @@
 }
 @utility z-window {
   z-index: var(--z-window); /* 10：窗口层基值 */
+}
+@utility z-sticky {
+  z-index: var(--z-sticky); /* 20：容器内粘性叠层（粘性表头 / 内层遮罩） */
 }
 @utility z-panel {
   z-index: var(--z-panel); /* 900：右键菜单、下拉、气泡、通知中心面板 */

@@ -4,7 +4,9 @@ import { useI18n } from 'vue-i18n'
 
 const props = withDefaults(
   defineProps<{
+    /** 每页条数；页数 = ceil(total / pageSize)，同时透传给页码窗口计算 */
     pageSize?: number
+    /** 总条数；驱动页数计算与 pagination.total 文案（共 {n} 条） */
     total: number
   }>(),
   { pageSize: 10 },

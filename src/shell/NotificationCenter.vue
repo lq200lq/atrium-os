@@ -5,6 +5,7 @@ import { useOS } from '@/kernel/composables/useOS'
 import { useNotification, type Notice } from '@/kernel/stores/notification'
 import { useSettings } from '@/kernel/stores/settings'
 import { useShellUi } from '@/kernel/stores/shellUi'
+import { DEFAULT_LEVEL, LEVEL_FG, LEVEL_ICON } from '@/ui/internal/level'
 
 const ui = useShellUi()
 const notif = useNotification()
@@ -45,6 +46,11 @@ function runAction(n: Notice) {
         :key="n.id"
         class="flex items-start gap-2 border-b border-line-soft px-4 py-sm text-ui"
       >
+        <OsIcon
+          :name="LEVEL_ICON[n.level ?? DEFAULT_LEVEL]"
+          :size="14"
+          :class="['mt-2xs shrink-0', LEVEL_FG[n.level ?? DEFAULT_LEVEL]]"
+        />
         <div class="min-w-0 flex-1">
           <p class="font-strong text-ink">{{ n.title }}</p>
           <p v-if="n.body" class="truncate text-ink-mute">{{ n.body }}</p>

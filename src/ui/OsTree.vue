@@ -20,8 +20,11 @@ interface TreeRow {
 
 const props = withDefaults(
   defineProps<{
+    /** 节点树；key 为展开/选中/勾选状态的唯一标识，同级必须唯一 */
     data: TreeNode[]
+    /** 单击选中且单选：selectedKeys 整体替换为仅含该节点；disabled 节点不响应 */
     selectable?: boolean
+    /** 显示复选框并做父子聚合；v-model:checkedKeys 写回的是终端（叶子）key 集合，不含父节点 key */
     checkable?: boolean
     /** 懒加载：首次展开「无 children 且非叶子」的节点时调用，结果由组件内部缓存 */
     loadData?: (node: TreeNode) => Promise<TreeNode[]>
@@ -29,7 +32,10 @@ const props = withDefaults(
   { selectable: true, checkable: false, loadData: undefined },
 )
 
-const emit = defineEmits<{ select: [node: TreeNode] }>()
+const emit = defineEmits<{
+  /** 行点击派发（需 selectable 为 true 且节点非 disabled）；Enter/Space 在 checkable 开启时优先走勾选、不触发 select */
+  select: [node: TreeNode]
+}>()
 
 // 未绑定 v-model 时 defineModel 自动退化为内部状态（受控与非受控同一条路径）
 const expandedKeys = defineModel<string[]>('expandedKeys', { default: () => [] })
