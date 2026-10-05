@@ -1,23 +1,30 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import OsBadge from '@/ui/OsBadge.vue'
-import OsButton from '@/ui/OsButton.vue'
-import OsCheckbox from '@/ui/OsCheckbox.vue'
-import OsDialog from '@/ui/OsDialog.vue'
-import OsDrawer from '@/ui/OsDrawer.vue'
-import OsEmpty from '@/ui/OsEmpty.vue'
-import OsForm, { type FormField } from '@/ui/OsForm.vue'
-import OsInput from '@/ui/OsInput.vue'
-import OsPagination from '@/ui/OsPagination.vue'
-import OsRadio from '@/ui/OsRadio.vue'
-import OsSelect from '@/ui/OsSelect.vue'
-import OsSkeleton from '@/ui/OsSkeleton.vue'
-import OsSwitch from '@/ui/OsSwitch.vue'
-import OsTable, { type TableColumn } from '@/ui/OsTable.vue'
-import OsTabs from '@/ui/OsTabs.vue'
-import OsTooltip from '@/ui/OsTooltip.vue'
-import OsTrafficLights from '@/ui/OsTrafficLights.vue'
+import {
+  OsBadge,
+  OsButton,
+  OsCheckbox,
+  OsDialog,
+  OsDrawer,
+  OsEmpty,
+  OsForm,
+  OsInput,
+  OsPagination,
+  OsRadio,
+  OsSelect,
+  OsSkeleton,
+  OsSwitch,
+  OsTable,
+  OsTabs,
+  OsTooltip,
+  OsTrafficLights,
+  type FormField,
+  type RadioOption,
+  type Size,
+  type Status,
+  type TableColumn,
+} from '@/ui'
 import { useNotification } from '@/kernel/stores/notification'
 import CrashProbe from './CrashProbe.vue'
 
@@ -32,6 +39,23 @@ const tabs = computed(() => [
   { key: 'feedback', label: t('gallery.tabs.feedback') },
 ])
 
+// 通用约定：四条契约在同一块里横向铺开，档位/状态名直接用 props 字面量
+const sizes: Size[] = ['sm', 'md', 'lg']
+const statuses: Status[] = ['default', 'error', 'warning']
+const sizeInputVal = ref('')
+const sizeSelectVal = ref('')
+const statusCheck = ref(true)
+const statusSwitch = ref(true)
+const busyDialog = ref(false)
+const busy = ref(false)
+function runBusy() {
+  busy.value = true
+  setTimeout(() => {
+    busy.value = false
+    busyDialog.value = false
+  }, 800)
+}
+
 // 录入
 const text = ref('')
 const selectVal = ref('')
@@ -42,6 +66,10 @@ const selectOptions = [
   { value: 'vue', label: 'Vue' },
   { value: 'react', label: 'React' },
   { value: 'svelte', label: 'Svelte' },
+]
+const radioOptions: RadioOption[] = [
+  { value: 'a', label: 'A' },
+  { value: 'b', label: 'B' },
 ]
 
 // 表单
@@ -108,6 +136,130 @@ const drawerOpen = ref(false)
   <OsTabs v-model="tab" :tabs="tabs" class="h-full">
     <!-- 基础 -->
     <div v-if="tab === 'basic'" class="space-y-5 p-4">
+      <section class="rounded-surface border border-line bg-surface p-md">
+        <h3 class="text-title font-strong text-ink">{{ t('gallery.conventions') }}</h3>
+        <p class="mt-2xs text-caption text-ink-mute">{{ t('gallery.conventionsHint') }}</p>
+
+        <div class="mt-sm grid grid-cols-1 gap-md xl:grid-cols-2">
+          <div>
+            <h4 class="text-ui font-strong text-ink">{{ t('gallery.conventionSize') }}</h4>
+            <p class="mt-2xs text-micro text-ink-mute">{{ t('gallery.conventionSizeHint') }}</p>
+            <div class="mt-xs flex flex-col gap-xs">
+              <div class="flex flex-wrap items-center gap-xs">
+                <OsButton v-for="s in sizes" :key="s" :size="s" variant="primary">{{ s }}</OsButton>
+              </div>
+              <div class="flex flex-wrap items-center gap-xs">
+                <OsInput
+                  v-for="s in sizes"
+                  :key="s"
+                  v-model="sizeInputVal"
+                  :size="s"
+                  :placeholder="s"
+                  class="w-32"
+                />
+              </div>
+              <div class="flex flex-wrap items-center gap-xs">
+                <OsSelect
+                  v-for="s in sizes"
+                  :key="s"
+                  v-model="sizeSelectVal"
+                  :size="s"
+                  :options="selectOptions"
+                  class="w-32"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-ui font-strong text-ink">{{ t('gallery.conventionStatus') }}</h4>
+            <p class="mt-2xs text-micro text-ink-mute">{{ t('gallery.conventionStatusHint') }}</p>
+            <div class="mt-xs flex flex-col gap-xs">
+              <div class="flex flex-wrap items-center gap-xs">
+                <OsInput
+                  v-for="s in statuses"
+                  :key="s"
+                  v-model="sizeInputVal"
+                  :status="s"
+                  :placeholder="s"
+                  class="w-32"
+                />
+              </div>
+              <div class="flex flex-wrap items-center gap-xs">
+                <OsSelect
+                  v-for="s in statuses"
+                  :key="s"
+                  v-model="sizeSelectVal"
+                  :status="s"
+                  :options="selectOptions"
+                  class="w-32"
+                />
+              </div>
+              <div class="flex flex-wrap items-center gap-sm">
+                <OsCheckbox
+                  v-for="s in statuses"
+                  :key="s"
+                  v-model="statusCheck"
+                  :status="s"
+                  :label="s"
+                />
+                <OsSwitch
+                  v-for="s in statuses"
+                  :key="s"
+                  v-model="statusSwitch"
+                  :status="s"
+                  :label="s"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-ui font-strong text-ink">{{ t('gallery.conventionDisabled') }}</h4>
+            <p class="mt-2xs text-micro text-ink-mute">
+              {{ t('gallery.conventionDisabledHint') }}
+            </p>
+            <div class="mt-xs flex flex-wrap items-center gap-sm">
+              <OsButton disabled>{{ t('gallery.disabled') }}</OsButton>
+              <OsInput v-model="sizeInputVal" disabled class="w-32" />
+              <OsSelect v-model="sizeSelectVal" :options="selectOptions" disabled class="w-32" />
+              <OsCheckbox v-model="checkVal" disabled :label="t('gallery.checkbox')" />
+              <OsSwitch v-model="switchVal" disabled :label="t('gallery.switch')" />
+              <OsRadio v-model="radioVal" :options="radioOptions" name="c-radio" disabled />
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-ui font-strong text-ink">{{ t('gallery.conventionLoading') }}</h4>
+            <p class="mt-2xs text-micro text-ink-mute">
+              {{ t('gallery.conventionLoadingHint') }}
+            </p>
+            <div class="mt-xs flex flex-col gap-xs">
+              <div class="flex flex-wrap items-center gap-xs">
+                <OsButton variant="primary" loading>{{ t('gallery.primary') }}</OsButton>
+                <OsButton variant="primary">{{ t('gallery.primary') }}</OsButton>
+              </div>
+              <div class="flex flex-wrap items-center gap-xs">
+                <OsSelect v-model="sizeSelectVal" :options="selectOptions" loading class="w-32" />
+                <OsButton size="sm" @click="busyDialog = true">
+                  {{ t('gallery.conventionDialogTrigger') }}
+                </OsButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <OsDialog
+          v-if="busyDialog"
+          :title="t('gallery.dialogTitle')"
+          :loading="busy"
+          @confirm="runBusy"
+          @cancel="busyDialog = false"
+        >
+          <p class="text-ui text-ink">{{ t('gallery.conventionLoadingHint') }}</p>
+        </OsDialog>
+      </section>
+
       <section>
         <h3 class="mb-2 text-title font-strong text-ink">OsButton</h3>
         <div class="flex flex-wrap items-center gap-2">
@@ -120,7 +272,12 @@ const drawerOpen = ref(false)
       </section>
       <section>
         <h3 class="mb-2 text-title font-strong text-ink">OsInput</h3>
-        <OsInput v-model="text" :placeholder="t('gallery.inputPlaceholder')" class="max-w-60" />
+        <OsInput
+          v-model="text"
+          :placeholder="t('gallery.inputPlaceholder')"
+          clearable
+          class="max-w-60"
+        />
         <p class="mt-1 text-caption text-ink-mute">
           {{ t('gallery.currentValue', { v: text || t('gallery.emptyValue') }) }}
         </p>
@@ -134,6 +291,10 @@ const drawerOpen = ref(false)
           <span class="inline-flex items-center gap-1"
             >{{ t('gallery.badgeMessage') }} <OsBadge :count="12"
           /></span>
+          <span class="inline-flex items-center gap-2xs">
+            <OsBadge dot status="success" />
+            {{ t('gallery.badgeNotice') }}
+          </span>
           <OsTrafficLights />
         </div>
       </section>
@@ -145,14 +306,7 @@ const drawerOpen = ref(false)
         <OsSelect v-model="selectVal" :options="selectOptions" class="w-40" />
         <OsSwitch v-model="switchVal" :label="t('gallery.switch')" />
         <OsCheckbox v-model="checkVal" :label="t('gallery.checkbox')" />
-        <OsRadio
-          v-model="radioVal"
-          :options="[
-            { value: 'a', label: 'A' },
-            { value: 'b', label: 'B' },
-          ]"
-          name="demo-radio"
-        />
+        <OsRadio v-model="radioVal" :options="radioOptions" name="demo-radio" />
       </section>
       <section>
         <h3 class="mb-2 text-title font-strong text-ink">{{ t('gallery.formTitle') }}</h3>

@@ -1,16 +1,17 @@
 <script setup lang="ts">
-export interface RadioOption {
-  value: string
-  label: string
-}
+import type { RadioOption, Status } from './types'
+import { controlStatusClass } from './internal/control'
+
+export type { RadioOption } from './types'
 
 withDefaults(
   defineProps<{
     options: RadioOption[]
     name?: string
     disabled?: boolean
+    status?: Status
   }>(),
-  { name: 'os-radio', disabled: false },
+  { name: 'os-radio', disabled: false, status: 'default' },
 )
 
 const model = defineModel<string>({ required: true })
@@ -31,6 +32,7 @@ const model = defineModel<string>({ required: true })
         :checked="model === opt.value"
         :disabled="disabled"
         class="h-4 w-4 accent-[var(--color-accent)]"
+        :class="controlStatusClass(status)"
         @change="model = opt.value"
       />
       <span>{{ opt.label }}</span>

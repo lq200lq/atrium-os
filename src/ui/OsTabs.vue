@@ -1,8 +1,7 @@
 <script setup lang="ts">
-export interface TabItem {
-  key: string
-  label: string
-}
+import type { TabItem } from './types'
+
+export type { TabItem } from './types'
 
 defineProps<{ tabs: TabItem[] }>()
 const active = defineModel<string>({ required: true })

@@ -260,4 +260,9 @@ antd 72 个组件里，以下**不纳入本规划**，并给出重新评估的�
 - 规划的 `--z-window-base/--z-overlay/--z-popover/--z-toast` 四档扩成**七档**（补 `desktop/panel/float/shell` 的区分）：壳层（顶栏/Dock）必须恒高于一切浮层，而对话框必须压过 Spotlight 遮罩，四档表达不了这两个相反的约束。
 - 新增规划未列的刻度：字阶 `display-1/2/3`（桌面标语与时钟原本用 `text-5xl/4xl` 裸档，不补档位就只能豁免）、中性填充四档 `fill-*`。
 - 一处**规划外**的必要修正：`@theme` 必须写 `@theme static`，否则 Tailwind 摇掉未被工具类引用的变量，运行时读不到 `--color-*-bg/-text`，对比度门禁无从测量。
+- 「契约单测按组件拆文件」落地时把 S3 合并的 `ui.test.ts`/`ui-inputs.test.ts`/`ui-feedback.test.ts` 三个文件**全部**拆开（不只规划点名的六件），18 个组件各自可定位。
+- 规划要求「size 三档高度与 `--control-height-*` 完全一致（computed style 断言）」在 happy-dom 里做不到：它不加载 Tailwind 产物，`getComputedStyle().height` 与 `var(--control-height-*)` 实测都是空串。拆成两层——单测断言类名令牌，像素值由新增的 `tests/e2e/control-height.spec.ts` 在真实浏览器里读刻度变量并断言 24/28/32。**单测不假装量像素**。
+- `Placement` 暂留 `OsTooltip.vue` 内联（四向 CSS 类映射只有它一个消费者）。S10 落 `src/ui/internal/placement.ts` 统一弹层定位原语时一并迁走，届时 OsDropdown/OsPopconfirm 共享。
+- 三态复用契约这一条**只做了约定与现状收口**（Table 的 loading/empty/error 仍是唯一实现处），真正的复用件是 S10 的 `OsSpin`，不在本阶段提前造。
+- 引入 barrel 后首屏 JS 从 205.8KB 涨到 208.4KB（+2.6KB，预算 700KB），7 个应用异步 chunk 分包未回退。
 - 控件密度不跟 antd：控件高刻度取 **24/28/32**（缺省 28）而非 antd 的 24/32/40。桌面 WebOS 的窗口可视区比常规网页更金贵，S5 前实测 28px 一排控件的观感与密度平衡最好；这条差异是刻意的，不是漏抄。

@@ -1,7 +1,11 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ disabled?: boolean; label?: string }>(), {
+import type { Status } from './types'
+import { controlStatusClass } from './internal/control'
+
+withDefaults(defineProps<{ disabled?: boolean; label?: string; status?: Status }>(), {
   disabled: false,
   label: '',
+  status: 'default',
 })
 const model = defineModel<boolean>({ required: true })
 </script>
@@ -12,7 +16,8 @@ const model = defineModel<boolean>({ required: true })
       type="checkbox"
       :checked="model"
       :disabled="disabled"
-      class="h-4 w-4 rounded-chip border-line accent-[var(--color-accent)]"
+      class="h-4 w-4 rounded-chip accent-[var(--color-accent)]"
+      :class="controlStatusClass(status)"
       @change="model = ($event.target as HTMLInputElement).checked"
     />
     <span v-if="label">{{ label }}</span>

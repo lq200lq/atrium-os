@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { FormField, Status } from './types'
+import { controlStatusClass } from './internal/control'
 import OsButton from './OsButton.vue'
 import OsInput from './OsInput.vue'
 import OsSelect from './OsSelect.vue'
@@ -8,22 +10,7 @@ import OsSwitch from './OsSwitch.vue'
 import OsCheckbox from './OsCheckbox.vue'
 import OsRadio from './OsRadio.vue'
 
-export type FieldType = 'input' | 'textarea' | 'select' | 'switch' | 'checkbox' | 'radio'
-
-export interface FormField {
-  key: string
-  label: string
-  type: FieldType
-  options?: { value: string; label: string }[]
-  placeholder?: string
-  required?: boolean
-  /** number 类型校验数值上下界；string 类型校验长度上下界 */
-  min?: number
-  max?: number
-  pattern?: string
-  /** 自定义校验失败文案 */
-  message?: string
-}
+export type { FieldType, FormField } from './types'
 
 const props = withDefaults(
   defineProps<{
@@ -91,6 +78,11 @@ function onSubmit() {
   if (validate()) emit('submit', { ...model.value })
 }
 
+/** 校验失败 → 控件 status：描边/状态环仍由刻度表派生，表单不自写样式 */
+function fieldStatus(key: string): Status {
+  return errors[key] ? 'error' : 'default'
+}
+
 defineExpose({ validate, errors })
 </script>
 
@@ -115,7 +107,7 @@ defineExpose({ validate, errors })
         :class="layout === 'horizontal' && 'pt-2xs text-right'"
         :style="layout === 'horizontal' ? { width: labelWidth } : undefined"
       >
-        {{ field.label }}<span v-if="field.required" class="text-danger">*</span>
+        {{ field.label }}<span v-if="field.required" class="text-danger-text">*</span>
       </label>
 
       <div class="min-w-0" :class="layout !== 'vertical' && 'flex-1'">
@@ -126,11 +118,13 @@ defineExpose({ validate, errors })
             :model-value="String(valueOf(field.key) ?? '')"
             :placeholder="field.placeholder"
             :disabled="disabled"
+            :status="fieldStatus(field.key)"
             @update:model-value="setField(field.key, $event)"
           />
           <textarea
             v-else-if="field.type === 'textarea'"
-            class="w-full rounded-control border border-line px-sm py-xs text-ui text-ink focus:border-accent"
+            class="w-full rounded-control border px-sm py-xs text-ui text-ink"
+            :class="controlStatusClass(fieldStatus(field.key))"
             :placeholder="field.placeholder"
             :disabled="disabled"
             rows="3"
@@ -143,12 +137,14 @@ defineExpose({ validate, errors })
             :options="field.options ?? []"
             :placeholder="field.placeholder"
             :disabled="disabled"
+            :status="fieldStatus(field.key)"
             @update:model-value="setField(field.key, $event)"
           />
           <OsSwitch
             v-else-if="field.type === 'switch'"
             :model-value="Boolean(valueOf(field.key))"
             :disabled="disabled"
+            :status="fieldStatus(field.key)"
             @update:model-value="setField(field.key, $event)"
           />
           <OsCheckbox
@@ -156,6 +152,7 @@ defineExpose({ validate, errors })
             :model-value="Boolean(valueOf(field.key))"
             :label="field.label"
             :disabled="disabled"
+            :status="fieldStatus(field.key)"
             @update:model-value="setField(field.key, $event)"
           />
           <OsRadio
@@ -164,10 +161,11 @@ defineExpose({ validate, errors })
             :options="field.options ?? []"
             :name="field.key"
             :disabled="disabled"
+            :status="fieldStatus(field.key)"
             @update:model-value="setField(field.key, $event)"
           />
         </slot>
-        <p v-if="errors[field.key]" class="mt-1 text-caption text-danger">
+        <p v-if="errors[field.key]" class="mt-1 text-caption text-danger-text">
           {{ errors[field.key] }}
         </p>
       </div>

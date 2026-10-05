@@ -48,6 +48,7 @@ export default {
     delete: 'Delete',
     save: 'Save',
     close: 'Close',
+    clear: 'Clear',
   },
   pagination: { total: '{n} in total', prev: 'Previous', next: 'Next' },
   validation: {
@@ -124,6 +125,19 @@ export default {
   },
   gallery: {
     tabs: { basic: 'Basic', input: 'Input', display: 'Display', feedback: 'Feedback' },
+    conventions: 'Common conventions',
+    conventionsHint:
+      'size / status / disabled / loading are one shared contract across every control: heights come only from the --control-height-* scale, disabled has a single spelling (is-disabled), and status outlines derive from the semantic -border / -text levels.',
+    conventionSize: 'Size',
+    conventionSizeHint: 'sm / md / lg — switching only changes height, not appearance',
+    conventionStatus: 'Status',
+    conventionStatusHint: 'error / warning swap the outline and status ring',
+    conventionDisabled: 'Disabled',
+    conventionDisabledHint: 'native disabled plus is-disabled apply together',
+    conventionLoading: 'Loading',
+    conventionLoadingHint:
+      'loading means disabled + inline icon; the icon slot keeps a fixed width so the label never shifts',
+    conventionDialogTrigger: 'Show Dialog confirm loading',
     primary: 'Primary',
     secondary: 'Secondary',
     danger: 'Danger',

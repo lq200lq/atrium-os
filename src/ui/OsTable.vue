@@ -1,21 +1,12 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import type { SortOrder, TableColumn } from './types'
 import OsEmpty from './OsEmpty.vue'
 import OsSkeleton from './OsSkeleton.vue'
 import OsPagination from './OsPagination.vue'
 
-export interface TableColumn<T> {
-  key: keyof T & string
-  title: string
-  width?: string
-  align?: 'left' | 'center' | 'right'
-  sortable?: boolean
-  /** 具名插槽名；提供后用该插槽自定义单元格，否则直接渲染 row[key] */
-  slot?: string
-}
-
-export type SortOrder = 'asc' | 'desc' | null
+export type { SortOrder, TableColumn } from './types'
 
 const props = withDefaults(
   defineProps<{

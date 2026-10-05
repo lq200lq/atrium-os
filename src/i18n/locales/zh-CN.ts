@@ -35,6 +35,7 @@ export default {
     delete: '删除',
     save: '保存',
     close: '关闭',
+    clear: '清除',
   },
   pagination: { total: '共 {n} 条', prev: '上一页', next: '下一页' },
   validation: {
@@ -111,6 +112,18 @@ export default {
   },
   gallery: {
     tabs: { basic: '基础', input: '录入', display: '展示', feedback: '反馈' },
+    conventions: '通用约定',
+    conventionsHint:
+      'size / status / disabled / loading 是全部控件共用的四条契约：高度只取自 --control-height-* 刻度，禁用统一用 is-disabled 一种写法，状态描边由语义色的 -border / -text 派生。',
+    conventionSize: '尺寸 size',
+    conventionSizeHint: 'sm / md / lg 三档，切换只改高度不改外观',
+    conventionStatus: '状态 status',
+    conventionStatusHint: 'error / warning 只替换描边色与状态环',
+    conventionDisabled: '禁用 disabled',
+    conventionDisabledHint: '原生 disabled 与 is-disabled 同时生效',
+    conventionLoading: '加载 loading',
+    conventionLoadingHint: '加载即禁用 + 内联图标，图标位预留等宽，文案不跳动',
+    conventionDialogTrigger: '查看 Dialog 确认按钮加载态',
     primary: '主要',
     secondary: '次要',
     danger: '危险',

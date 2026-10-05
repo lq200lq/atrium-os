@@ -1,25 +1,36 @@
 <script setup lang="ts">
+import OsIcon from '@/components/OsIcon.vue'
+import type { Size } from './types'
+import { controlHeightClass, controlPaddingClass } from './internal/control'
+
 withDefaults(
   defineProps<{
     variant?: 'primary' | 'ghost' | 'danger'
-    size?: 'sm' | 'md'
+    size?: Size
     disabled?: boolean
+    loading?: boolean
   }>(),
-  { variant: 'ghost', size: 'md', disabled: false },
+  { variant: 'ghost', size: 'md', disabled: false, loading: false },
 )
 </script>
 
 <template>
   <button
-    :disabled="disabled"
+    :disabled="disabled || loading"
+    :aria-busy="loading || undefined"
     :class="[
       'inline-flex items-center justify-center rounded-control transition disabled:is-disabled',
-      size === 'sm' ? 'h-control-sm px-xs' : 'h-control px-sm',
+      controlHeightClass(size),
+      controlPaddingClass(size),
       variant === 'primary' && 'bg-accent text-white hover:brightness-110',
       variant === 'ghost' && 'border border-line text-ink hover:bg-surface-hover',
       variant === 'danger' && 'border border-danger/30 text-danger hover:bg-danger/10',
     ]"
   >
+    <!-- loading 用等宽占位，避免文案在切换时横向跳动 -->
+    <span v-if="loading" class="mr-2xs inline-flex w-4 shrink-0 justify-center">
+      <OsIcon name="loader-circle" :size="14" class="animate-spin" />
+    </span>
     <slot />
   </button>
 </template>

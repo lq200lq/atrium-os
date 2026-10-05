@@ -169,14 +169,43 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 形态无关、无 store 依赖（store 逻辑留在调用方）；样式只消费 token 派生类。
 
-| 组件               | 契约                                                                               | 替换现状                                            |
-| ------------------ | ---------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `OsIcon`（已收口） | `name: IconName; size; strokeWidth`                                                | 全仓图标                                            |
-| `OsButton`         | `variant: primary/ghost/danger; size: sm/md; disabled`                             | 各应用/文件管理散落按钮                             |
-| `OsInput`          | `modelValue; placeholder; @enter/@esc`                                             | 对话框输入（Spotlight/AI 输入为定制组合件，不强推） |
-| `OsDialog`         | `title; confirmText/cancelText; @confirm/@cancel`（默认插槽为内容，`v-if` 控显隐） | file-manager 新建/重命名弹窗                        |
-| `OsTrafficLights`  | `@close/@minimize/@maximize`                                                       | 窗口标题栏三钮                                      |
-| `OsBadge`          | `count; max=9`                                                                     | 通知未读角标                                        |
+### 4.1 通用契约（S8）
+
+`src/ui/types.ts` 是全仓控件契约的唯一来源，`src/ui/index.ts` 统一具名导出（组件 + 类型）：
+
+| 类型                                                                                                 | 取值                               | 约束                                                                                                         |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `Size`                                                                                               | `sm` / `md` / `lg`                 | 高度**只能**取 `--control-height-sm/md/lg`（24/28/32），经 `src/ui/internal/control.ts` 映射为 `h-control-*` |
+| `Status`                                                                                             | `default` / `error` / `warning`    | 非 default 时描边取语义色 `-text`、状态环取 `-border`，不自造色                                              |
+| `CommonProps`                                                                                        | `size?` / `disabled?` / `loading?` | 可交互组件必须全部支持                                                                                       |
+| `BadgeStatus`                                                                                        | `Status` + `success` / `info`      | 只读展示语义，用于 `OsBadge` 的圆点型                                                                        |
+| `TableColumn` / `SortOrder` / `FormField` / `FieldType` / `SelectOption` / `TabItem` / `RadioOption` | —                                  | 从各 SFC 迁入 `types.ts`，SFC 内保留 re-export，既有 import 不破                                             |
+
+四条跨组件一致性由 `tests/unit/contract-helpers.ts` 的同一组断言跑遍 Input/Select/Checkbox/Radio/Switch/Form（不是每个文件各写一份口径）：
+
+- **size**：单测断言类名令牌；**像素一致性在 `tests/e2e/control-height.spec.ts` 的真实浏览器里断言**——happy-dom 不加载 Tailwind 产物，`getComputedStyle().height` 与 `var(--control-height-*)` 实测都是空串，所以单测不假装量像素。
+- **disabled**：必须是 `is-disabled` 唯一写法，且原生控件同时真 `disabled`（不能只掉视觉）。
+- **status**：同一状态在不同控件上必须落到同一组语义刻度类。
+- **loading**：加载即禁用 + 内联图标，图标位预留等宽，文案不跳动。
+
+`src/ui/internal/ControlShell.vue` 收口 Input/Select 共用的控件外框（尺寸/状态/禁用/loading 指示只在此处派生一次），差异靠 props（`filled` 决定实心面还是透明面）。
+
+### 4.2 组件清单
+
+| 组件               | 契约                                                                                                           | 替换现状                                            |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `OsIcon`（已收口） | `name: IconName; size; strokeWidth`                                                                            | 全仓图标                                            |
+| `OsButton`         | `variant: primary/ghost/danger; size: sm/md/lg; disabled; loading`                                             | 各应用/文件管理散落按钮                             |
+| `OsInput`          | `modelValue; placeholder; size/disabled/status/clearable; prefix/suffix 插槽; @enter/@esc/@clear`              | 对话框输入（Spotlight/AI 输入为定制组合件，不强推） |
+| `OsSelect`         | `options; placeholder; size/disabled/status; loading`                                                          | 散落自绘下拉                                        |
+| `OsTooltip`        | `text; placement: top/bottom/left/right`                                                                       | 壳层 title 属性替代                                 |
+| `OsDialog`         | `title; confirmText/cancelText; loading; maskClosable=true; @confirm/@cancel`（默认插槽为内容，`v-if` 控显隐） | file-manager 新建/重命名弹窗                        |
+| `OsTrafficLights`  | `@close/@minimize/@maximize`                                                                                   | 窗口标题栏三钮                                      |
+| `OsBadge`          | 计数型 `count; max=9` \| 圆点型 `dot; status: BadgeStatus`（两者不混用）                                       | 通知未读角标、状态指示                              |
+| `OsForm`           | `fields: FormField[]; modelValue; @submit`（schema 驱动 + 校验）                                               | 应用内联表单                                        |
+| `OsTable`          | `columns: TableColumn<T>; rows; loading/error/empty 三态; 远端分页排序`                                        | data-board、file-manager                            |
+
+（其余 `OsCheckbox/OsRadio/OsSwitch/OsPagination/OsSkeleton/OsTabs/OsToast/OsDrawer/OsEmpty` 同源于 `@/ui` 出口。）
 
 开闭原则：基础组件只通过 props/slot 扩展表现，新场景优先加 variant，不在业务侧复制样式。
 
@@ -184,7 +213,10 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 ```text
 src/
-  ui/                 # 形态无关基础组件（OsButton/OsInput/OsDialog/OsTrafficLights/OsBadge）
+  ui/                 # 形态无关基础组件（18 件）
+    types.ts          # 通用契约：Size/Status/CommonProps + 数据结构类型（S8）
+    index.ts          # 唯一出口（组件 + 类型具名导出，S8）
+    internal/         # 不对外暴露的共用件（control.ts 刻度映射、ControlShell 外框）
   components/         # 组合型组件（OsIcon 等，可依赖 ui/）
 tests/
   unit/               # Vitest 单测

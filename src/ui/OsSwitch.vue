@@ -1,7 +1,11 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ disabled?: boolean; label?: string }>(), {
+import type { Status } from './types'
+import { controlStatusClass } from './internal/control'
+
+withDefaults(defineProps<{ disabled?: boolean; label?: string; status?: Status }>(), {
   disabled: false,
   label: '',
+  status: 'default',
 })
 const model = defineModel<boolean>({ required: true })
 </script>
@@ -17,7 +21,7 @@ const model = defineModel<boolean>({ required: true })
       :aria-checked="model"
       :disabled="disabled"
       class="relative h-5 w-9 rounded-full transition"
-      :class="model ? 'bg-accent' : 'bg-ink-mute'"
+      :class="[model ? 'bg-accent' : 'bg-ink-mute', controlStatusClass(status, false)]"
       @click="!disabled && (model = !model)"
     >
       <span
