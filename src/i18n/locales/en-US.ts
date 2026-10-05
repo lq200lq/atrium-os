@@ -87,6 +87,18 @@ export default {
     minNum: '{label} must be ≥ {min}',
     maxNum: '{label} must be ≤ {max}',
   },
+  embed: {
+    loading: 'Loading…',
+    retry: 'Retry',
+    openInTab: 'Open in new tab',
+    invalid: 'The URL is invalid. Re-enter it under Web Apps in App Center.',
+    timeoutTitle: 'Load timed out',
+    timeoutSubtitle:
+      'This address did not finish loading within 8 seconds. Some sites refuse to be embedded (X-Frame-Options / CSP) — open them in a new tab instead.',
+    failedTitle: 'Load failed',
+    failedSubtitle:
+      'The browser could not load this address. Check the network or open it in a new tab.',
+  },
   apps: {
     fileManager: 'Files',
     docEditor: 'Docs',

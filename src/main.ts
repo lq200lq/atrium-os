@@ -7,6 +7,7 @@ import { useSession } from './kernel/stores/session'
 import { useSettings } from './kernel/stores/settings'
 import { useTheme } from './kernel/stores/theme'
 import { useVfs } from './kernel/stores/vfs'
+import { useWebApps } from './kernel/stores/webApps'
 import { useWindowManager } from './kernel/stores/windowManager'
 import { useErrorLog } from './kernel/observability/errorLog'
 import { i18n } from './i18n'
@@ -49,8 +50,13 @@ const vfs = useVfs(pinia)
 const theme = useTheme(pinia)
 const session = useSession(pinia)
 const settings = useSettings(pinia)
+const webApps = useWebApps(pinia)
 
-// 先还原会话与偏好，再还原依赖它们的窗口布局（权限/固定项在布局还原前就位）
-void Promise.all([session.restore(), settings.restore(), errorLog.restore()])
-  .then(() => Promise.all([vfs.init(), theme.restore(), wm.restoreLayout()]))
+// 先还原会话与偏好，再还原依赖它们的窗口布局（权限/固定项在布局还原前就位）。
+// 用户添加的网页应用必须在第一波注册：windowManager.restoreLayout 会丢掉注册表里查不到的 appId。
+void Promise.all([session.restore(), settings.restore(), errorLog.restore(), webApps.restore()])
+  .then(() => {
+    for (const rec of webApps.items) registry.register(webApps.toManifest(rec))
+    return Promise.all([vfs.init(), theme.restore(), wm.restoreLayout()])
+  })
   .then(() => app.mount('#app'))

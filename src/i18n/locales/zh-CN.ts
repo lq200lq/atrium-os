@@ -76,6 +76,17 @@ export default {
     componentGallery: '组件陈列',
     dataBoard: '数据看板',
   },
+  embed: {
+    loading: '正在加载…',
+    retry: '重试',
+    openInTab: '新标签页打开',
+    invalid: '地址无效，请在应用中心「网页应用」里重新填写',
+    timeoutTitle: '加载超时',
+    timeoutSubtitle:
+      '该地址 8 秒内未完成加载。部分站点禁止被嵌入（X-Frame-Options / CSP），此时请改用新标签页打开。',
+    failedTitle: '加载失败',
+    failedSubtitle: '浏览器未能加载该地址，请检查网络或改用新标签页打开。',
+  },
   appCenter: {
     search: '搜索应用…',
     singleton: '单例',

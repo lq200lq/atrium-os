@@ -13,12 +13,25 @@ export interface AppWindowSpec {
 
 export type AppCategory = 'system' | 'productivity' | 'data' | 'settings' | 'other'
 
-export interface AppManifest {
+type EntryFn = () => Promise<Component>
+
+/** 外部网页应用的嵌入规格；与 entry 互斥，由 register() 合成内置 EmbedView 作为渲染组件 */
+export interface AppEmbedSpec {
+  url: string
+}
+
+/**
+ * entry 与 embed 二选一（决策 D2′）：类型层面互斥，编译期就挡住「两个都给」和「两个都不给」，
+ * 运行时无需再判分支。窗口渲染路径因此始终只有一条，新增类目不改壳层。
+ */
+export type AppManifest = AppBase &
+  ({ entry: EntryFn; embed?: never } | { embed: AppEmbedSpec; entry?: never })
+
+interface AppBase {
   id: string
   name: string
   icon: IconName
   tint?: string
-  entry: () => Promise<Component>
   window: AppWindowSpec
   singleton?: boolean
   dock?: boolean
@@ -35,9 +48,8 @@ export interface AppManifest {
   order?: number
 }
 
-export interface RegisteredApp extends AppManifest {
-  component: Component
-}
+/** 交叉而非 interface extends：AppManifest 是联合类型，接口只能继承静态可知的单一对象类型 */
+export type RegisteredApp = AppManifest & { component: Component }
 
 const DEFAULT_ORDER = 100
 
@@ -65,14 +77,22 @@ export const useAppRegistry = defineStore('appRegistry', {
   actions: {
     register(manifest: AppManifest) {
       if (this.apps.some((a) => a.id === manifest.id)) return
+      // embed 类目没有自己的入口组件：合成内置 EmbedView，壳层因此不认识「iframe」这件事
+      const load = manifest.embed ? () => import('@/windows/EmbedView.vue') : manifest.entry
       const app: RegisteredApp = {
         ...manifest,
-        component: markRaw(defineAsyncComponent(manifest.entry)),
+        component: markRaw(defineAsyncComponent(load)),
       }
       // 按 order 升序插入（稳定：同权重保持先注册在前），使派生入口排序不依赖 import 顺序
       const at = this.apps.findIndex((a) => orderOf(a) > orderOf(app))
       if (at === -1) this.apps.push(app)
       else this.apps.splice(at, 0, app)
+    },
+
+    /** 运行时添加的应用可卸载：先由调用方关掉活窗口，再从注册表移除 */
+    unregister(id: string) {
+      const at = this.apps.findIndex((a) => a.id === id)
+      if (at !== -1) this.apps.splice(at, 1)
     },
   },
 })

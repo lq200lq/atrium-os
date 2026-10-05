@@ -175,4 +175,36 @@ describe('windowManager', () => {
     expect(wm.topZ).toBe(15)
     expect(wm.activeId).toBe(wm.windows[0].id)
   })
+
+  it('embed 应用的窗口同样能还原；未注册（未按序恢复）时被跳过', async () => {
+    const embedWin = {
+      appId: 'web-example-com',
+      title: '示例站',
+      x: 30,
+      y: 40,
+      w: 900,
+      h: 620,
+      z: 20,
+      status: 'normal' as const,
+    }
+    const wm = useWindowManager()
+
+    // 未注册：main.ts 里 webApps.restore 若晚于 restoreLayout，就会静默丢掉这个窗口
+    idbStore.set('layout-v1', [embedWin])
+    await wm.restoreLayout()
+    expect(wm.windows).toHaveLength(0)
+
+    // 注册之后（同一份布局记录）恢复成功，且 component 由 registry 合成
+    useAppRegistry().register({
+      id: 'web-example-com',
+      name: '示例站',
+      icon: 'globe',
+      embed: { url: 'https://example.com/' },
+      window: { w: 900, h: 620 },
+    })
+    await wm.restoreLayout()
+    expect(wm.windows.map((w) => w.appId)).toEqual(['web-example-com'])
+    expect(wm.windows[0].title).toBe('示例站')
+    expect(useAppRegistry().byId('web-example-com')?.component).toBeTruthy()
+  })
 })
