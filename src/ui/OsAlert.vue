@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 import type { IconName } from '@/kernel/icons'
 import type { BadgeStatus } from './types'
@@ -32,7 +32,7 @@ withDefaults(
 )
 
 const emit = defineEmits<{ close: [] }>()
-const { t } = useI18n()
+const { t } = useText()
 </script>
 
 <template>

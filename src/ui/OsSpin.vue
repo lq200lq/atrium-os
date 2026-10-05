@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import OsIcon from '@/components/OsIcon.vue'
+import { useControlSize } from './config'
 import type { Size } from './types'
 import { controlHeightClass } from './internal/control'
 
@@ -13,15 +14,18 @@ import { controlHeightClass } from './internal/control'
 // 数值按三档控件高等比缩放（与 OsButton/OsTag 的内联图标同一惯例）
 const ICON_PX: Record<Size, number> = { sm: 12, md: 14, lg: 16 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     /** 缺省 true：内联型挂载即转（可纯当指示器用）；容器型以此控制遮罩显隐 */
     loading?: boolean
+    /** 直径走 h-control-* 刻度；缺省可被 OsConfigProvider 的 size 覆盖 */
     size?: Size
     tip?: string
   }>(),
-  { loading: true, size: 'md', tip: '' },
+  { loading: true, size: undefined, tip: '' },
 )
+
+const resolvedSize = useControlSize(() => props.size)
 </script>
 
 <template>
@@ -35,9 +39,9 @@ withDefaults(
     >
       <span
         class="inline-flex aspect-square items-center justify-center text-accent"
-        :class="controlHeightClass(size)"
+        :class="controlHeightClass(resolvedSize)"
       >
-        <OsIcon name="loader-circle" :size="ICON_PX[size]" class="animate-spin" />
+        <OsIcon name="loader-circle" :size="ICON_PX[resolvedSize]" class="animate-spin" />
       </span>
       <span v-if="tip" class="text-caption text-ink-mute">{{ tip }}</span>
     </div>
@@ -52,9 +56,9 @@ withDefaults(
   >
     <span
       class="inline-flex aspect-square items-center justify-center text-accent"
-      :class="controlHeightClass(size)"
+      :class="controlHeightClass(resolvedSize)"
     >
-      <OsIcon name="loader-circle" :size="ICON_PX[size]" class="animate-spin" />
+      <OsIcon name="loader-circle" :size="ICON_PX[resolvedSize]" class="animate-spin" />
     </span>
     <span v-if="tip" class="text-caption text-ink-mute">{{ tip }}</span>
   </div>

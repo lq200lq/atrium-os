@@ -40,6 +40,7 @@ export default {
     decrease: '减少',
     expand: '展开',
     collapse: '收起',
+    selectPlaceholder: '请选择',
   },
   pagination: { total: '共 {n} 条', prev: '上一页', next: '下一页' },
   popconfirm: { title: '请确认操作' },
@@ -140,6 +141,7 @@ export default {
       display: '展示',
       nav: '导航',
       feedback: '反馈',
+      config: '作用域配置',
     },
     conventions: '通用约定',
     conventionsHint:
@@ -292,5 +294,21 @@ export default {
     stepPrev: '上一步',
     stepNext: '下一步',
     stepErrorToggle: '当前步标错',
+    configTitle: '作用域配置（OsConfigProvider）',
+    configHint:
+      'Provider 只给它自己那棵子树定缺省尺寸、强调色与内建文案语言：组件自身的 size prop 仍可逐项压过作用域，全局主题与全局语言也不会被它改动。',
+    configScopeSize: '作用域尺寸',
+    configScopeAccent: '作用域强调色',
+    configScopeLocale: '作用域语言',
+    configFollowOutside: '跟随作用域外',
+    configInheritAccent: '不覆盖',
+    configFollowGlobal: '跟随全局',
+    configNoStoreHint: '这三档取值只活在 Provider 上：不写 theme store、不落持久化，刷新即回默认。',
+    configInside: '作用域内',
+    configInsideHint: '包在 OsConfigProvider 里：缺省尺寸、强调色、内建文案都就近取作用域值',
+    configOutside: '作用域外（对照）',
+    configOutsideHint: '同一批组件不包 Provider：仍取全局主题与全局语言',
+    configAppCopyNote:
+      '按钮上的「主要」是应用内容，走全局 i18n，不随作用域语言改变；只有组件内建文案（空态描述、分页总数、选择占位）会。',
   },
 }

@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import OsIcon from '@/components/OsIcon.vue'
+import { useControlSize } from './config'
 import type { Size } from './types'
 import { controlHeightClass, controlPaddingClass } from './internal/control'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     /** primary 实底 / ghost 描边（默认） / danger 红字描边；无 text 档 */
     variant?: 'primary' | 'ghost' | 'danger'
-    /** 高度与内边距同档联动（h-control-* + px-*） */
+    /** 高度与内边距同档联动（h-control-* + px-*）；缺省可被 OsConfigProvider 的 size 覆盖 */
     size?: Size
     /** 落原生 disabled，鼠标态走 is-disabled 唯一写法 */
     disabled?: boolean
     /** 前置等宽 spinner（防文案跳动），自动禁用点击并置 aria-busy */
     loading?: boolean
   }>(),
-  { variant: 'ghost', size: 'md', disabled: false, loading: false },
+  { variant: 'ghost', size: undefined, disabled: false, loading: false },
 )
+
+const resolvedSize = useControlSize(() => props.size)
 </script>
 
 <template>
@@ -24,9 +27,9 @@ withDefaults(
     :aria-busy="loading || undefined"
     :class="[
       'inline-flex items-center justify-center rounded-control transition disabled:is-disabled',
-      controlHeightClass(size),
-      controlPaddingClass(size),
-      variant === 'primary' && 'bg-accent text-white hover:brightness-110',
+      controlHeightClass(resolvedSize),
+      controlPaddingClass(resolvedSize),
+      variant === 'primary' && 'bg-accent text-on-accent hover:brightness-110',
       variant === 'ghost' && 'border border-line text-ink hover:bg-surface-hover',
       variant === 'danger' && 'border border-danger/30 text-danger hover:bg-danger/10',
     ]"

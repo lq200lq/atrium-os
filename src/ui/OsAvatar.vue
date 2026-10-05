@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
+import { useControlSize } from './config'
 import type { IconName } from '@/kernel/icons'
 import type { Size } from './types'
 import { controlHeightClass } from './internal/control'
@@ -15,11 +16,13 @@ const props = withDefaults(
     text?: string
     /** src 与 text 都不可用时的兜底图标；sm 档 12px、其余 16px */
     icon?: IconName
-    /** 直径复用控件高度刻度（24/28/32），aspect-square 保持圆形 */
+    /** 直径复用控件高度刻度（24/28/32），aspect-square 保持圆形；缺省可被 OsConfigProvider 的 size 覆盖 */
     size?: Size
   }>(),
-  { src: '', alt: '', text: '', icon: 'user', size: 'md' },
+  { src: '', alt: '', text: '', icon: 'user', size: undefined },
 )
+
+const resolvedSize = useControlSize(() => props.size)
 
 const imgFailed = ref(false)
 const showImg = computed(() => props.src !== '' && !imgFailed.value)
@@ -29,7 +32,7 @@ const showImg = computed(() => props.src !== '' && !imgFailed.value)
   <span
     class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full"
     :class="[
-      controlHeightClass(size),
+      controlHeightClass(resolvedSize),
       'aspect-square',
       showImg ? '' : text ? 'bg-accent-bg text-accent-text' : 'bg-fill text-ink-mute',
     ]"
@@ -42,6 +45,6 @@ const showImg = computed(() => props.src !== '' && !imgFailed.value)
       @error="imgFailed = true"
     />
     <span v-else-if="text" class="truncate px-2xs text-caption font-strong">{{ text }}</span>
-    <OsIcon v-else :name="icon" :size="size === 'sm' ? 12 : 16" />
+    <OsIcon v-else :name="icon" :size="resolvedSize === 'sm' ? 12 : 16" />
   </span>
 </template>

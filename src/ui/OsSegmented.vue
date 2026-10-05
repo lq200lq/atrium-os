@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
+import { useControlSize } from './config'
 import type { SegmentedOption, Size } from './types'
 import { controlHeightClass } from './internal/control'
 
@@ -12,15 +13,17 @@ const props = withDefaults(
     options: SegmentedOption[]
     /** 可访问名：radiogroup 缺少可见标题时必传 */
     label?: string
-    /** 段高走 h-control-* 刻度；字号/内边距不随档变化 */
+    /** 段高走 h-control-* 刻度；字号/内边距不随档变化；缺省可被 OsConfigProvider 的 size 覆盖 */
     size?: Size
     /** 整组禁用：各段原生 disabled，方向键导航同时失效 */
     disabled?: boolean
     /** true 时铺满容器，各段等宽 */
     block?: boolean
   }>(),
-  { label: '', size: 'md', disabled: false, block: false },
+  { label: '', size: undefined, disabled: false, block: false },
 )
+
+const resolvedSize = useControlSize(() => props.size)
 
 const model = defineModel<string>({ required: true })
 const group = ref<HTMLElement | null>(null)
@@ -71,7 +74,7 @@ function onKeydown(event: KeyboardEvent) {
       :disabled="disabled"
       class="flex items-center justify-center gap-2xs whitespace-nowrap rounded-control px-sm text-ui transition duration-quick"
       :class="[
-        controlHeightClass(size),
+        controlHeightClass(resolvedSize),
         block && 'flex-1',
         model === option.value
           ? 'bg-surface text-ink shadow-raise'

@@ -3,7 +3,7 @@
 | Prop | 类型 | 必填 | 默认 | 说明 |
 | --- | --- | --- | --- | --- |
 | `loading` | `boolean` | 否 | `true` | 缺省 true：内联型挂载即转（可纯当指示器用）；容器型以此控制遮罩显隐 |
-| `size` | `Size` | 否 | `'md'` |  |
+| `size` | `Size` | 否 | `undefined` | 直径走 h-control-* 刻度；缺省可被 OsConfigProvider 的 size 覆盖 |
 | `tip` | `string` | 否 | `''` |  |
 
 **Slots**

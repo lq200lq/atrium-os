@@ -50,6 +50,14 @@
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
 
+  /* ── 阅读宽度：max-w 的唯一来源 ──
+   * 不能用 `max-w-md` / `max-w-lg` 这类 Tailwind 具名档：本表把 --spacing-* 定义成了六级刻度，
+   * Tailwind 4 解析 `max-w-md` 时优先绑到 `--spacing-md`（16px）而不是它的 `--container-md` 默认值，
+   * 于是顶栏搜索胶囊被压成 34px、OsResult 正文列压成 24px（实测 computed max-width:16px）。
+   * 因此这里只留实际用到的两档，消费方一律写 `max-w-[var(--container-md)]` 显式绑 token。 */
+  --container-md: 448px;
+  --container-lg: 512px;
+
   /* ── 圆角：按组件类别分档，相邻元素不得混档 ── */
   --radius-chip: 4px; /* 标签、徽标、提示气泡 */
   --radius-control: 6px; /* 按钮、输入、选择 */
@@ -150,6 +158,8 @@
   --duration-quick: 120ms;
   --duration-base: 180ms;
   --duration-slow: 260ms;
+  /* prefers-reduced-motion 的兜底下限（main.css 全局规则唯一消费此档，别处不得再写字面量） */
+  --duration-reduced: 0.01ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in: cubic-bezier(0.55, 0.055, 0.675, 0.19);
   --ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1);
@@ -163,7 +173,9 @@
  *   --raw-mix-darken  active/按下方向
  *   --raw-mix-ink     浅底上的强调文字方向（浅主题压暗、暗主题提亮）
  * ======================================================================== */
-:root {
+/* .os-config（S11 OsConfigProvider 根）：子树覆盖 seed 时派生就近重算，公式仍只写一次 */
+:root,
+.os-config {
   /* 强调色六级 */
   --raw-accent-hover: color-mix(in oklab, var(--raw-accent) 84%, var(--raw-mix-lighten));
   --raw-accent-active: color-mix(in oklab, var(--raw-accent) 78%, var(--raw-mix-darken));
@@ -196,6 +208,17 @@
   --raw-success-bg-hover: color-mix(in oklab, var(--raw-success) 20%, var(--raw-mix-base));
   --raw-success-border: color-mix(in oklab, var(--raw-success) 38%, var(--raw-mix-base));
   --raw-success-text: color-mix(in oklab, var(--raw-success) 76%, var(--raw-mix-ink));
+
+  /* 中性三级文本（S12 a11y 派生点，一处公式，theme-*.css 不再给 seed）：
+   * 旧 seed 明暗同为 #94a3b8，白底仅 2.56:1，caption/micro 级正文不达标 AA。
+   * 改为 ink-strong 向当前主题表面色 75% 混合：明主题落深（白底 ≥7:1，
+   * 含 accent-soft / fill 混合底），暗主题落亮（深底 ≥7:1），三级墨色层级仍在。 */
+  --raw-ink-mute: color-mix(in oklab, var(--raw-ink-strong) 75%, var(--raw-surface));
+
+  /* 实底控件前景（S12 a11y 派生点）：旧 seed 写死白色，sky 系亮强调上仅 2.77:1。
+   * 按 seed 强调色的 CIE 亮度二值化：L<50（深）→ 白，L≥50（亮）→ 黑——
+   * (50-l)*1000% 让 calc 结果越界后自动钉死在 0/100 两端，换任何 accent 预设都跟随。 */
+  --raw-on-accent: lch(from var(--raw-accent) calc((50 - l) * 1000%) 0 0);
 
   /* 焦点环：一处定义，全站 :focus-visible 消费（见 main.css） */
   --raw-focus-ring: color-mix(in oklab, var(--raw-accent) 45%, transparent);
@@ -280,3 +303,24 @@
 @custom-variant w-narrow (@container window (max-width: 479.98px));
 @custom-variant w-mid (@container window (min-width: 480px) and (max-width: 799.98px));
 @custom-variant w-wide (@container window (min-width: 800px));
+
+/* ====================== 作用域别名（S11 OsConfigProvider）===============
+ * @theme 的语义别名在 :root 上求值：子树里只改 seed（--raw-accent）不会传导，
+ * 所以 Provider 根（.os-config）就近重声明强调色/info 别名，指向同一批 --raw-* 变量。
+ * 这里只有别名，没有公式——color-mix 仍只在上面「派生公式」块写一次。
+ * 圆角与控件高度是字面值（@theme 内无 var 引用），就近覆盖 var 即可，无需重复别名。 */
+.os-config {
+  --color-accent: var(--raw-accent);
+  --color-accent-hover: var(--raw-accent-hover);
+  --color-accent-active: var(--raw-accent-active);
+  --color-accent-bg: var(--raw-accent-bg);
+  --color-accent-bg-hover: var(--raw-accent-bg-hover);
+  --color-accent-border: var(--raw-accent-border);
+  --color-accent-text: var(--raw-accent-text);
+  --color-accent-strong: var(--raw-accent-text);
+  --color-accent-soft: var(--raw-accent-bg);
+  --color-info: var(--raw-accent);
+  --color-info-bg: var(--raw-accent-bg);
+  --color-info-border: var(--raw-accent-border);
+  --color-info-text: var(--raw-accent-text);
+}

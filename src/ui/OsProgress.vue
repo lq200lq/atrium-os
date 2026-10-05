@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 import type { ProgressStatus, ProgressType } from './types'
 
@@ -24,7 +24,7 @@ const props = withDefaults(
   { percent: 0, type: 'line', status: undefined, strokeWidth: undefined, showInfo: true },
 )
 
-const { t } = useI18n()
+const { t } = useText()
 
 const clamped = computed(() => Math.min(100, Math.max(0, props.percent)))
 const shown = computed<ProgressStatus>(

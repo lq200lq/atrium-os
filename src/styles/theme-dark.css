@@ -8,18 +8,16 @@
   --raw-mix-darken: #000000;
   --raw-mix-ink: #ffffff; /* 深底上的强调文字：提亮 */
 
-  /* 文本墨色（反转明度） */
+  /* 文本墨色（反转明度；三级 mute 由 tokens.css 公式派生，S12 起此处只留两级 seed） */
   --raw-ink-strong: #f1f5f9;
   --raw-ink: #e2e8f0;
-  --raw-ink-mute: #94a3b8;
 
-  /* 面板/描边/遮罩 */
+  /* 面板/描边/遮罩（on-accent 前景由 tokens.css 按强调色亮度派生，不再写死） */
   --raw-surface: #1e293b;
   --raw-surface-sunken: #0f172a;
   --raw-surface-hover: #334155;
   --raw-line: #334155;
   --raw-line-soft: #293548;
-  --raw-on-accent: #ffffff;
   --raw-scrim: rgba(0, 0, 0, 0.55);
 
   /* 中性填充四档（深底用白 alpha） */
@@ -81,12 +79,20 @@
 }
 
 /* 暗色下的强调色预设：只改 seed，派生层自动跟随 */
-:root[data-theme='dark'][data-accent='violet'] {
+/* S11：后代形式让 OsConfigProvider 的根（带 data-accent 的 .os-config）也能取到暗档 seed */
+[data-theme='dark'] [data-accent='sky'],
+:root[data-theme='dark'][data-accent='sky'] {
+  --raw-accent: #38bdf8;
+}
+:root[data-theme='dark'][data-accent='violet'],
+[data-theme='dark'] [data-accent='violet'] {
   --raw-accent: #a78bfa;
 }
-:root[data-theme='dark'][data-accent='emerald'] {
+:root[data-theme='dark'][data-accent='emerald'],
+[data-theme='dark'] [data-accent='emerald'] {
   --raw-accent: #34d399;
 }
-:root[data-theme='dark'][data-accent='rose'] {
+:root[data-theme='dark'][data-accent='rose'],
+[data-theme='dark'] [data-accent='rose'] {
   --raw-accent: #fb7185;
 }

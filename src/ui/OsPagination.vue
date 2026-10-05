@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 
 const props = withDefaults(
   defineProps<{
@@ -13,7 +13,7 @@ const props = withDefaults(
 )
 
 const page = defineModel<number>({ required: true })
-const { t } = useI18n()
+const { t } = useText()
 
 const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.pageSize)))
 

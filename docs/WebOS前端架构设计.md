@@ -236,7 +236,7 @@ src/
 | 图标系统改造         | 已完成（2026-10-04） | 全仓 emoji 图标（4 个 manifest + 17 处 UI 硬编码）替换为 lucide-vue-next 线性图标，经 `OsIcon` + `ICON_MAP` 收口；Dock 磁贴保持 tint 渐变 + 白色线图标；文件类型图标/配色由 `fileIconName/fileIconClass` 共享（file-manager 与 Spotlight 一致）；vue-tsc + 浏览器实测通过                                                                                   |
 | 工程基建打底         | 已完成（2026-10-04） | 详见《WebOS设计规范与工程基建.md》：ESLint/Prettier/husky 门禁、Vitest 单测（45 例）、Playwright E2E 冒烟（6 例，均为打底时点读数，现状见《WebOS对标AntDesign迭代规划.md》§9）、GitHub Actions CI、设计 token 化（`src/styles/tokens.css`）、`src/ui/` 基础组件收口                                                                                         |
 | 后续迭代路线         | 已规划（2026-10-04） | P0~P3 与打底完成后的脚手架方向路线（S1 应用接入契约与生成器 / S2 权限模型与 settings / S3 组件纵深 / S4 数据访问层 / S5 主题与 i18n / S6 文档站·版本·可观测）详见《WebOS脚手架迭代路线.md》，该文档为后续迭代的设计依据                                                                                                                                     |
-| 对标 Ant Design 纵深 | 进行中（2026-10-05） | S1~S6 之后以 Ant Design 的设计/研发/组件体系为参照另文规划 S7~S12（设计语言成文与 token 刻度、组件契约、布局与展示件、反馈与导航件、配置层与文档自动化、a11y 与质量线），详见《WebOS对标AntDesign迭代规划.md》；S7~S10 已完成，逐阶段状态见该文档 §9                                                                                                        |
+| 对标 Ant Design 纵深 | 进行中（2026-10-05） | S1~S6 之后以 Ant Design 的设计/研发/组件体系为参照另文规划 S7~S12（设计语言成文与 token 刻度、组件契约、布局与展示件、反馈与导航件、配置层与文档自动化、a11y 与质量线），详见《WebOS对标AntDesign迭代规划.md》；S7~S11 已完成，逐阶段状态见该文档 §9                                                                                                        |
 
 **实施期对设计的修正（已回写本文档）**
 

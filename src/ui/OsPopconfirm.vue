@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsButton from './OsButton.vue'
 import type { Placement } from './types'
 import { placementClass } from './internal/placement'
@@ -24,7 +24,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{ confirm: []; cancel: [] }>()
-const { t } = useI18n()
+const { t } = useText()
 
 const open = ref(false)
 /** 根节点同时是触发容器：tabindex=-1 让关闭后焦点可程序化回到触发元素 */

@@ -10,6 +10,7 @@ import {
   OsCard,
   OsCheckbox,
   OsCollapse,
+  OsConfigProvider,
   OsDescriptions,
   OsDialog,
   OsDivider,
@@ -56,6 +57,7 @@ import {
   type TableColumn,
   type TreeNode,
 } from '@/ui'
+import type { Locale } from '@/i18n'
 import { useNotification } from '@/kernel/stores/notification'
 import { useWindowManager } from '@/kernel/stores/windowManager'
 import { useFeedback } from '@/ui/feedback'
@@ -74,6 +76,7 @@ const tabs = computed(() => [
   { key: 'display', label: t('gallery.tabs.display') },
   { key: 'nav', label: t('gallery.tabs.nav') },
   { key: 'feedback', label: t('gallery.tabs.feedback') },
+  { key: 'config', label: t('gallery.tabs.config') },
 ])
 
 // 通用约定：四条契约在同一块里横向铺开，档位/状态名直接用 props 字面量
@@ -334,6 +337,41 @@ function stepPrev() {
 function stepNext() {
   stepCurrent.value = Math.min(stepItems.value.length - 1, stepCurrent.value + 1)
 }
+
+// 作用域配置（S11）：三档取值只活在局部 ref 上——不读也不写 theme store，不持久化
+const scopeSize = ref('inherit')
+const scopeAccent = ref('inherit')
+const scopeLocale = ref('inherit')
+const accentKeys = ['sky', 'violet', 'emerald', 'rose'] as const
+const localeKeys: Locale[] = ['zh-CN', 'en-US']
+const scopeSizeOptions = computed<SegmentedOption[]>(() => [
+  { value: 'inherit', label: t('gallery.configFollowOutside') },
+  { value: 'sm', label: 'sm' },
+  { value: 'md', label: 'md' },
+  { value: 'lg', label: 'lg' },
+])
+const scopeAccentOptions = computed<SegmentedOption[]>(() => [
+  { value: 'inherit', label: t('gallery.configInheritAccent') },
+  ...accentKeys.map((key) => ({ value: key, label: t(`settings.appearance.accents.${key}`) })),
+])
+const scopeLocaleOptions = computed<SegmentedOption[]>(() => [
+  { value: 'inherit', label: t('gallery.configFollowGlobal') },
+  ...localeKeys.map((key) => ({ value: key, label: t(`settings.appearance.languages.${key}`) })),
+])
+
+// undefined 即「不覆盖」：Provider 缺省该 prop 时，子树退回全局刻度与全局语言
+const providerSize = computed<Size | undefined>(() =>
+  scopeSize.value === 'inherit' ? undefined : (scopeSize.value as Size),
+)
+const providerAccent = computed<string | undefined>(() =>
+  scopeAccent.value === 'inherit' ? undefined : scopeAccent.value,
+)
+const providerLocale = computed<Locale | undefined>(() =>
+  scopeLocale.value === 'inherit' ? undefined : (scopeLocale.value as Locale),
+)
+const scopeInputVal = ref('')
+const scopeSelectVal = ref('')
+const scopePage = ref(1)
 </script>
 
 <template>
@@ -627,7 +665,7 @@ function stepNext() {
     <div v-else-if="tab === 'display'" class="space-y-5 p-4">
       <section>
         <h3 class="mb-2 text-title font-strong text-ink">OsTypography</h3>
-        <div class="flex max-w-lg flex-col gap-xs">
+        <div class="flex max-w-[var(--container-lg)] flex-col gap-xs">
           <OsTypography type="title">{{ t('gallery.conventions') }}</OsTypography>
           <OsTypography type="paragraph" ellipsis :rows="2" expandable>
             {{ t('gallery.typographySample') }}
@@ -815,6 +853,70 @@ function stepNext() {
           <OsSwitch v-model="stepError" :label="t('gallery.stepErrorToggle')" />
         </OsSpace>
       </section>
+    </div>
+
+    <!-- 作用域配置 -->
+    <div v-else-if="tab === 'config'" class="space-y-5 p-4">
+      <section class="rounded-surface border border-line bg-surface p-md">
+        <h3 class="text-title font-strong text-ink">{{ t('gallery.configTitle') }}</h3>
+        <p class="mt-2xs text-caption text-ink-mute">{{ t('gallery.configHint') }}</p>
+        <OsSpace size="lg" align="start" wrap class="mt-sm">
+          <OsSegmented
+            v-model="scopeSize"
+            :options="scopeSizeOptions"
+            :label="t('gallery.configScopeSize')"
+          />
+          <OsSegmented
+            v-model="scopeAccent"
+            :options="scopeAccentOptions"
+            :label="t('gallery.configScopeAccent')"
+          />
+          <OsSegmented
+            v-model="scopeLocale"
+            :options="scopeLocaleOptions"
+            :label="t('gallery.configScopeLocale')"
+          />
+        </OsSpace>
+        <p class="mt-xs text-micro text-ink-mute">{{ t('gallery.configNoStoreHint') }}</p>
+      </section>
+
+      <div class="grid grid-cols-1 gap-md xl:grid-cols-2">
+        <section class="rounded-surface border border-line bg-surface p-md">
+          <h4 class="text-ui font-strong text-ink">{{ t('gallery.configInside') }}</h4>
+          <p class="mt-2xs text-micro text-ink-mute">{{ t('gallery.configInsideHint') }}</p>
+          <OsConfigProvider :size="providerSize" :accent="providerAccent" :locale="providerLocale">
+            <div
+              role="group"
+              :aria-label="t('gallery.configInside')"
+              class="mt-sm flex flex-col gap-xs"
+            >
+              <OsButton variant="primary">{{ t('gallery.primary') }}</OsButton>
+              <OsInput v-model="scopeInputVal" class="w-60" />
+              <OsSelect v-model="scopeSelectVal" :options="selectOptions" class="w-60" />
+              <OsEmpty />
+              <OsPagination v-model="scopePage" :total="45" :page-size="10" />
+            </div>
+          </OsConfigProvider>
+        </section>
+
+        <section class="rounded-surface border border-line bg-surface p-md">
+          <h4 class="text-ui font-strong text-ink">{{ t('gallery.configOutside') }}</h4>
+          <p class="mt-2xs text-micro text-ink-mute">{{ t('gallery.configOutsideHint') }}</p>
+          <div
+            role="group"
+            :aria-label="t('gallery.configOutside')"
+            class="mt-sm flex flex-col gap-xs"
+          >
+            <OsButton variant="primary">{{ t('gallery.primary') }}</OsButton>
+            <OsInput v-model="scopeInputVal" class="w-60" />
+            <OsSelect v-model="scopeSelectVal" :options="selectOptions" class="w-60" />
+            <OsEmpty />
+            <OsPagination v-model="scopePage" :total="45" :page-size="10" />
+          </div>
+        </section>
+      </div>
+
+      <p class="text-caption text-ink-mute">{{ t('gallery.configAppCopyNote') }}</p>
     </div>
 
     <!-- 反馈 -->

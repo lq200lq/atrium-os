@@ -4,6 +4,7 @@
 | --- | --- | --- | --- | --- |
 | `disabled` | `boolean` | 否 | `false` | 落原生 disabled，勾选框与 label 文本一并失效 |
 | `label` | `string` | 否 | `''` | 相邻文案；input 可被 label 关联，点击文本等同勾选切换 |
+| `ariaLabel` | `string` | 否 | `undefined` | 可访问名称：label 缺省（纯图标/自定义排布场景）时给 input 显式命名，优先级最高 |
 | `status` | `Status` | 否 | `'default'` | 非 default 时给勾选框加语义描边 + 状态环 |
 
 **Model**

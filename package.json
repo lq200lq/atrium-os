@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "build:check": "npm run build && node scripts/check-tokens.mjs && node scripts/check-bundle.mjs",
+    "build:check": "npm run build && node scripts/check-tokens.mjs && node scripts/check-bundle.mjs && node scripts/gen-icons.mjs --check",
     "check:tokens": "node scripts/check-tokens.mjs",
     "preview": "vite preview",
     "type-check": "vue-tsc -b",
@@ -19,6 +19,7 @@
     "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "gen:app": "node scripts/gen-app.mjs",
+    "icons:gen": "node scripts/gen-icons.mjs --write",
     "docs:dev": "vitepress dev website",
     "docs:gen": "node scripts/gen-api-tables.mjs --write",
     "docs:check": "node scripts/gen-api-tables.mjs --check",

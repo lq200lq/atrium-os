@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 
 withDefaults(
@@ -19,7 +19,7 @@ const emit = defineEmits<{
   /** × 按钮或遮罩点击时派发；先置 v-model 为 false 再发出 */
   close: []
 }>()
-const { t } = useI18n()
+const { t } = useText()
 
 function close() {
   open.value = false

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 import type { IconName } from '@/kernel/icons'
 import type { ResultStatus } from './types'
@@ -53,7 +53,7 @@ const props = withDefaults(
   { status: 'success', title: '', subtitle: '' },
 )
 
-const { t } = useI18n()
+const { t } = useText()
 const config = computed(() => CONFIG[props.status])
 </script>
 
@@ -76,7 +76,7 @@ const config = computed(() => CONFIG[props.status])
     <!-- 补充内容区：失败项摘要 / 提示；操作区：下一步出口（如「重试」「去设置」） -->
     <div
       v-if="$slots.default"
-      class="mt-xs w-full max-w-lg rounded-surface bg-fill-quaternary p-md text-left text-ui leading-body text-ink"
+      class="mt-xs w-full max-w-[var(--container-lg)] rounded-surface bg-fill-quaternary p-md text-left text-ui leading-body text-ink"
     >
       <slot />
     </div>

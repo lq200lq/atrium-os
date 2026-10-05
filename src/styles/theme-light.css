@@ -8,18 +8,16 @@
   --raw-mix-darken: #000000; /* active/按下方向 */
   --raw-mix-ink: #000000; /* 浅底上的强调文字：压暗 */
 
-  /* 文本墨色 */
+  /* 文本墨色（三级 mute 由 tokens.css 公式派生，S12 起此处只留两级 seed） */
   --raw-ink-strong: #1e293b;
   --raw-ink: #334155;
-  --raw-ink-mute: #94a3b8;
 
-  /* 面板/描边/遮罩 */
+  /* 面板/描边/遮罩（on-accent 前景由 tokens.css 按强调色亮度派生，不再写死） */
   --raw-surface: #ffffff;
   --raw-surface-sunken: #f8fafc;
   --raw-surface-hover: #f1f5f9;
   --raw-line: #e2e8f0;
   --raw-line-soft: #f1f5f9;
-  --raw-on-accent: #ffffff;
   --raw-scrim: rgba(15, 23, 42, 0.25);
 
   /* 中性填充四档（alpha：叠在着色表面/玻璃上仍自然混合） */
@@ -64,13 +62,19 @@
   --raw-file-other: #94a3b8;
 }
 
-/* 强调色预设：只覆盖 seed，hover/active/bg/border/text 全部由公式跟着走 */
-:root[data-accent='violet'] {
+/* 强调色预设：只覆盖 seed，hover/active/bg/border/text 全部由公式跟着走。
+ * 选择器写成属性形式（不带 :root），S11 的 OsConfigProvider 根（带 data-accent 的后代）
+ * 因此能就近复用同一批预设：不改全局、不写 store，色值也不在 JS 里裸写。
+ * 暗主题下 theme-dark.css 的同名预设特异度更高，会覆盖此处。 */
+[data-accent='sky'] {
+  --raw-accent: #0ea5e9;
+}
+[data-accent='violet'] {
   --raw-accent: #8b5cf6;
 }
-:root[data-accent='emerald'] {
+[data-accent='emerald'] {
   --raw-accent: #10b981;
 }
-:root[data-accent='rose'] {
+[data-accent='rose'] {
   --raw-accent: #f43f5e;
 }

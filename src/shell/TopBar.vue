@@ -48,7 +48,7 @@ const date = () =>
 
     <div class="min-w-0 flex-1 px-4">
       <button
-        class="flex w-full max-w-md items-center gap-2 rounded-full border border-glass-border bg-glass-raise px-4 py-1 text-left text-ui text-ink-mute hover:bg-glass-base"
+        class="flex w-full max-w-[var(--container-md)] items-center gap-2 rounded-full border border-glass-border bg-glass-raise px-4 py-1 text-left text-ui text-ink-mute hover:bg-glass-base"
         @click="ui.openSpotlight()"
       >
         <OsIcon name="search" :size="14" class="text-ink-mute" />
@@ -58,7 +58,13 @@ const date = () =>
     </div>
 
     <div class="flex shrink-0 items-center gap-3 whitespace-nowrap text-ui text-ink">
-      <button class="relative" @click="ui.toggleNotifications()">
+      <button
+        type="button"
+        class="relative"
+        :aria-label="t('notification.title')"
+        :aria-expanded="ui.notificationsOpen"
+        @click="ui.toggleNotifications()"
+      >
         <OsIcon name="bell" :size="16" />
         <OsBadge class="absolute -right-1.5 -top-1" :count="notif.unread" />
       </button>

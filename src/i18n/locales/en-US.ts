@@ -53,6 +53,7 @@ export default {
     decrease: 'Decrease',
     expand: 'Expand',
     collapse: 'Collapse',
+    selectPlaceholder: 'Select…',
   },
   pagination: { total: '{n} in total', prev: 'Previous', next: 'Next' },
   popconfirm: { title: 'Please confirm the action' },
@@ -161,6 +162,7 @@ export default {
       display: 'Display',
       nav: 'Navigation',
       feedback: 'Feedback',
+      config: 'Scoped config',
     },
     conventions: 'Common conventions',
     conventionsHint:
@@ -318,5 +320,24 @@ export default {
     stepPrev: 'Back',
     stepNext: 'Next',
     stepErrorToggle: 'Mark current step as error',
+    configTitle: 'Scoped config (OsConfigProvider)',
+    configHint:
+      'A provider only sets the default size, accent and built-in copy language for its own subtree: a component’s own size prop still overrides it per item, and neither the global theme nor the global language is touched.',
+    configScopeSize: 'Scope size',
+    configScopeAccent: 'Scope accent',
+    configScopeLocale: 'Scope language',
+    configFollowOutside: 'Inherit from outside',
+    configInheritAccent: 'No override',
+    configFollowGlobal: 'Follow global',
+    configNoStoreHint:
+      'These three choices live on the provider only: they never write the theme store, are never persisted, and reset on reload.',
+    configInside: 'Inside scope',
+    configInsideHint:
+      'Wrapped in OsConfigProvider — default size, accent and built-in copy all resolve from the scope',
+    configOutside: 'Outside scope (reference)',
+    configOutsideHint:
+      'The same controls with no provider: they still use the global theme and language',
+    configAppCopyNote:
+      'The button label is app content and goes through global i18n, so it never follows the scope language; only built-in component copy does (empty description, pagination total, select placeholder).',
   },
 }

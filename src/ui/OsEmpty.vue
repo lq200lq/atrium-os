@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 import type { IconName } from '@/kernel/icons'
 
@@ -13,7 +13,7 @@ withDefaults(
   { icon: 'boxes', description: '' },
 )
 
-const { t } = useI18n()
+const { t } = useText()
 </script>
 
 <template>

@@ -7,7 +7,8 @@
 | `max` | `number` | 否 | `undefined` | 数值上界：提交与步进时钳制，到界时上钮禁用 |
 | `precision` | `number` | 否 | `undefined` | 显示与提交值保留的小数位 |
 | `placeholder` | `string` | 否 | `''` | 占位文字 |
-| `size` | `Size` | 否 | `'md'` | 高度/内边距走控件刻度（ControlShell） |
+| `ariaLabel` | `string` | 否 | `undefined` | 可访问名称：优先级 aria-label prop > placeholder > i18n 缺省文案（common.edit）——与 OsSelect 的 ariaLabel 同一契约 |
+| `size` | `Size` | 否 | `undefined` | 高度/内边距走控件刻度（ControlShell）；缺省可被 OsConfigProvider 的 size 覆盖 |
 | `disabled` | `boolean` | 否 | `false` | 禁用输入、上下钮与步进键，同时落原生 disabled |
 | `status` | `Status` | 否 | `'default'` | 与 OsInput 同一组语义刻度描边/状态环 |
 

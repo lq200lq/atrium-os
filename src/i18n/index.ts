@@ -24,6 +24,26 @@ export function translate(key: string, named?: Record<string, unknown>): string 
   return named ? i18n.global.t(key, named) : i18n.global.t(key)
 }
 
+/**
+ * 按指定语言取词（S11 作用域 locale）：点路径查消息表 + `{name}` 插值，未命中回退全局 t。
+ * 只用于组件内建文案的局部语言覆盖；应用内容文案仍走全局 i18n。
+ */
+export function resolveMessage(
+  locale: Locale,
+  key: string,
+  named?: Record<string, string | number>,
+): string {
+  const messages = { 'zh-CN': zhCN, 'en-US': enUS } as const
+  const value = key.split('.').reduce<unknown>((acc, seg) => {
+    if (acc && typeof acc === 'object' && seg in (acc as Record<string, unknown>)) {
+      return (acc as Record<string, unknown>)[seg]
+    }
+    return undefined
+  }, messages[locale])
+  if (typeof value !== 'string') return i18n.global.t(key, (named ?? {}) as never)
+  return named ? value.replace(/\{(\w+)\}/g, (_, k: string) => String(named[k] ?? '')) : value
+}
+
 interface Nameable {
   name: string
   nameKey?: string

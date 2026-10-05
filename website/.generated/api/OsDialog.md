@@ -2,7 +2,7 @@
 
 | Prop | 类型 | 必填 | 默认 | 说明 |
 | --- | --- | --- | --- | --- |
-| `title` | `string` | 是 | — | 标题文字（必填，无 i18n 回退）；对话框不自带关闭入口，退出靠 cancel/confirm 由父级收敛 |
+| `title` | `string` | 是 | — | 标题文字（必填，无 i18n 回退）；同时作为对话框的 aria-label。退出通道：cancel/confirm 按钮 + Esc，由父级据事件收敛；关闭后焦点自动回触发元素（S12 键盘契约） |
 | `confirmText` | `string` | 否 | `''` | 确认按钮文案，空串回退 common.confirm |
 | `cancelText` | `string` | 否 | `''` | 取消按钮文案，空串回退 common.cancel |
 | `loading` | `boolean` | 否 | `false` | 确认按钮 loading 态：提交中由调用方置 true |

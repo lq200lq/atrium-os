@@ -7,7 +7,8 @@
 | `showCount` | `boolean` | 否 | `false` | 右下角字数；不传但给了 maxLength 时同样显示（n / max 形式） |
 | `maxLength` | `number` | 否 | `undefined` | 原生 maxlength 硬上限；提供即强制显示字数（见 showCount） |
 | `placeholder` | `string` | 否 | `''` | 占位文字 |
-| `size` | `Size` | 否 | `'md'` | 只驱动内边距刻度；多行件高度属于 rows/autosize 语义，不进控件高表 |
+| `ariaLabel` | `string` | 否 | `undefined` | 可访问名称：优先级 aria-label prop > placeholder > i18n 缺省文案（common.edit）——与 OsSelect 的 ariaLabel 同一契约 |
+| `size` | `Size` | 否 | `undefined` | 只驱动内边距刻度；多行件高度属于 rows/autosize 语义，不进控件高表。缺省跟随作用域（OsConfigProvider） |
 | `disabled` | `boolean` | 否 | `false` | is-disabled 唯一写法；同时落原生 disabled |
 | `status` | `Status` | 否 | `'default'` | error/warning 描边 + 状态环，default 走中性描边 |
 

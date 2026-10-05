@@ -34,6 +34,7 @@ export default defineConfig({
             { text: '展示与数据', link: '/components/display' },
             { text: '反馈与展示', link: '/components/feedback' },
             { text: '导航组件', link: '/components/nav' },
+            { text: '作用域配置', link: '/components/config' },
           ],
         },
       ],

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import type { FormField, Status } from './types'
 import OsButton from './OsButton.vue'
 import OsInput from './OsInput.vue'
@@ -33,7 +33,7 @@ const emit = defineEmits<{
   submit: [values: Record<string, unknown>]
 }>()
 const model = defineModel<Record<string, unknown>>({ required: true })
-const { t } = useI18n()
+const { t } = useText()
 
 const errors = reactive<Record<string, string>>({})
 

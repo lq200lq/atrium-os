@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsMenu from './OsMenu.vue'
 import type { MenuItem, Placement } from './types'
 import { placementClass } from './internal/placement'
@@ -31,7 +31,7 @@ const emit = defineEmits<{
   click: [key: string]
 }>()
 
-const { t } = useI18n()
+const { t } = useText()
 
 // v-model:open 受控与非受控同一条路径（未绑定时退化为内部状态）
 const open = defineModel<boolean>('open', { default: false })

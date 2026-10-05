@@ -3,7 +3,8 @@
 | Prop | 类型 | 必填 | 默认 | 说明 |
 | --- | --- | --- | --- | --- |
 | `placeholder` | `string` | 否 | `''` | 占位文字 |
-| `size` | `Size` | 否 | `'md'` | 高度/内边距走控件刻度（ControlShell） |
+| `ariaLabel` | `string` | 否 | `undefined` | 可访问名称：优先级 aria-label prop > placeholder > i18n 缺省文案（common.edit）——与 OsSelect 的 ariaLabel 同一契约 |
+| `size` | `Size` | 否 | `undefined` | 高度/内边距走控件刻度（ControlShell）；缺省可被 OsConfigProvider 的 size 覆盖 |
 | `disabled` | `boolean` | 否 | `false` | is-disabled 唯一写法；同时落原生 disabled |
 | `status` | `Status` | 否 | `'default'` | error/warning 描边 + 状态环，default 走中性描边 |
 | `clearable` | `boolean` | 否 | `false` | 值非空时在后缀区显示 ×，点击清空 v-model 并派发 clear；与 suffix 插槽共存 |

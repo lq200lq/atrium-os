@@ -4,7 +4,7 @@
 | --- | --- | --- | --- | --- |
 | `options` | `SegmentedOption[]` | 是 | — | 分段定义（value/label/icon）；icon 为可选项，缺省该段只渲染 label |
 | `label` | `string` | 否 | `''` | 可访问名：radiogroup 缺少可见标题时必传 |
-| `size` | `Size` | 否 | `'md'` | 段高走 h-control-* 刻度；字号/内边距不随档变化 |
+| `size` | `Size` | 否 | `undefined` | 段高走 h-control-* 刻度；字号/内边距不随档变化；缺省可被 OsConfigProvider 的 size 覆盖 |
 | `disabled` | `boolean` | 否 | `false` | 整组禁用：各段原生 disabled，方向键导航同时失效 |
 | `block` | `boolean` | 否 | `false` | true 时铺满容器，各段等宽 |
 

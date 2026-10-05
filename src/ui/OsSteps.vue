@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 import type { StepItem, StepStatus } from './types'
 
@@ -32,7 +32,7 @@ const emit = defineEmits<{
 // 未绑定 v-model 时退化为内部状态，受控/非受控同一条路径
 const current = defineModel<number>('current', { default: 0 })
 
-const { t } = useI18n()
+const { t } = useText()
 
 const statusOf = computed(() => (i: number): StepStatus => {
   if (i < current.value) return 'finish'

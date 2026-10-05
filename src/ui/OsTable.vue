@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
 import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import type { SortOrder, TableColumn } from './types'
 import OsEmpty from './OsEmpty.vue'
 import OsSpin from './OsSpin.vue'
@@ -43,7 +43,7 @@ const props = withDefaults(
   },
 )
 
-const { t } = useI18n()
+const { t } = useText()
 
 const emit = defineEmits<{
   /** 点击 sortable 列表头派发；order 循环 asc→desc→null，本地模式同时重排展示，remote 模式仅通知父级 */
@@ -113,6 +113,14 @@ function keyOf(row: T) {
   return row[props.rowKey] as string | number
 }
 
+/** 行勾选框的可访问名：取第一列单元格文本（与表体渲染同源），空/对象值回落行 key——都是数据，不造文案 */
+function rowLabel(row: T): string {
+  const first = props.columns[0]
+  const v = first ? row[first.key] : undefined
+  const s = v === null || typeof v === 'object' ? '' : String(v)
+  return s.trim() !== '' ? s : String(keyOf(row))
+}
+
 function toggleAll() {
   selected.value = allChecked.value ? [] : displayRows.value.map(keyOf)
 }
@@ -132,7 +140,12 @@ function toggleRow(row: T) {
         <thead class="sticky top-0 z-sticky bg-surface-sunken/95 backdrop-blur">
           <tr class="border-b border-line">
             <th v-if="selectable" class="w-9 px-2 py-2">
-              <input type="checkbox" :checked="allChecked" @change="toggleAll" />
+              <input
+                type="checkbox"
+                :aria-label="t('common.all')"
+                :checked="allChecked"
+                @change="toggleAll"
+              />
             </th>
             <th
               v-for="col in columns"
@@ -198,6 +211,7 @@ function toggleRow(row: T) {
               <td v-if="selectable" class="px-2 py-2" @click.stop>
                 <input
                   type="checkbox"
+                  :aria-label="rowLabel(row)"
                   :checked="selected.includes(keyOf(row))"
                   @change="toggleRow(row)"
                 />

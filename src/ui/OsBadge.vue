@@ -34,7 +34,7 @@ withDefaults(
   </span>
   <span
     v-else-if="count > 0"
-    class="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-2xs text-micro font-strong text-white"
+    class="flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-2xs text-micro font-strong text-on-accent"
   >
     {{ count > max ? `${max}+` : count }}
   </span>

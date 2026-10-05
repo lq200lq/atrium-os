@@ -8,10 +8,12 @@ withDefaults(
     disabled?: boolean
     /** 相邻文案；input 可被 label 关联，点击文本等同勾选切换 */
     label?: string
+    /** 可访问名称：label 缺省（纯图标/自定义排布场景）时给 input 显式命名，优先级最高 */
+    ariaLabel?: string
     /** 非 default 时给勾选框加语义描边 + 状态环 */
     status?: Status
   }>(),
-  { disabled: false, label: '', status: 'default' },
+  { disabled: false, label: '', ariaLabel: undefined, status: 'default' },
 )
 const model = defineModel<boolean>({ required: true })
 </script>
@@ -22,6 +24,7 @@ const model = defineModel<boolean>({ required: true })
       type="checkbox"
       :checked="model"
       :disabled="disabled"
+      :aria-label="ariaLabel"
       class="h-4 w-4 rounded-chip accent-[var(--color-accent)]"
       :class="controlStatusClass(status)"
       @change="model = ($event.target as HTMLInputElement).checked"

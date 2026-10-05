@@ -61,3 +61,30 @@ body {
   opacity: 0;
   transform: scale(0.96) translateY(8px);
 }
+
+/* prefers-reduced-motion 降级（S12）：把所有过渡/关键帧时长统一压到 token 下限
+ * （--duration-reduced，只在 tokens.css 动效刻度里定义一次），并取消入场位移——
+ * 状态切换仍然发生（可见、即时），只是不再播放 transform/slide/spin 的动画过程。
+ * !important 是为了压过组件 scoped style 与 utilities 层的 transition/animation 声明。 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: var(--duration-reduced) !important;
+    transition-delay: 0s !important;
+    animation-duration: var(--duration-reduced) !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  /* transform 型入场：底时长下若保留位移会闪一帧错位，直接取消位移量 */
+  .win-enter-from,
+  .win-leave-to {
+    transform: none;
+  }
+  /* 吐司滑入同理只保留水平居中定位，去掉纵向滑行（与 .toast-enter-from 原语义同构） */
+  .toast-enter-from,
+  .toast-leave-to {
+    transform: translate(-50%, 0);
+  }
+}

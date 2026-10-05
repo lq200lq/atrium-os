@@ -190,7 +190,7 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 `src/ui/internal/ControlShell.vue` 收口 Input/Select 共用的控件外框（尺寸/状态/禁用/loading 指示只在此处派生一次），差异靠 props（`filled` 决定实心面还是透明面）。
 
-### 4.2 组件清单（41 件：`src/ui` 40 件经 `@/ui` 出口，`OsIcon` 在 `src/components`）
+### 4.2 组件清单（42 件：`src/ui` 41 件经 `@/ui` 出口，`OsIcon` 在 `src/components`）
 
 按职责分五类；S9 新增件标 ★，S10 新增件标 ◎。
 
@@ -255,6 +255,14 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 （其余 `OsCheckbox/OsRadio/OsSwitch/OsPagination/OsSkeleton/OsTabs/OsToast/OsDrawer/OsEmpty` 同源于 `@/ui` 出口。）
 
+**作用域配置（S11，`OsConfigProvider`）**：一处配置、局部生效的载体，可套在应用内的任意子树上，聚合三类覆盖——`locale`（组件内建文案的语言）、`size`（componentDefaults，控件缺省档）、`theme`（`accent` 预设 / `controlHeight` / `radius` 刻度）。实现只有两条腿：CSS 变量（写在该子树根 `.os-config` 上，圆角/控件高就近覆盖，强调色只写 `data-accent` 预设名、seed 与六级派生仍只在 `theme-*.css` + `tokens.css` 各写一次）与 `provide/inject`（`config.ts` 的 `useConfig`/`useControlSize`）。**职责边界（规划 §8 已定，这里是权威口径）**：`theme` store 管**全局持久化**设置（写 localStorage、落根元素 `data-*`），Provider 管**子树局部覆盖**且**不写 store**——因此 Provider 的选择刷新即消失、也不越界影响其它窗口；两者不存在同一份状态的双写。尺寸决议收敛在一处：`useControlSize(() => props.size)`（显式 prop > 作用域缺省 > `md`），组件不再各自写 `?? 'md'`；`ControlShell` 消费它，所以整个输入族自动获得作用域尺寸。
+
+**宽度刻度（S11 补）**：`max-w-*` **禁用 Tailwind 具名档**（`max-w-md`/`max-w-lg`…）。本仓库 `@theme` 的六级 `--spacing-*` 会让 Tailwind 4 把 `max-w-md` 解析成 `var(--spacing-md)`（16px）而不是它自己的 `--container-md`，实测把顶栏搜索胶囊压成 34px。可读宽度一律走 `--container-md: 448px` / `--container-lg: 512px` 两档，写法固定为 `max-w-[var(--container-md)]`，把绑定关系显式写在类名里。`w-2xl`/`h-2xl` 这类**方框尺寸**绑到 `--spacing-2xl`（48px）是有意用法，保留。
+
+**组件内建文案（S11）**：基础组件的自带文案（「暂无数据」「确定」「上一页」`select` 占位…）一律经 `src/ui/internal/text.ts` 的 `useText()` 取词——作用域内有 `locale` 就按该语言解析，否则回退全局 i18n（仍响应式）。业务应用不受此约束，继续直接用 vue-i18n 的 `t`。全库唯一一处写死中文的 `OsSelect` 占位 `'请选择'` 已改为 `common.selectPlaceholder`，并补了 `ariaLabel` 契约（原生 `select` 没有可见 label，axe 的 `select-name` 由此在源头解决）。
+
+**图标白名单（S11）**：`kernel/icons.ts` 的 `ICON_MAP` 仍是显式子集（`IconName` 因此保持字面量联合，写错名字在 `vue-tsc` 就红），但不再手写：`npm run icons:gen` 扫描 `src/` 的用点（静态 `name="…"` 与 `icon: '…'`）补齐 import 与映射，`--check` 模式已挂进 `build:check`——用了未登记图标即 CI 失败并提示跑生成命令。规划里「改全量动态解析」的路线经实测否决：单文件探针 `import * as lucide` 产出 583KB（未拆包、minify 后），同时打爆 vendor 单块 260KB 上限与首屏 700KB 预算，且 `lucide-vue-next@0.577` 根本没有 `DynamicIcon`；现状 26 个图标只占 vendor 7.9KB。
+
 受控/非控一条路：`OsCollapse`/`OsTree`/`OsSegmented`/`OsInputNumber`/`OsTextarea` 一律用 `defineModel`，未绑 v-model 时自动退化为内部状态，不写"受控就报错"的分支。
 
 开闭原则：基础组件只通过 props/slot 扩展表现，新场景优先加 variant，不在业务侧复制样式。
@@ -263,18 +271,19 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 ```text
 src/
-  ui/                 # 形态无关基础组件（40 件）
+  ui/                 # 形态无关基础组件（41 件）
     types.ts          # 通用契约：Size/Status/CommonProps + 数据结构类型（S8/S9/S10）
     index.ts          # 唯一出口（组件 + 类型具名导出，S8）
+    config.ts         # 作用域配置契约：OsConfig/useConfig/useControlSize（S11）
     feedback.ts       # 命令式反馈契约层（useFeedback/provideFeedback，S10）
-    internal/         # 不对外暴露的共用件（control.ts 刻度映射、scale.ts 布局刻度、placement.ts 浮层定位、level.ts 分级配色/图标、ControlShell 外框）
+    internal/         # 不对外暴露的共用件（control.ts 刻度映射、scale.ts 布局刻度、placement.ts 浮层定位、level.ts 分级配色/图标、text.ts 作用域取词（S11）、ControlShell 外框）
   components/         # 组合型组件（OsIcon 等，可依赖 ui/）
 tests/
   unit/               # Vitest 单测
   e2e/                # Playwright 冒烟
 ```
 
-**`src/ui` 的边界（S10 收尾定案，暂不拆包）**：对外只有 `@/ui` 这一个 API 面——`internal/*` 只允许 `src/ui` 自身引用，`check-tokens` 之外靠 review 守；业务应用按件路径（`@/ui/OsCard.vue`）引入是**包体预算**决定（单个应用平均只用 4~6 件，走 barrel 会把整包拉进首屏，见规划 §9 S9 修正条），不是第二套 API。是否独立发包（monorepo）等 S11 的 `OsConfigProvider` 把 API 面稳定后再评估。
+**`src/ui` 的边界（S10 收尾定案，暂不拆包）**：对外只有 `@/ui` 这一个 API 面——`internal/*` 只允许 `src/ui` 自身引用，`check-tokens` 之外靠 review 守；业务应用按件路径（`@/ui/OsCard.vue`）引入是**包体预算**决定（单个应用平均只用 4~6 件，走 barrel 会把整包拉进首屏，见规划 §9 S9 修正条），不是第二套 API。是否独立发包（monorepo）等 S11 的 `OsConfigProvider` 把 API 面稳定后再评估——S11 已交付该件，API 面（组件 props + `config.ts` 契约 + `@/ui` 出口）至此稳定，结论仍是**维持单仓**：拆包只解决分发问题，本仓库的分包收益由 `manualChunks` 与包体预算门禁拿到（见规划 §8 定案）。
 
 ## 6. 实施状态
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 import OsDropdown from './OsDropdown.vue'
 import type { BreadcrumbItem, MenuItem } from './types'
@@ -27,7 +27,7 @@ const emit = defineEmits<{
   click: [item: BreadcrumbItem]
 }>()
 
-const { t } = useI18n()
+const { t } = useText()
 
 const collapsed = computed(
   () => props.maxVisibleItems >= 3 && props.items.length > props.maxVisibleItems,

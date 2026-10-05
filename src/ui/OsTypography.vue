@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, useId } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import type { Status, TypographyType } from './types'
 
 export type { TypographyType } from './types'
@@ -56,7 +56,7 @@ const props = withDefaults(
   },
 )
 
-const { t } = useI18n()
+const { t } = useText()
 const uid = useId()
 const expanded = ref(false)
 

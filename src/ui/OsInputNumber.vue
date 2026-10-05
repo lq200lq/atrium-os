@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 import type { Size, Status } from './types'
 import ControlShell from './internal/ControlShell.vue'
@@ -17,7 +17,9 @@ const props = withDefaults(
     precision?: number
     /** 占位文字 */
     placeholder?: string
-    /** 高度/内边距走控件刻度（ControlShell） */
+    /** 可访问名称：优先级 aria-label prop > placeholder > i18n 缺省文案（common.edit）——与 OsSelect 的 ariaLabel 同一契约 */
+    ariaLabel?: string
+    /** 高度/内边距走控件刻度（ControlShell）；缺省可被 OsConfigProvider 的 size 覆盖 */
     size?: Size
     /** 禁用输入、上下钮与步进键，同时落原生 disabled */
     disabled?: boolean
@@ -30,14 +32,18 @@ const props = withDefaults(
     max: undefined,
     precision: undefined,
     placeholder: '',
-    size: 'md',
+    ariaLabel: undefined,
+    size: undefined,
     disabled: false,
     status: 'default',
   },
 )
 
 const model = defineModel<number | undefined>()
-const { t } = useI18n()
+const { t } = useText()
+
+/** 可访问名一处决议：调用方名字 > 占位即语义 > 内建缺省（i18n，绝不硬编码中文） */
+const accessibleName = computed(() => props.ariaLabel || props.placeholder || t('common.edit'))
 
 const format = (v: number | undefined): string =>
   v === undefined ? '' : props.precision !== undefined ? v.toFixed(props.precision) : String(v)
@@ -91,6 +97,7 @@ function stepBy(dir: number) {
       :aria-valuenow="model"
       :aria-valuemin="props.min"
       :aria-valuemax="props.max"
+      :aria-label="accessibleName"
       :placeholder="placeholder"
       :disabled="disabled"
       class="min-w-0 flex-1 bg-transparent text-ui text-ink"

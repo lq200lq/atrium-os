@@ -265,6 +265,7 @@ function onRowKeydown(event: KeyboardEvent, row: TreeRow) {
         v-if="checkable"
         type="checkbox"
         class="h-4 w-4 shrink-0 rounded-chip accent-[var(--color-accent)]"
+        :aria-label="row.node.label"
         :checked="row.checked"
         :indeterminate.prop="row.half"
         :disabled="row.disabled"
