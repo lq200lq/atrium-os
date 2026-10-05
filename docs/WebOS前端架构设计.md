@@ -235,6 +235,7 @@ src/
 | P3 打磨           | 已完成（2026-10-04） | Theme store + 三套壁纸切换（右键菜单驱动）；窗口布局持久化（位置/尺寸/z/最小化集合/标题/payload，`layout-v1`）+ 壁纸持久化（`theme-v1`），刷新后精确还原；窗口开合动画（TransitionGroup `.win-*` opacity+scale，覆盖 section 的 transition 工具类）； Dock 固定项/多用户设置暂无对应功能，不在本期范围                                                      |
 | 图标系统改造      | 已完成（2026-10-04） | 全仓 emoji 图标（4 个 manifest + 17 处 UI 硬编码）替换为 lucide-vue-next 线性图标，经 `OsIcon` + `ICON_MAP` 收口；Dock 磁贴保持 tint 渐变 + 白色线图标；文件类型图标/配色由 `fileIconName/fileIconClass` 共享（file-manager 与 Spotlight 一致）；vue-tsc + 浏览器实测通过                                                                                   |
 | 工程基建打底      | 已完成（2026-10-04） | 详见《WebOS设计规范与工程基建.md》：ESLint/Prettier/husky 门禁、Vitest 单测（45 例）、Playwright E2E 冒烟（6 例）、GitHub Actions CI、设计 token 化（`src/styles/tokens.css`）、`src/ui/` 基础组件收口                                                                                                                                                      |
+| 后续迭代路线      | 已规划（2026-10-04） | P0~P3 与打底完成后的脚手架方向路线（S1 应用接入契约与生成器 / S2 权限模型与 settings / S3 组件纵深 / S4 数据访问层 / S5 主题与 i18n / S6 文档站·版本·可观测）详见《WebOS脚手架迭代路线.md》，该文档为后续迭代的设计依据                                                                                                                                     |
 
 **实施期对设计的修正（已回写本文档）**
 

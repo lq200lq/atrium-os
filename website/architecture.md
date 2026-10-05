@@ -9,22 +9,29 @@
 
 ## 分层架构
 
-```text
-┌─────────────────────────────────────────────┐
-│ shell  壳层：TopBar / Desktop / Dock /        │
-│        Spotlight / Widgets / NotificationCenter│
-├─────────────────────────────────────────────┤
-│ windows  窗口层：WindowFrame / ErrorBoundary   │
-├─────────────────────────────────────────────┤
-│ apps  应用层：每个 src/apps/<id> 自包含        │
-│        经 AppManifest 契约接入，glob 自动注册   │
-├─────────────────────────────────────────────┤
-│ kernel  内核：stores / data / fs / bus /       │
-│         observability / icons / layout        │
-├─────────────────────────────────────────────┤
-│ ui  基础组件：18 个 Os* 组件，消费语义 token    │
-└─────────────────────────────────────────────┘
-```
+<script setup>
+const layers = [
+  {
+    name: 'shell',
+    title: '壳层',
+    items: ['TopBar', 'Desktop', 'Dock', 'Spotlight', 'Widgets', 'NotificationCenter'],
+  },
+  { name: 'windows', title: '窗口层', items: ['WindowFrame', 'ErrorBoundary'] },
+  {
+    name: 'apps',
+    title: '应用层',
+    items: ['src/apps/<id> 自包含', 'AppManifest 契约接入', 'glob 自动注册'],
+  },
+  {
+    name: 'kernel',
+    title: '内核',
+    items: ['stores', 'data', 'fs', 'bus', 'observability', 'icons', 'layout'],
+  },
+  { name: 'ui', title: '基础组件', items: ['18 个 Os* 组件', '消费语义 token'] },
+]
+</script>
+
+<LayerDiagram :layers="layers" />
 
 ## 内核模块
 
