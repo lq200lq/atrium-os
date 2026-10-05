@@ -18,6 +18,8 @@
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:e2e:a11y": "playwright test a11y keyboard",
+    "test:e2e:visual": "playwright test visual",
     "gen:app": "node scripts/gen-app.mjs",
     "icons:gen": "node scripts/gen-icons.mjs --write",
     "docs:dev": "vitepress dev website",
@@ -46,7 +48,10 @@
     "vue-i18n": "^11.4.13"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@changesets/cli": "^3.0.3",
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.1.13",

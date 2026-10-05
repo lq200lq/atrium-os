@@ -58,4 +58,34 @@ describe('OsDrawer', () => {
     await nextTick()
     expect(document.body.querySelector('footer')).toBeNull()
   })
+
+  it('Esc 关闭并派发事件，关闭后焦点归还触发元素（S12 键盘契约）', async () => {
+    const trigger = document.createElement('button')
+    document.body.append(trigger)
+    trigger.focus()
+
+    const w = mount(OsDrawer, {
+      props: { modelValue: true },
+      slots: { default: '<p>抽屉内容X</p>' },
+    })
+    await nextTick()
+
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await nextTick()
+    expect(w.emitted('update:modelValue')?.[0]).toEqual([false])
+    expect(w.emitted('close')).toBeTruthy()
+
+    // 真实父级由 v-model 把 prop 置回 false，此时才走焦点归还分支
+    await w.setProps({ modelValue: false })
+    expect(document.activeElement).toBe(trigger)
+  })
+
+  it('关闭后 Esc 不再触发事件（监听随 open 摘除）', async () => {
+    const w = mount(OsDrawer, { props: { modelValue: true } })
+    await nextTick()
+    await w.setProps({ modelValue: false })
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await nextTick()
+    expect(w.emitted('close')).toBeFalsy()
+  })
 })

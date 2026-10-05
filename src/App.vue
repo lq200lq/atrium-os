@@ -16,7 +16,9 @@ const ui = useShellUi()
 function onKey(e: KeyboardEvent) {
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault()
-    ui.openSpotlight()
+    // ⌘K/ctrl+K 是开合开关（S12 键盘契约：浮层必须可以从键盘原路退出）
+    if (ui.spotlightOpen) ui.closeOverlays()
+    else ui.openSpotlight()
   }
 }
 onMounted(() => window.addEventListener('keydown', onKey))

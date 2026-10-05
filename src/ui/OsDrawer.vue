@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watch } from 'vue'
 import { useText } from './internal/text'
 import OsIcon from '@/components/OsIcon.vue'
 
@@ -16,7 +17,7 @@ withDefaults(
 
 const open = defineModel<boolean>({ required: true })
 const emit = defineEmits<{
-  /** × 按钮或遮罩点击时派发；先置 v-model 为 false 再发出 */
+  /** × 按钮、遮罩点击或 Esc 时派发；先置 v-model 为 false 再发出，关闭后焦点回触发元素 */
   close: []
 }>()
 const { t } = useText()
@@ -25,6 +26,29 @@ function close() {
   open.value = false
   emit('close')
 }
+
+/** 键盘退出契约（S12，与 OsDialog 同口径）：Esc 等同关闭；关闭后焦点还给打开它的触发元素 */
+let opener: HTMLElement | null = null
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') close()
+}
+
+watch(
+  open,
+  (v) => {
+    if (v) {
+      const el = document.activeElement
+      opener = el instanceof HTMLElement && el !== document.body ? el : null
+      window.addEventListener('keydown', onKeydown)
+    } else {
+      window.removeEventListener('keydown', onKeydown)
+      if (opener?.isConnected) opener.focus()
+      opener = null
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>

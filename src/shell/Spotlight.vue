@@ -29,6 +29,7 @@ const appName = useAppName()
 const query = ref('')
 const cursor = ref(0)
 const inputEl = ref<HTMLInputElement | null>(null)
+let opener: HTMLElement | null = null
 
 const hits = computed<Hit[]>(() => {
   const q = query.value.trim().toLowerCase()
@@ -70,7 +71,13 @@ watch(
     if (open) {
       query.value = ''
       cursor.value = 0
+      // 记住唤起元素（⌘K 直开时可能是 body/输入框）：关闭后焦点原样归还
+      const el = document.activeElement
+      opener = el instanceof HTMLElement && el !== document.body ? el : null
       void nextTick(() => inputEl.value?.focus())
+    } else if (opener?.isConnected) {
+      opener.focus()
+      opener = null
     }
   },
 )
@@ -127,6 +134,7 @@ function onKey(e: KeyboardEvent) {
           <button
             class="flex w-full items-center gap-3 px-4 py-2 text-left"
             :class="i === cursor ? 'bg-accent-soft' : 'hover:bg-surface-hover'"
+            :aria-current="i === cursor ? 'true' : undefined"
             @mouseenter="cursor = i"
             @click="pick(h)"
           >

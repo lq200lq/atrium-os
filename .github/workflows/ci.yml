@@ -17,11 +17,14 @@ jobs:
       - run: npm ci
       - run: npm run type-check
       - run: npm run lint
+      # 提交钩子只做暂存文件格式化，全仓一致性靠这里兜（prettier --check）
+      - run: npm run format:check
       # 设计 token 审计：源码不得出现裸色值/裸圆角/小数间距/裸层级（早失败）
       - run: npm run check:tokens
       - run: npm run test:unit:coverage
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      # 无障碍扫描在 a11y 专岗跑、截图 diff 在 visual 专岗跑，这里排除避免重复占时
+      - run: npm run test:e2e -- --grep-invert "a11y|visual"
       # 构建 + 包体预算门禁（manualChunks 分包、首屏与单 chunk 阈值）
       - run: npm run build:check
       # 文档站可构建性校验
@@ -31,5 +34,67 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # 无障碍专岗：axe 扫描（严重/致命必须为 0）+ 键盘可达性，与 check 并行、独立红
+  a11y:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # a11y.spec.ts 已解除 A11Y=1 门控，test:e2e:a11y 同时跑键盘契约
+      - run: npm run test:e2e:a11y
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # 视觉回归专岗：组件级截图 diff（tests/e2e/visual.spec.ts）。
+  # 基线按平台分目录（…-snapshots/<platform>/）：字体栅格化跨 OS 不可比，
+  # 因此本 job 只比对 linux 基线；仓库当前只有本地生成的 darwin 基线，
+  # 首次运行按下面的引导路径产出 linux 基线并提交，之后转为真正的 diff 门禁。
+  visual:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - id: baseline
+        run: |
+          if [ -d tests/e2e/visual.spec.ts-snapshots/linux ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: 截图 diff
+        if: steps.baseline.outputs.ready == 'true'
+        run: npm run test:e2e:visual
+      - name: 引导缺失平台的基线（一次性）
+        if: steps.baseline.outputs.ready == 'false'
+        run: |
+          npx playwright test visual --update-snapshots
+          echo "::notice::本仓库缺 linux 视觉基线，本次已生成。下载 visual-baselines-linux 产物，放入 tests/e2e/visual.spec.ts-snapshots/linux/ 并提交，此后本 job 即为 diff 门禁。"
+      - name: 上传生成的基线
+        if: steps.baseline.outputs.ready == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines-linux
+          path: tests/e2e/visual.spec.ts-snapshots/linux/
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-playwright-report
           path: playwright-report/
           retention-days: 7

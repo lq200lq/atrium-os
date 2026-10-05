@@ -38,19 +38,31 @@ test:unit / test:unit:watch / test:e2e
 - 中文单行「类型：描述」：`feat：…` / `fix：…` / `refactor：…` / `test：…` / `docs：…` / `chore：…`
 - 一个 commit 只装一条工作线；逐文件名 `git add`，禁止 `git add -A`
 - 不替并行工作线提交 WIP
+- **S12 起由 `commitlint` 机器兜住**：`commitlint.config.mjs` + `.husky/commit-msg`。要点是 `parserPreset.headerPattern` 必须改成按**全角冒号**拆分——conventional-commits-parser 默认只认半角 `:`，不改则本仓所有中文提交都会被判 `type-empty` 全红。`header-max-length` 放宽到 100（中文信息密度高），`subject-case`/`scope-case` 关闭（描述里嵌 `OsAlert` 这类组件名会被误判成大小写违规）。
 
 ### 2.3 测试策略
 
-| 层   | 工具                     | 覆盖对象                                                     | 不做什么                     |
-| ---- | ------------------------ | ------------------------------------------------------------ | ---------------------------- |
-| 单元 | Vitest + happy-dom       | store 纯逻辑（windowManager/vfs/icons/notification）、纯函数 | 不测视觉                     |
-| 组件 | Vitest + @vue/test-utils | 基础组件（src/ui）的 props/emit 契约                         | 不测样式渲染像素             |
-| E2E  | Playwright               | 冒烟链路：启动→开窗→拖拽→Dock→Spotlight→持久化刷新还原       | 不穷举交互                   |
-| 视觉 | 浏览器截图人工复核       | 改视觉时抽查                                                 | 不做视觉回归基线（暂不引入） |
+| 层     | 工具                     | 覆盖对象                                                                                                | 不做什么                                     |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| 单元   | Vitest + happy-dom       | store 纯逻辑（windowManager/vfs/icons/notification）、纯函数                                            | 不测视觉                                     |
+| 组件   | Vitest + @vue/test-utils | 基础组件（src/ui）的 props/emit 契约                                                                    | 不测样式渲染像素                             |
+| E2E    | Playwright               | 按主题拆分的 spec（壳层/窗口/权限/数据/组件/主题/可观测…）                                              | 不穷举交互                                   |
+| 无障碍 | Playwright + axe-core    | `a11y.spec.ts` 四场景 serious/critical 必须为 0；`keyboard.spec.ts` 键盘契约；`contrast.spec.ts` 对比度 | 不做 AA 之外的全量 WCAG 打分                 |
+| 视觉   | Playwright 截图基线      | `visual.spec.ts` 10 张组件级基线（壳层明暗 / Spotlight / 陈列窗口 7 页签）随仓库提交，CI 比对           | 不做全页面像素回归（噪声大，见规划 §8 定案） |
+
+覆盖率下限自 S12 起按目录分档（`vitest.config.ts`）：全局 75/72/78/78（stmts/branch/funcs/lines）之外，另设 `src/ui/**` 85/78/85/88 与 `src/kernel/**` 65/58/70/68 两块地板。分档而不是一刀切全局，是因为 `windows`/`i18n` 的覆盖结构与组件层不同，混在一个全局阈值里只会把地板架空。
 
 ### 2.4 CI
 
-`ci.yml`：install → `type-check` → `lint` → `test:unit` → `test:e2e`。任一失败即挡合并。
+`ci.yml` 三个 job，任一失败即挡合并：
+
+| job      | 内容                                                                                                                                                           |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check`  | install → `type-check` → `lint` → `format:check` → `check:tokens` → `test:unit:coverage` → E2E（`--grep-invert "a11y\|visual"`）→ `build:check` → `docs:build` |
+| `a11y`   | `test:e2e:a11y`（axe 四场景 + 键盘契约），独立红                                                                                                               |
+| `visual` | `test:e2e:visual` 截图 diff；缺本平台基线时先跑 `--update-snapshots` 并把产物上传为 `visual-baselines-linux`，提交后转为真正的 diff 门禁                       |
+
+截图基线按平台分目录（`snapshotPathTemplate` 里的 `{platform}`）：字体栅格化与抗锯齿跨 OS 不可比，同 OS 的 diff 才是有效门禁，所以 darwin 基线守护本地开发、linux 基线由 CI 首跑引导生成。
 
 ## 3. 设计 token 体系
 
@@ -267,6 +279,21 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 开闭原则：基础组件只通过 props/slot 扩展表现，新场景优先加 variant，不在业务侧复制样式。
 
+**键盘与焦点规范（S12 成文）**：这一类行为在 S11 之前只散落在个别组件里，现在定为契约，验收在 `tests/e2e/keyboard.spec.ts`（6 条）+ `tests/e2e/focus.spec.ts`（4 条）+ `tests/e2e/a11y.spec.ts`（axe 四场景 + 降级一条）。
+
+| 条目     | 规范                                                                                                                                                                                          | 落点                                                                        |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 焦点可见 | 键盘焦点一律走 token 环：`--raw-focus-width`（2px）+ `--raw-focus-ring`（accent 45% 混合），由 `main.css` 的 `:focus-visible` 一处定义；组件不得再写 `outline-none` 自废                      | `focus.spec.ts` 断言每一站 ≥2px 实线，且鼠标点击不套环                      |
+| Tab 顺序 | 与 DOM 顺序一致，不加正/负 `tabindex` 插队：壳层为顶栏 → 桌面 → Dock                                                                                                                          | `keyboard.spec.ts`「纯 Tab 可达」                                           |
+| Esc 退出 | 每个浮层都必须能从键盘原路退出：`OsDialog`→`@cancel`、`OsDrawer`→`@close`（S12 补）、`OsDropdown`/`OsPopconfirm`→内部 hide、Spotlight/通知中心→`closeOverlays()`                              | 对话框、抽屉、Spotlight 三条 E2E                                            |
+| 焦点归还 | 浮层关闭后焦点必须回到打开它的元素（记住 `document.activeElement`，卸载/关闭时 `focus()`，节点已消失则不动）。没有这条，键盘用户每关一次浮层就要从页头重新 Tab 一遍                           | `OsDialog.onBeforeUnmount` / `OsDrawer` 的 `watch(open)` / `Spotlight` 同构 |
+| 唤起键   | `⌘K`/`Ctrl+K` 是**开合开关**而不是只开有关（否则键盘用户无法用同一键位退出）                                                                                                                  | `App.vue` 的全局 keydown                                                    |
+| 方向键   | 列表型浮层用 `aria-current="true"` 标活动项（Spotlight 结果），树型结构支持上下移动 + 回车展开/选中（`OsTree`）                                                                               | `keyboard.spec.ts`、`tree.spec.ts`                                          |
+| 可访问名 | 无可见 label 的原生控件必须有名：录入族（`OsInput/OsInputNumber/OsTextarea/OsSelect/OsCheckbox`）走 `ariaLabel` 契约，`OsTree` 复选框取节点名，图标按钮（顶栏铃铛等）取 `aria-label`          | axe `label`/`button-name`/`select-name` 在四场景均为 0                      |
+| 动效降级 | `prefers-reduced-motion: reduce` 下时长统一压到 `--duration-reduced`（0.01ms）并取消入场位移，但**状态切换本身照常发生**——Vue 的 Transition 靠 `transitionend` 判定结束，降级不能把它一起关掉 | `a11y.spec.ts` 降级用例（窗口能开也能关 + 时长实测 ≤1ms）                   |
+
+未做（诚实记录，不在 S12 范围内）：浮层的**焦点陷阱**（Tab 循环锁在浮层内）与打开时自动聚焦首个可交互元素。`OsDialog`/`OsDrawer` 已声明 `aria-modal="true"`，但辅助技术之外，纯键盘仍可 Tab 到浮层背后的桌面元素。补这条要先定「谁负责 trap」（组件 vs 壳层），单独立项。
+
 ## 5. 目录结构增补
 
 ```text
@@ -289,14 +316,17 @@ tests/
 
 > 下表数字是 **S1~S6 打底完成时（2026-10-04）的基线快照**，不作为现状读数。当前组件数见 §4.2，各阶段增量与实测数（单测/E2E/包体）见《WebOS对标AntDesign迭代规划.md》§9。
 
-| 项            | 状态                 | 说明                                                                                                                                        |
-| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 工程规范      | 已完成（2026-10-04） | ESLint flat（vue/ts/prettier 兼容）+ Prettier + husky/lint-staged（lint-staged + type-check 门禁）                                          |
-| 单测基建      | 已完成（2026-10-04） | Vitest + happy-dom + @vue/test-utils；45 个用例（windowManager/vfs/notification/icons/layout/ui 契约）                                      |
-| E2E 冒烟      | 已完成（2026-10-04） | Playwright chromium 6 条冒烟（壳层/Dock 语义/交通灯/拖拽/Spotlight/布局刷新还原），替代手工点测                                             |
-| CI 门禁       | 已完成（2026-10-04） | `.github/workflows/ci.yml`：type-check → lint → unit → e2e；仓库暂无远端，CI 未实跑过，待首次 push 验证                                     |
-| 设计 token 化 | 已完成（2026-10-04） | `src/styles/tokens.css`（Tailwind `@theme`）；全仓硬编码色值/字号/阴影/时长已收敛，computed style 断言验证（玻璃/交通灯/文件类型/字号层级） |
-| 基础组件收口  | 已完成（2026-10-04） | `src/ui/` 五个组件落地并被 WindowFrame/TopBar/file-manager 消费，props/emit 契约有单测                                                      |
+| 项            | 状态                 | 说明                                                                                                                                             |
+| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 工程规范      | 已完成（2026-10-04） | ESLint flat（vue/ts/prettier 兼容）+ Prettier + husky/lint-staged（lint-staged + type-check 门禁）                                               |
+| 单测基建      | 已完成（2026-10-04） | Vitest + happy-dom + @vue/test-utils；45 个用例（windowManager/vfs/notification/icons/layout/ui 契约）                                           |
+| E2E 冒烟      | 已完成（2026-10-04） | Playwright chromium 6 条冒烟（壳层/Dock 语义/交通灯/拖拽/Spotlight/布局刷新还原），替代手工点测                                                  |
+| CI 门禁       | 已完成（2026-10-04） | `.github/workflows/ci.yml`：type-check → lint → unit → e2e；仓库暂无远端，CI 未实跑过，待首次 push 验证                                          |
+| 设计 token 化 | 已完成（2026-10-04） | `src/styles/tokens.css`（Tailwind `@theme`）；全仓硬编码色值/字号/阴影/时长已收敛，computed style 断言验证（玻璃/交通灯/文件类型/字号层级）      |
+| 基础组件收口  | 已完成（2026-10-04） | `src/ui/` 五个组件落地并被 WindowFrame/TopBar/file-manager 消费，props/emit 契约有单测                                                           |
+| 无障碍门禁    | 已完成（2026-10-05） | axe 四场景 serious/critical = 0（`BASELINE` 空表，只减不增）+ 键盘/焦点契约 10 条 + 对比度含暗色×4 预设与中性 `ink-mute`/`on-accent` 盲区        |
+| 视觉回归基线  | 已完成（2026-10-05） | `visual.spec.ts` 10 张组件级基线随仓库提交（`darwin/`），时钟冻结 + `reducedMotion` + `animations:'disabled'` 三处钉死不确定项，CI 独立 job 比对 |
+| 提交信息门禁  | 已完成（2026-10-05） | `commitlint` + `.husky/commit-msg`：中文全角冒号「类型：描述」，半角与自由文本实测被挡（exit=1）                                                 |
 
 **实施期对规范的修正（回写此处）**
 
@@ -305,3 +335,7 @@ tests/
 - 圆角不新增 token，直接消费 Tailwind 圆角刻度（原规范草案的 6/8/12/16 与 md/lg/xl/2xl 一致）。
 - `tsconfig.vitest.json` 同时覆盖 `tests/unit`、`tests/e2e` 与 `playwright.config.ts` 的类型检查（命名沿用 vitest）。
 - OsDialog 不带 `open` prop，由调用方 `v-if` 控显隐（与既有写法一致，避免双状态源）。
+- **S12**：视觉基线**按平台分目录**（`snapshotPathTemplate` 带 `{platform}`）。原计划「一套基线全平台比」经实测不成立——字体栅格化与抗锯齿跨 OS 不可比，同一份 UI 在 mac 与 ubuntu 上必然 diff；故 darwin 基线守护本地，linux 基线由 CI `visual` job 首跑 `--update-snapshots` 引导生成后提交。
+- **S12**：E2E 拆分没有按规划提的 `permission`/`data`/`theme-i18n`/`components` 四个名字落地，而是随各阶段按主题长出 17 个 spec（`shell/nav/apps/container/feedback/focus/theme/tree/observability/control-height/config/contrast/a11y/keyboard/visual/window/smoke`），`smoke.spec.ts` 只剩 1 条冷启动。口径改为「按主题分文件、单文件不混关注点」，命名与规划草案不同但目标已达成。
+- **S12**：「覆盖率加组件维度下限」落为**目录地板**（`src/ui/**` 85/78/85/88、`src/kernel/**` 65/58/70/68），不是逐组件「至少 N 条断言」——后者要为 41 件各写一条阈值，收益低于维护成本，且组件级断言密度已由 `tests/unit/contract-helpers.ts` 的同一组跨组件断言保证。
+- **S12**：CI 远端首跑**未执行**（用户决定「暂不推送」，见规划 §9 S12 条），workflow 三 job 配置已就绪，Actions 首跑由用户手动触发。
