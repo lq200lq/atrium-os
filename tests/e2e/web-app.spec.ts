@@ -1,9 +1,10 @@
-import { expect, test, type Page } from '@playwright/test'
-import { dockTile, gotoShell } from './helpers'
+import { expect, test } from '@playwright/test'
+import { addWebApp, dockTile, gotoShell, webWindow, webAppsSection } from './helpers'
 
 // 外部网页应用（embed 类目）的端到端门禁：决策 D2′ 说「iframe 只能作为这类应用的内容区」，
 // 那么「用户添加的站点真的在窗口里渲染出来了没有」就只能由 frame 内部的文本来证明——
 // 只看 iframe 元素存在会放过一整类失败（被 X-Frame-Options 拒了也是一样的空壳）。
+// 添加与定位三个助手已收进 helpers.ts（docs-deep-link 的守卫态用例共用同一条 UI 路径）。
 
 const FIXTURE = '/embed-demo.html'
 const FIXTURE_NAME = '本地夹具'
@@ -11,30 +12,6 @@ const FIXTURE_NAME = '本地夹具'
 test.beforeEach(async ({ page }) => {
   await gotoShell(page)
 })
-
-/** 应用中心 → 「网页应用」分区 */
-async function webAppsSection(page: Page) {
-  await page.locator(dockTile('应用中心')).click()
-  const win = page.locator('section.absolute').filter({ has: page.locator('[role="radiogroup"]') })
-  await expect(win).toBeVisible()
-  await win.locator('[role="radio"]', { hasText: '网页应用' }).click()
-  return win
-}
-
-async function addWebApp(page: Page, name: string, url: string) {
-  const win = await webAppsSection(page)
-  await win.getByRole('button', { name: '添加网页应用' }).click()
-  const dialog = page.getByRole('dialog')
-  await expect(dialog).toBeVisible()
-  await dialog.locator('input').nth(0).fill(name)
-  await dialog.locator('input').nth(1).fill(url)
-  await dialog.getByRole('button', { name: '确定' }).click()
-  await expect(dialog).toHaveCount(0)
-  return win
-}
-
-const webWindow = (page: Page) =>
-  page.locator('section.absolute').filter({ has: page.locator('iframe') })
 
 test('网页应用：添加后 Dock 出磁贴，窗口里 iframe 真的渲染出同源内容', async ({ page }) => {
   const win = await addWebApp(page, FIXTURE_NAME, `http://localhost:5199${FIXTURE}`)

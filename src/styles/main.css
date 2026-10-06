@@ -88,3 +88,51 @@ body {
     transform: translate(-50%, 0);
   }
 }
+
+/* 反嵌套降级页（渲染方：src/kernel/boot/embedGuard.ts，调用方：src/entry.ts）。
+ * 两处刻意的不合群：① 这页在内核之前渲染，拿不到 theme-v1，因此恒为浅色——一张说明页不值得
+ * 为它引入状态依赖；② 样式写成具名块而不是往 .ts 的字符串里塞 Tailwind 类，因为候选类要靠
+ * Tailwind 从源码文本里扫出来，赌它扫得到不如把样式放在一定生效的地方。
+ * 颜色/圆角/字号一律取 token，间距用 em 跟着字号走（窗口能缩放，这页也得跟着呼吸）。
+ * 居中用 flex + margin:auto 而不是 place-items:center：内容高于窗口时后者会把顶部裁掉。 */
+.embed-guard-page {
+  display: flex;
+  height: 100%;
+  padding: 2em 1.5em;
+  overflow: auto;
+  box-sizing: border-box;
+  background: var(--color-surface-sunken);
+  color: var(--color-ink);
+}
+
+.embed-guard {
+  margin: auto;
+  max-width: 34em;
+  padding: 2em 2.25em;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-window);
+  font-size: var(--text-ui);
+  line-height: 1.6;
+}
+
+.embed-guard h1 {
+  margin: 0 0 1em;
+  font-size: var(--text-heading-1);
+  line-height: var(--text-heading-1--line-height);
+  font-weight: var(--font-weight-strong);
+}
+
+.embed-guard p {
+  margin: 0 0 1em;
+}
+
+/* 第二段是同一句话的另一语言，降一级墨色让主次分明（撞名门禁管不到的那类层级问题） */
+.embed-guard__alt {
+  color: var(--color-ink-mute);
+}
+
+.embed-guard a {
+  color: var(--color-accent-strong);
+}

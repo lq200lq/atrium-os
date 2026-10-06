@@ -11,7 +11,6 @@ import { useWebApps } from './kernel/stores/webApps'
 import { useWindowManager } from './kernel/stores/windowManager'
 import { useErrorLog } from './kernel/observability/errorLog'
 import { i18n } from './i18n'
-import './styles/main.css'
 
 // 自动收集应用 manifest：新增/删除一个 apps/<id>/manifest.ts 即自动注册/注销，无需改此处
 const manifestModules = import.meta.glob<{ manifest: AppManifest }>('./apps/*/manifest.ts', {
@@ -59,17 +58,6 @@ void Promise.all([session.restore(), settings.restore(), errorLog.restore(), web
     for (const rec of webApps.items) registry.register(webApps.toManifest(rec))
     return Promise.all([vfs.init(), theme.restore(), wm.restoreLayout()])
   })
-  .then(() => {
-    // 反嵌套守卫：Vite 的 SPA fallback 会把本站无扩展名路径（`/docs/`、`/docs/tokens`）当路由回退成
-    // WebOS 自己的 index.html，同源 embed 入口于是把整套 shell 套进自己的窗口——而内层与外层共用
-    // 同一份 IndexedDB，布局一起「复活」成嵌套两层的同一个系统。同源入口必须带扩展名，这里兜住漏网。
-    if (window.self !== window.top) {
-      document.title = '不支持嵌入本站'
-      const root = document.getElementById('app')
-      if (root)
-        root.textContent =
-          '本站不支持被自己嵌入：同源入口请写成带扩展名的地址（如 /docs/index.html）'
-      return
-    }
-    app.mount('#app')
-  })
+  // 这里不再有「被嵌入就不挂载」的判断：那件事已经由 src/entry.ts 在启动之前挡掉，
+  // 走到这份文件的文档一定是顶层窗口（否则整套内核连求值都不会求）。
+  .then(() => app.mount('#app'))

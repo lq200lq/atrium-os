@@ -4,7 +4,7 @@ import { readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const DIST = join(process.cwd(), 'dist', 'assets')
-// gzip 前的原始字节阈值（KB）。首屏只加载 index + vue + vendor，应用按需异步加载。
+// gzip 前的原始字节阈值（KB）。首屏加载入口、壳层启动主体与 vue/vendor，应用按需异步加载。
 const MAX_CHUNK_KB = 260
 const MAX_ENTRY_TOTAL_KB = 700
 
@@ -36,11 +36,13 @@ for (const a of assets) {
   }
 }
 
-// 首屏总量 = index 入口 + 手动分包 vue/vendor（应用 chunk 为异步、不计入首屏）
-const entryNames = assets.filter((a) => /^(index|vue|vendor)-/.test(a.name))
+// 首屏总量 = 入口 + 壳层启动主体 + 手动分包 vue/vendor（应用 chunk 为异步、不计入首屏）。
+// main 必须算进来：`src/entry.ts` 在顶层窗口里无条件 `import('./main')`，它只是从入口的静态图里
+// 挪到了动态一跳，字节一分没少。漏掉它，首屏读数会凭空小掉整个壳层（约 90KB）。
+const entryNames = assets.filter((a) => /^(index|main|vue|vendor)-/.test(a.name))
 const entryTotal = entryNames.reduce((s, a) => s + a.kb, 0)
 console.log(
-  `[bundle] 首屏总量（index+vue+vendor）：${fmt(entryTotal)} / 预算 ${MAX_ENTRY_TOTAL_KB}KB`,
+  `[bundle] 首屏总量（index+main+vue+vendor）：${fmt(entryTotal)} / 预算 ${MAX_ENTRY_TOTAL_KB}KB`,
 )
 if (entryTotal > MAX_ENTRY_TOTAL_KB) {
   console.error(`[bundle] ✗ 首屏总量 ${fmt(entryTotal)} 超过预算 ${MAX_ENTRY_TOTAL_KB}KB`)

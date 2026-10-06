@@ -7,7 +7,8 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
  * 1. 写成带扩展名的真文件地址（本例 `/docs/index.html`）最稳——不经过重写直接命中静态文件；
  * 2. `/docs/`、`/docs/components/`、`/docs/tokens` 这类目录根或无扩展名深链，由 vite.config.ts 的
  *    serve-embedded-docs 中间件按「真文件存在才重写」接住，dev 与 preview 同一条规则；
- * 3. 前两层都没兜住的（页面真不存在）落 main.ts 的反嵌套守卫——它给的是可读的降级说明，不是内容。
+ * 3. 前两层都没兜住的（页面真不存在、或干脆指向本站根路径）落 src/entry.ts 的反嵌套守卫：它在内核之前
+ *    分叉，只渲染一张按成因分两态的降级页，不启动任何 store。它给的是可读的处方，不是内容。
  */
 export const manifest: AppManifest = {
   id: 'docs-center',
