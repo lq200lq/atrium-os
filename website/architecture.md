@@ -31,7 +31,7 @@ const layers = [
     title: '内核',
     items: ['stores', 'data', 'fs', 'bus', 'observability', 'icons', 'layout', 'webapp'],
   },
-  { name: 'ui', title: '基础组件', items: ['18 个 Os* 组件', '消费语义 token'] },
+  { name: 'ui', title: '基础组件', items: ['41 个 Os* 组件', '消费语义 token'] },
 ]
 </script>
 

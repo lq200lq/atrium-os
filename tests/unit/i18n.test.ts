@@ -105,3 +105,27 @@ describe('文案可被消息编译器接受', () => {
     expect(EN_KEYS).toHaveLength(ZH_KEYS.length)
   })
 })
+
+/** 收集某子树下的叶子 [key, 取值]，用于按「取值」找撞名 */
+function leafEntries(tree: Record<string, unknown>, prefix = ''): [string, string][] {
+  return Object.entries(tree).flatMap(([k, v]) =>
+    v && typeof v === 'object'
+      ? leafEntries(v as Record<string, unknown>, prefix ? `${prefix}.${k}` : k)
+      : [[prefix ? `${prefix}.${k}` : k, String(v)] as [string, string]],
+  )
+}
+
+// key 齐平管的是「有没有」，管不到「撞名」：docEditor 与 docsCenter 都写成 'Docs' 时两份语言包
+// 依旧齐平、编译也不报错，但英文界面上是两个互不相干的应用共用一个名字，Dock 与窗口标题都分不出来。
+describe('应用名在同一语言内不撞名', () => {
+  for (const [locale, messages] of [
+    ['zh-CN', zhCN],
+    ['en-US', enUS],
+  ] as const) {
+    it(`${locale} 的 apps.* 取值互不相同`, () => {
+      const entries = leafEntries(messages.apps as Record<string, unknown>, 'apps')
+      const clash = entries.filter(([, v]) => entries.filter(([, o]) => o === v).length > 1)
+      expect(clash.map(([k, v]) => `${k} = ${v}`).sort(), 'apps.* 出现重名应用').toEqual([])
+    })
+  }
+})

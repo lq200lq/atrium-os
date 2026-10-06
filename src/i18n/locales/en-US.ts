@@ -101,7 +101,7 @@ export default {
   },
   apps: {
     fileManager: 'Files',
-    docEditor: 'Docs',
+    docEditor: 'Doc Editor',
     aiAssistant: 'AI Assistant',
     appCenter: 'App Center',
     settings: 'Settings',

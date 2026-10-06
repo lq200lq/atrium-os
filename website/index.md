@@ -17,7 +17,7 @@ features:
   - title: 权限模型
     details: 权限点为主、角色为集合，canAccessApp 单一判定收口所有派生入口，wm.open 未授权留痕通知中心。
   - title: 组件纵深
-    details: 18 个 src/ui 组件覆盖表格/表单/反馈/录入/展示，component-gallery 可视化验收。
+    details: 41 个 src/ui 组件覆盖表格/表单/反馈/录入/展示，component-gallery 可视化验收。
   - title: 数据访问层
     details: Query/Page/DataSource 契约 + applyQuery 纯函数，fixture/vfs 两实现共用契约单测，三态规范内建。
   - title: 主题与国际化
