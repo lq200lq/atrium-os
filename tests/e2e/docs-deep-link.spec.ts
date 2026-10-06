@@ -46,6 +46,15 @@ test('文档站内链盘点：目录根 / 尾斜杠分区 / 无扩展名叶子�
   expect(hrefs).toContain(EXTENSIONLESS)
 })
 
+test('文档站搜索确实生效：frame 内有触发件，且中文站不留英文默认文案', async ({ page }) => {
+  const frame = await openDocsCenter(page)
+  // VitePress 只在 search.provider='local' 时渲染这件，所以这条锁的是「配了且真的装上了」
+  const trigger = frame.locator('.VPNavBarSearch button')
+  await expect(trigger).toBeVisible()
+  // buttonText 同时驱动触发件文案与弹窗 placeholder：不配 translations 这里就是 "Search"
+  await expect(trigger).toContainText('搜索文档')
+})
+
 for (const [label, path] of [
   ['目录根（logo 形态）', DIRECTORY_ROOT],
   ['带尾斜杠的分区（nav 形态）', SECTION_ROOT],

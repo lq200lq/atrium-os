@@ -66,7 +66,7 @@ export const manifest: AppManifest = {
   id: 'docs-center',
   name: '文档中心',
   icon: 'book-open',
-  embed: { url: '/docs/index.html' }, // 同源入口必须带扩展名；用户添加的应用指向外部站点
+  embed: { url: '/docs/index.html' }, // 带扩展名的真文件地址最稳；用户添加的应用指向外部站点
   window: { w: 900, h: 640, minW: 520, minH: 360 },
   singleton: true,
   order: 45,
@@ -78,7 +78,10 @@ export const manifest: AppManifest = {
 - **地址在写入边界校验**：`kernel/webapp/url.ts` 用**正向协议白名单**只放 `http:`/`https:`（`new URL('javascript:alert(1)')` 是能解析成功的，反向黑名单必漏），剥凭证、限长 2048。
 - **沙箱取值是有意的**：给 `allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-presentation`，**不给 `allow-top-navigation`**——外部页面不能把整个系统顶掉。`allow-scripts`+`allow-same-origin` 只对同源文档构成逃逸，而外部地址按构造是第三方。
 - **跨源读不到，不假装能读**：窗口标题恒为 `manifest.name`，没有前进/后退/URL 回读，暗色主题不注入 frame。被 `X-Frame-Options`/CSP `frame-ancestors` 拒绝时 frame 里只剩一个父页读不到的空文档且照常触发 `load`，**无法可靠检测**，所以 `EmbedView` 只做「超时 → 警示态 + 重试 + 新标签页打开」，不谎称识别出了拒绝。实测：嵌 `https://www.google.com`（`x-frame-options: SAMEORIGIN`）时 frame 照样拿到 200、`load` 照常触发，界面停在就绪态、画面空白——这是正确行为，任何伪检测都会连带误伤能正常嵌入的站点；限制因此在两处明示：添加/编辑弹窗的说明文案，与窗口工具栏常驻的「重试 / 新标签页打开」出口。
-- **同源入口必须带扩展名**：`/docs/index.html` 可以，`/docs/` 与 `/docs/tokens` 不行——Vite dev 的 SPA fallback 会把未知路径落回本应用 `index.html`，那样 frame 里装的是 **WebOS 壳层自己**（壳套壳）。因此 `main.ts` 判断 `window.self !== window.top`，被嵌入时不挂载，只留一行说明；用户手填指向本站根路径的地址也会撞上同一条，这道判断是系统性的。
+- **同源入口有三层，各管一段**：① 带扩展名的真文件地址（`/docs/index.html`）最稳，不经重写直接命中静态服务；② 目录根与无扩展名深链（`/docs/`、`/docs/components/`、`/docs/tokens`）由 `vite.config.ts` 的内联插件 `serve-embedded-docs` 按**存在性**重写——命中 `<path>.html` 或 `<path>/index.html` 才改 `req.url`，dev 查 `public/docs`、preview 查 `dist/docs`；③ 两层都没兜住的落 `main.ts` 的反嵌套守卫（`window.self !== window.top` 时壳层不挂载，只给一行说明）。为什么需要 ②：Vite 服务 `public/`/`dist/` 的 sirv 配了 `extensions: []`，`htmlFallbackMiddleware` 又只看项目根，而文档站开了 `cleanUrls`，首页内链**全是**无扩展名或目录根形态——改 `cleanUrls: false` 也救不了 logo 的 `normalizeLink('/')` 与带尾斜杠的 nav。
+- **文档站首开即有内容**：`public/docs` 是生成物且 gitignore，`npm run dev` 挂了 `predev`（缺产物才 `vitepress build` + 复制，实测 1.6s），Playwright 的 webServer 走同一条命令，因此不挂 `pretest:e2e` 的 a11y/visual job 也不会撞上「iframe 里只有一行裸文本」。
+- **文档站有站内搜索，⌘K 的归属要说清**：`website/.vitepress/config.ts` 开了 `themeConfig.search.provider = 'local'`（VitePress 不自带搜索，不配就没有；默认件文案是英文，中文站要一并配 `options.translations`）。热键 `⌘K`/`Ctrl+K` 与 `/` 和 WebOS Spotlight **同名但不冲突**——键盘事件只在获得焦点的那个 document 上派发，不跨 frame 边界。用户可感知的唯一一点：焦点进了 frame 之后 ⌘K 开的是文档站内搜索，要用 Spotlight 得先点回壳层。**这不是 bug，别去父层接管 frame 快捷键**——那等于给 embed 类目开同源专属特权，违反「chrome 对类目一无所知」。搜索索引与 `minisearch`/`mark.js`/`focus-trap` 全是 VitePress 自带依赖，只落 `dist/docs`（实测新增 2 个懒加载 chunk ≈ 201KB，`scripts/check-bundle.mjs` 只扫 `dist/assets`），OS 首屏预算不受影响。
+- **a11y 与视觉门禁的扫描面不含文档站正文**（含它的搜索弹窗）：`tests/e2e/a11y.spec.ts` 刻意不打开文档中心窗口——axe 会下钻同源 iframe，VitePress 自有页面的可访问性问题不该记在壳层门禁的头上。
 - **不要在应用里自写 iframe**，也不要与 frame 内容建 `postMessage` 通道（本阶段没有这个协议）。
 
 ## 应用内可用的能力
