@@ -3,9 +3,11 @@ import type { AppManifest } from '@/kernel/stores/appRegistry'
 /**
  * embed 类目的官方样板（决策 D2′）：没有 entry，只有 embed——渲染组件由 appRegistry 合成。
  *
- * 地址必须带扩展名：Vite 的 SPA fallback 会把 `/docs/` 这类无扩展名路径回退到 **WebOS 自己的**
- * index.html，同源相对入口因此在 shell 里自套壳。构建产物里 `/docs/index.html` 是真文件，命中前。
- * main.ts 的反嵌套守卫是这条约束的第二道保险，不是替代它。
+ * 同源入口有三层，各管一段，别把任何一层当硬约束：
+ * 1. 写成带扩展名的真文件地址（本例 `/docs/index.html`）最稳——不经过重写直接命中静态文件；
+ * 2. `/docs/`、`/docs/components/`、`/docs/tokens` 这类目录根或无扩展名深链，由 vite.config.ts 的
+ *    serve-embedded-docs 中间件按「真文件存在才重写」接住，dev 与 preview 同一条规则；
+ * 3. 前两层都没兜住的（页面真不存在）落 main.ts 的反嵌套守卫——它给的是可读的降级说明，不是内容。
  */
 export const manifest: AppManifest = {
   id: 'docs-center',

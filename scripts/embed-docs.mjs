@@ -7,7 +7,7 @@
  * VitePress 的 base 已设为 `/docs/`（website/.vitepress/config.ts），产物内的资源路径因此能对上。
  *
  *   node scripts/embed-docs.mjs              # 缺产物就先 vitepress build，再复制
- *   node scripts/embed-docs.mjs --if-missing # public/docs 已存在则跳过（E2E 前置，避免每次都重建）
+ *   node scripts/embed-docs.mjs --if-missing # public/docs 已存在则跳过（dev/E2E 前置，避免每次都重建）
  */
 import { existsSync, rmSync, cpSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -18,7 +18,10 @@ const SRC = join(ROOT, 'website', '.vitepress', 'dist')
 const DEST = join(ROOT, 'public', 'docs')
 const INDEX = 'index.html'
 
-if (process.argv[2] === '--if-missing' && existsSync(join(DEST, INDEX))) {
+// 认旗标而不是认位序：按 `argv[2]` 读等于把旗标绑死在参数位次上，将来任何在它前面插参的调用形态
+// 都会让 --if-missing 静默失效、predev 退化成每次冷启动重建。实测 npm 11.13 不给 pre-hook 转
+// `dev -- --port …` 的额外参数（所以今天两种写法都对），但插参之后就只剩这一种仍然对。
+if (process.argv.includes('--if-missing') && existsSync(join(DEST, INDEX))) {
   console.log('[embed-docs] public/docs 已就绪，跳过（改文档后跑 npm run docs:embed 刷新）')
   process.exit(0)
 }
