@@ -2,6 +2,30 @@
   "name": "atrium-os",
   "private": true,
   "version": "0.1.0",
+  "description": "Atrium OS：浏览器内桌面 OS 形态的纯前端企业级脚手架（Vue 3 + Vite + Pinia + Tailwind CSS）",
+  "license": "Apache-2.0",
+  "keywords": [
+    "atrium-os",
+    "webos",
+    "desktop-os",
+    "vue3",
+    "vite",
+    "pinia",
+    "tailwindcss",
+    "frontend-scaffold",
+    "component-library"
+  ],
+  "homepage": "https://github.com/lq200lq/atrium-os#readme",
+  "bugs": {
+    "url": "https://github.com/lq200lq/atrium-os/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lq200lq/atrium-os.git"
+  },
+  "engines": {
+    "node": ">=24"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -34,7 +58,6 @@
     "docs:preview": "vitepress preview website",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "changeset publish",
     "prepare": "husky"
   },
   "lint-staged": {
