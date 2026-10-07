@@ -93,6 +93,8 @@ const NEUTRAL_PAIRS = [
   { fg: '--color-ink-mute', bg: '--color-accent-bg' },
   { fg: '--color-ink-mute', bg: '--color-fill' },
   { fg: '--color-on-accent', bg: '--color-accent' },
+  // S13 实填主按钮：深一档 accent-fill 底 + 白字（--raw-mix-lighten 明暗两主题都是 #fff）
+  { fg: '--raw-mix-lighten', bg: '--color-accent-fill' },
 ]
 
 test.describe('中性文本与实底前景对比度（S12 axe 盲区）', () => {

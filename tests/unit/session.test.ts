@@ -64,7 +64,7 @@ describe('session 权限模型', () => {
   it('编辑者命中权限点后可编辑应用', () => {
     const session = useSession()
     session.setUser('editor')
-    expect(session.canAccessApp(useAppRegistry().byId('editor-app'))).toBe(true)
+    expect(session.canAccess(useAppRegistry().byId('editor-app'))).toBe(true)
     expect(useAppRegistry().accessibleApps).toHaveLength(2)
   })
 

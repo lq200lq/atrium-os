@@ -13,7 +13,7 @@ describe('OsButton', () => {
   it('variant 决定样式', () => {
     const primary = mount(OsButton, { props: { variant: 'primary' } })
     const danger = mount(OsButton, { props: { variant: 'danger' } })
-    expect(primary.classes()).toContain('bg-accent')
+    expect(primary.classes()).toContain('bg-accent-fill')
     expect(danger.classes()).toContain('text-danger')
   })
 

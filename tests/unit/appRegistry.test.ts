@@ -56,6 +56,16 @@ describe('appRegistry 注册契约与排序', () => {
     expect(registry.dockApps.map((a) => a.id)).toEqual(['shown'])
   })
 
+  it('dockAnchors/dockRest 按 manifest.dockAnchor 分组且互补覆盖全部 Dock 应用', () => {
+    const registry = useAppRegistry()
+    registry.register(manifest('launcher', { order: 40, dockAnchor: true }))
+    registry.register(manifest('a', { order: 10 }))
+    registry.register(manifest('b', { order: 20 }))
+    registry.register(manifest('off', { order: 1, dock: false }))
+    expect(registry.dockAnchors.map((a) => a.id)).toEqual(['launcher'])
+    expect(registry.dockRest.map((a) => a.id)).toEqual(['a', 'b'])
+  })
+
   it('embed 类目没有 entry，注册时合成内置 EmbedView', async () => {
     const registry = useAppRegistry()
     registry.register({

@@ -13,10 +13,10 @@ import { dockTile, gotoShell } from './helpers'
 const BASELINE: Record<string, string[]> = {}
 
 async function scan(page: Page, scenario: string): Promise<string[]> {
-  // axe 读的是即时计算样式：窗口入场动画没跑完时，半透明的玻璃层会把背景混淡，对比度读数随之漂移
-  // （settings 场景曾偶发 4.15:1 就是这么来的）。等过渡类撤下再扫，量到的才是稳定态。
+  // axe 读的是即时计算样式：入场/离场动画没跑完时，半透明的玻璃层（窗口、抽屉、吐司）会把背景混淡，
+  // 对比度读数随之漂移（settings 与小组件库都撞过 4.x:1 的偶发失败）。等所有过渡类撤下再扫。
   await page.waitForFunction(
-    () => !document.querySelector('.win-enter-active, .win-leave-active'),
+    () => !document.querySelector('[class*="-enter-active"], [class*="-leave-active"]'),
     null,
     { timeout: 5000 },
   )
@@ -58,6 +58,40 @@ test('Spotlight 浮层：输入框与结果列表', async ({ page }) => {
   await page.keyboard.press('Control+k')
   await expect(page.locator('input[placeholder="搜索应用与文件…"]')).toBeVisible()
   expectClean('spotlight', await scan(page, 'spotlight'))
+})
+
+test('小组件库抽屉：实例配置与种类列表', async ({ page }) => {
+  await gotoShell(page)
+  await page.mouse.click(320, 620, { button: 'right' })
+  await page.getByRole('button', { name: '添加小组件' }).click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  expectClean('widget-gallery', await scan(page, 'widget-gallery'))
+})
+
+test('小组件中心窗口：种类台账与实例两段', async ({ page }) => {
+  await gotoShell(page)
+  await page.locator(dockTile('小组件中心')).click()
+  // 窗口本身是 section.absolute：面板内的分区也是 section，按 absolute 收窄到窗口
+  await expect(page.locator('section.absolute').filter({ hasText: '桌面上的小组件' })).toBeVisible()
+  expectClean('widget-center', await scan(page, 'widget-center'))
+})
+
+test('小组件卡片右键菜单：玻璃弹层与条目', async ({ page }) => {
+  await gotoShell(page)
+  await page.locator('[data-widget-kind="clock"]').click({ button: 'right' })
+  await expect(page.locator('[data-shell-menu]')).toBeVisible()
+  expectClean('widget-menu', await scan(page, 'widget-menu'))
+})
+
+test('小组件卡片配置弹层：schema 字段与页脚按钮', async ({ page }) => {
+  await gotoShell(page)
+  // 配置面此前从未进过 axe 的视野：抽屉那条只开到收起态的实例行，面板要「管理小组件…」定位才展开。
+  // 取待办是因为它在桌面种子里、面板走 schema 缺省渲染（时钟那张是 `configEntry` 自绘），
+  // 而 boolean 字段渲染出的 `OsSwitch` 是四类控件里此前唯一没传可访问名的那一个（另三类一直传）。
+  await page.locator('[data-widget-kind="todos"]').click({ button: 'right' })
+  await page.locator('[data-shell-menu]').getByRole('button', { name: '配置', exact: true }).click()
+  await expect(page.getByRole('dialog', { name: '今日待办 配置' })).toBeVisible()
+  expectClean('widget-config', await scan(page, 'widget-config'))
 })
 
 test('组件陈列：逐页签扫描全量组件', async ({ page }) => {

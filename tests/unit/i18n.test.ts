@@ -129,3 +129,23 @@ describe('应用名在同一语言内不撞名', () => {
     })
   }
 })
+
+// 小组件同理（§9 T7）：两个 kind 共用一个显示名时，桌面卡片、目录行与「⋯」菜单全部分不出彼此。
+// T9 的去重只管 widgets.descriptions.*，names 落在它和上面的 apps 用例之间，是第三条独立判据。
+describe('小组件名在同一语言内不撞名', () => {
+  for (const [locale, messages] of [
+    ['zh-CN', zhCN],
+    ['en-US', enUS],
+  ] as const) {
+    it(`${locale} 的 widgets.names.* 取值互不相同`, () => {
+      const names = leafEntries(messages.widgets as Record<string, unknown>, 'widgets').filter(
+        ([key]) => key.startsWith('widgets.names.'),
+      )
+      expect(names.length).toBeGreaterThan(5)
+      const clash = names.filter(([, v]) => names.filter(([, o]) => o === v).length > 1)
+      expect(clash.map(([k, v]) => `${k} = ${v}`).sort(), 'widgets.names.* 出现重名小组件').toEqual(
+        [],
+      )
+    })
+  }
+})

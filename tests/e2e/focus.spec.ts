@@ -59,11 +59,14 @@ test('鼠标点击不套键盘焦点环', async ({ page }) => {
 
 test('焦点基线规则随样式表发布', async ({ page }) => {
   const found = await page.evaluate(() => {
-    // Tailwind 把基线规则放在 @layer base 里，需要递归进分组规则
+    // Tailwind 把基线规则放在 @layer base 里，需要递归进分组规则。
+    // 选择器按精确值认，不按「第一条含 :focus-visible 的规则」认——工具类（如某个件里的
+    // `focus-visible:opacity-100`）会编译成 `.focus-visible\:opacity-100:focus-visible`，
+    // 排在基线之前，靠顺序判就会把「基线没发布」和「有人多写了一个变体」混成同一个红。
     const walk = (rules: CSSRuleList): string | null => {
       for (const rule of Array.from(rules)) {
         const style = rule as CSSStyleRule
-        if (style.selectorText?.includes(':focus-visible')) return style.cssText
+        if (style.selectorText?.trim() === ':focus-visible') return style.cssText
         const group = rule as CSSGroupingRule
         if (group.cssRules?.length) {
           const nested = walk(group.cssRules)

@@ -73,6 +73,24 @@ describe('设计 token 审计（S7 门禁）', () => {
     expect(good).toBeUndefined()
   })
 
+  /**
+   * 作用域规则（`rule.scope`）：同一段写法在 `src/widgets/` 里违规、在 `src/ui/` 里合法。
+   * Good.vue 就带一个 `text-micro`（上一个用例断言它整体不被报＝件外不误伤），
+   * WidgetInk.vue 带 `text-white` + `text-micro`＝件内两条都要抓——件的前景三档与文字地板（指南 §10-9/§10-11）
+   * 从「只有人评审」变成有腿的门禁。
+   */
+  it('件内前景档只在 src/widgets 下命中（widget-foreground 作用域规则）', () => {
+    const result = audit(fixtureRoot)
+    const hits = result.json.report
+      .flatMap((r) => r.violations.map((v) => ({ ...v, file: r.file })))
+      .filter((v) => v.rule === 'widget-foreground')
+    const inWidget = hits.filter((v) => v.file.endsWith('WidgetInk.vue'))
+    expect(inWidget.map((v) => v.match).sort()).toEqual(['text-micro', 'text-white'])
+    expect(hits.length, '除件内那两条之外不该有别的命中（件外的 micro 档合法）').toBe(
+      inWidget.length,
+    )
+  })
+
   it('真实仓库无裸值违规（S7 验收口径：一致性=裸值清零）', () => {
     const result = audit(join(here, '../..'))
     const detail = result.json.report

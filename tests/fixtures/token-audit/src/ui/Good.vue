@@ -10,4 +10,6 @@
   >
     allowed
   </span>
+  <!-- micro 档在件外合法（应用与壳层用它标次级元信息）；只有 src/widgets/ 下才禁 -->
+  <p class="text-micro">metainfo outside widgets is fine</p>
 </template>
