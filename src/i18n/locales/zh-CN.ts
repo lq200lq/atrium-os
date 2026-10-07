@@ -331,6 +331,14 @@ export default {
     quickPlan: '帮我制定智慧园区方案',
     inputPlaceholder: '输入你的问题…',
     send: '发送',
+    greeting:
+      '你好！我是「Atrium OS」的 AI 助手。点击下方快捷指令，我会生成一份文档并通过 CommandBus 唤起文档编辑器。',
+    thinking: '思考中…',
+    placeholderReply: '（占位回复）已收到：{text}',
+    planUserMsg: '帮我制定一个智慧园区数字化解决方案',
+    planDone: '方案已生成并保存到「我的文件」，可打开编辑：',
+    planFailed: '文档写入没有成功，方案没有生成。',
+    planSaved: '文档已生成',
   },
   docEditor: {
     noFile: '未关联文件',

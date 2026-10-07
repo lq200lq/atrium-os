@@ -361,6 +361,14 @@ export default {
     quickPlan: 'Draft a smart campus plan',
     inputPlaceholder: 'Type your question…',
     send: 'Send',
+    greeting:
+      'Hi! I’m the AI assistant of “Atrium OS”. Use a quick command below and I’ll draft a document you can edit in the doc editor.',
+    thinking: 'Thinking…',
+    placeholderReply: '(stub reply) Got it: {text}',
+    planUserMsg: 'Draft a smart campus digital solution',
+    planDone: 'The draft is saved to “My Files” — open it to edit:',
+    planFailed: 'The document could not be written, so no draft was created.',
+    planSaved: 'Document generated',
   },
   docEditor: {
     noFile: 'No file linked',
