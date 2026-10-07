@@ -5,9 +5,6 @@
   "src/apps/ai-assistant/manifest.ts": {
     "palette-class": 1
   },
-  "src/apps/app-center/App.vue": {
-    "palette-class": 1
-  },
   "src/apps/app-center/manifest.ts": {
     "palette-class": 1
   },
@@ -26,10 +23,46 @@
   "src/apps/settings/manifest.ts": {
     "palette-class": 1
   },
-  "src/shell/Dock.vue": {
+  "src/apps/today/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/apps/widget-center/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/components/OsAppTile.vue": {
     "palette-class": 1
   },
   "src/shell/TopBar.vue": {
+    "palette-class": 1
+  },
+  "src/widgets/calendar/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/clock/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/control-center/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/data-summary/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/notification-summary/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/recent-files/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/sticky-note/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/storage/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/system/manifest.ts": {
+    "palette-class": 1
+  },
+  "src/widgets/todos/manifest.ts": {
     "palette-class": 1
   }
 }

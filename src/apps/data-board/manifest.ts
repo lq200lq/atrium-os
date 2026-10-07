@@ -5,7 +5,7 @@ export const manifest: AppManifest = {
   name: '数据看板',
   nameKey: 'apps.dataBoard',
   icon: 'file-spreadsheet',
-  tint: 'from-emerald-500 to-teal-600',
+  tint: 'from-emerald-700 to-teal-800',
   entry: () => import('./App.vue'),
   window: { w: 760, h: 540, minW: 560, minH: 420 },
   singleton: true,

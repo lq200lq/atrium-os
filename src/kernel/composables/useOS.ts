@@ -15,7 +15,7 @@ export function useOS() {
     open: (appId: string, payload?: unknown) => wm.open(appId, payload),
 
     /** 唯一鉴权判定入口：当前会话是否可访问某应用 */
-    can: (appId: string) => session.canAccessApp(registry.byId(appId)),
+    can: (appId: string) => session.canAccess(registry.byId(appId)),
 
     exec(cmd: string, payload?: unknown): boolean {
       if (cmd.endsWith(OPEN_SUFFIX)) {

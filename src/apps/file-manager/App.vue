@@ -3,8 +3,16 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import OsIcon from '@/components/OsIcon.vue'
 import { commandBus } from '@/kernel/bus/commandBus'
 import { useOS } from '@/kernel/composables/useOS'
+import { useWindowContext } from '@/kernel/composables/useWindowContext'
 import { createVfsDataSource } from '@/kernel/data/vfsDataSource'
-import { baseName, formatSize, isUnderTrash, TRASH_ROOT, type FsNode } from '@/kernel/fs/types'
+import {
+  baseName,
+  formatSize,
+  isUnderTrash,
+  parentOf,
+  TRASH_ROOT,
+  type FsNode,
+} from '@/kernel/fs/types'
 import { fileIconClass, fileIconName } from '@/kernel/icons'
 import { useVfs } from '@/kernel/stores/vfs'
 import OsBreadcrumb from '@/ui/OsBreadcrumb.vue'
@@ -217,6 +225,35 @@ function onRestore() {
   selected.value = []
   if (node?.trashedFrom) vfs.restore(path)
 }
+
+/* ── 消费下钻 payload（§4.9 依赖清单 2）：open('file-manager', { path, key }) 直达并选中该路径 ──
+ * recent-files 带文件路径、storage 带分类目录；`key` 是窗口身份（多实例复用只在 key 匹配时发生），
+ * 约定一律 { path, key }（§8 偏差 7）。
+ * 沿用既有导航：目录 → navigate；文件 → 进父目录并选中该行，同时展开侧栏树祖先。 */
+const { win } = useWindowContext()
+const payloadPath = computed(() => (win.value?.payload as { path?: string } | undefined)?.path)
+
+function revealPath(path: string) {
+  const node = vfs.byPath(path)
+  if (!node) return // 路径已不存在（比如文件被移走）：保持当前视图，不乱跳
+  const dir = node.type === 'dir' ? path : parentOf(path)
+  navigate(dir)
+  if (node.type === 'file') selected.value = [path]
+  // 展开侧栏目录树祖先，让落点在导航里可见（根节点恒可见，从第二段起补）
+  const parts = dir.split('/').filter(Boolean)
+  const ancestors: string[] = []
+  for (let i = 2; i <= parts.length; i++) ancestors.push(`/${parts.slice(0, i).join('/')}`)
+  treeExpanded.value = [...new Set([...treeExpanded.value, ...ancestors])]
+}
+
+// VFS 晚于本组件就绪（首屏并发还原）；窗口复用时 payload 变化也会再次触发
+watch(
+  [payloadPath, () => vfs.ready],
+  ([p, ready]) => {
+    if (p && ready) revealPath(p)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>

@@ -8,12 +8,19 @@ import { useSettings } from './kernel/stores/settings'
 import { useTheme } from './kernel/stores/theme'
 import { useVfs } from './kernel/stores/vfs'
 import { useWebApps } from './kernel/stores/webApps'
+import { useWidgetRegistry, type WidgetManifest } from './kernel/stores/widgetRegistry'
+import { useWidgets } from './kernel/stores/widgets'
 import { useWindowManager } from './kernel/stores/windowManager'
 import { useErrorLog } from './kernel/observability/errorLog'
 import { i18n } from './i18n'
 
 // 自动收集应用 manifest：新增/删除一个 apps/<id>/manifest.ts 即自动注册/注销，无需改此处
 const manifestModules = import.meta.glob<{ manifest: AppManifest }>('./apps/*/manifest.ts', {
+  eager: true,
+})
+
+// 小组件同一条约定：新增/删除 src/widgets/<id>/manifest.ts 即自动注册/注销
+const widgetModules = import.meta.glob<{ manifest: WidgetManifest }>('./widgets/*/manifest.ts', {
   eager: true,
 })
 
@@ -25,6 +32,12 @@ app.use(i18n)
 const registry = useAppRegistry(pinia)
 for (const mod of Object.values(manifestModules)) {
   registry.register(mod.manifest)
+}
+
+// 小组件 kind 全是构建期声明：注册同步完成，早于任何 restore()
+const widgetRegistry = useWidgetRegistry(pinia)
+for (const mod of Object.values(widgetModules)) {
+  widgetRegistry.register(mod.manifest)
 }
 
 useNotification(pinia).boot()
@@ -50,10 +63,18 @@ const theme = useTheme(pinia)
 const session = useSession(pinia)
 const settings = useSettings(pinia)
 const webApps = useWebApps(pinia)
+const widgets = useWidgets(pinia)
 
 // 先还原会话与偏好，再还原依赖它们的窗口布局（权限/固定项在布局还原前就位）。
 // 用户添加的网页应用必须在第一波注册：windowManager.restoreLayout 会丢掉注册表里查不到的 appId。
-void Promise.all([session.restore(), settings.restore(), errorLog.restore(), webApps.restore()])
+// 小组件实例只依赖已同步注册的 kind，与窗口布局互不影响，故同在第一波还原。
+void Promise.all([
+  session.restore(),
+  settings.restore(),
+  errorLog.restore(),
+  webApps.restore(),
+  widgets.restore(),
+])
   .then(() => {
     for (const rec of webApps.items) registry.register(webApps.toManifest(rec))
     return Promise.all([vfs.init(), theme.restore(), wm.restoreLayout()])

@@ -50,6 +50,13 @@ export const useTheme = defineStore('theme', {
       void this.persist()
     },
 
+    /** 直接落到某一档（快捷设置件用）：cycle 只能轮转，选不了目标档 */
+    setWallpaper(key: WallpaperKey) {
+      if (this.wallpaper === key) return
+      this.wallpaper = key
+      void this.persist()
+    },
+
     setMode(mode: ThemeMode) {
       this.mode = mode
       this.apply()

@@ -1,8 +1,12 @@
 import { defineStore } from 'pinia'
 import { idbGet, idbSet } from '../fs/idb'
-import type { AppManifest } from './appRegistry'
 
 const SESSION_KEY = 'session-v1'
+
+/** 任何可鉴权对象：应用与小组件 manifest 都只有这一个字段参与判定 */
+export interface Permissioned {
+  permissions?: string[]
+}
 
 export interface Role {
   id: string
@@ -66,10 +70,10 @@ export const useSession = defineStore('session', {
       return perms.includes('*') || perms.includes(perm)
     },
 
-    /** 唯一鉴权判定：应用无 permissions 视为公开，否则要求全部权限点命中 */
-    canAccessApp(manifest?: AppManifest | null): boolean {
-      if (!manifest) return false
-      const required = manifest.permissions ?? []
+    /** 唯一鉴权判定：无 permissions 视为公开，否则要求全部权限点命中。应用与小组件共用 */
+    canAccess(target?: Permissioned | null): boolean {
+      if (!target) return false
+      const required = target.permissions ?? []
       if (required.length === 0) return true
       return required.every((p) => this.has(p))
     },

@@ -50,6 +50,11 @@
   --spacing-xl: 32px;
   --spacing-2xl: 48px;
 
+  /* 小组件外边距两档（HIG：标准 16 点、需要分组时 11 点，且 Mac 桌面使用较小外边距）：
+   * 11 不在 4px 网格上，因此只此两档、按 kind 声明选用（manifest.padding），件内不自写像素。 */
+  --spacing-widget: 16px;
+  --spacing-widget-compact: 11px;
+
   /* ── 阅读宽度：max-w 的唯一来源 ──
    * 不能用 `max-w-md` / `max-w-lg` 这类 Tailwind 具名档：本表把 --spacing-* 定义成了六级刻度，
    * Tailwind 4 解析 `max-w-md` 时优先绑到 `--spacing-md`（16px）而不是它的 `--container-md` 默认值，
@@ -93,6 +98,17 @@
   --color-glass-border: var(--raw-glass-border);
   --color-glass-border-active: var(--raw-glass-border-active);
 
+  /* ── 小组件表面（§4.6）：卡片前景与表面**同层派生**，件内不再出现 text-white / 裸 opacity ──
+   * 根因是「前景写死、表面跟主题翻」，所以两者必须一起给：surface 决定卡片底，
+   * ink 三档是**不透明灰度值**（HIG：虚化模式用不透明灰度，而非白色的不透明度）。 */
+  --color-widget-surface: var(--raw-widget-surface);
+  --color-widget-ink: var(--raw-widget-ink);
+  --color-widget-ink-mute: var(--raw-widget-ink-mute);
+  --color-widget-ink-disabled: var(--raw-widget-ink-disabled);
+  --color-widget-line: var(--raw-widget-line);
+  --color-widget-fill: var(--raw-widget-fill);
+  --color-widget-border: var(--raw-widget-border);
+
   /* ── 语义色：每个语义 6 级（seed / hover / active / bg / bg-hover / border / text） ── */
   --color-accent: var(--raw-accent);
   --color-accent-hover: var(--raw-accent-hover);
@@ -101,6 +117,7 @@
   --color-accent-bg-hover: var(--raw-accent-bg-hover);
   --color-accent-border: var(--raw-accent-border);
   --color-accent-text: var(--raw-accent-text);
+  --color-accent-fill: var(--raw-accent-fill);
   /* 兼容名：strong=文字/图标强调，soft=选中浅底（S8 起新代码用 -text / -bg） */
   --color-accent-strong: var(--raw-accent-text);
   --color-accent-soft: var(--raw-accent-bg);
@@ -183,6 +200,10 @@
   --raw-accent-bg-hover: color-mix(in oklab, var(--raw-accent) 20%, var(--raw-mix-base));
   --raw-accent-border: color-mix(in oklab, var(--raw-accent) 38%, var(--raw-mix-base));
   --raw-accent-text: color-mix(in oklab, var(--raw-accent) 76%, var(--raw-mix-ink));
+  /* 实填控件底（S13）：亮强调 seed 上黑字观感差，主按钮改「深一档实填 + 白字」。
+   * 直接钉 oklch 明度、只保色相与彩度——明暗两套 seed（浅主题 500 档 / 暗主题 400 档提亮）
+   * 因此落到同一深度，白字对 4 套强调色 × 明暗恒定达标，不靠逐色手写。 */
+  --raw-accent-fill: oklch(from var(--raw-accent) 50% c h);
 
   --raw-danger-hover: color-mix(in oklab, var(--raw-danger) 84%, var(--raw-mix-lighten));
   --raw-danger-active: color-mix(in oklab, var(--raw-danger) 78%, var(--raw-mix-darken));
@@ -223,6 +244,23 @@
   /* 焦点环：一处定义，全站 :focus-visible 消费（见 main.css） */
   --raw-focus-ring: color-mix(in oklab, var(--raw-accent) 45%, transparent);
   --raw-focus-width: 2px;
+
+  /* ── 小组件三级墨（一处公式，明暗两套 seed 各自落到同一个可读层级）──
+   * 与 widget-surface-solid（卡片底的代表色）混合，得到**不透明**的次级/禁用前景：
+   * 浅色档 mute≈6.2:1、disabled≈4.7:1，深色档更高——都过 AA 正文 4.5。
+   * line/fill 是描边与浅底，不参与文字对比度，因此用透明叠加。 */
+  --raw-widget-ink-mute: color-mix(
+    in oklab,
+    var(--raw-widget-ink) 85%,
+    var(--raw-widget-surface-solid)
+  );
+  --raw-widget-ink-disabled: color-mix(
+    in oklab,
+    var(--raw-widget-ink) 75%,
+    var(--raw-widget-surface-solid)
+  );
+  --raw-widget-line: color-mix(in oklab, var(--raw-widget-ink) 22%, transparent);
+  --raw-widget-fill: color-mix(in oklab, var(--raw-widget-ink) 12%, transparent);
 
   /* ── 与明暗无关的刻度（放这里，theme-*.css 只留颜色与混合锚点） ── */
   --control-height-sm: 24px; /* 紧凑控件：表格内联、工具条 */
@@ -304,6 +342,14 @@
 @custom-variant w-mid (@container window (min-width: 480px) and (max-width: 799.98px));
 @custom-variant w-wide (@container window (min-width: 800px));
 
+/* 小组件根：尺寸档是用户从 sm/md/lg 里选的已知离散值（见 useWidgetContext），
+ * 宿主直接给出，不经容器查询反推，故此处只留容器根、不定义任何变体——
+ * 供 v2 放开自由缩放时在此补 widget 断点，避免现在把无消费者的 px 字面量引进刻度层。 */
+@utility cq-widget {
+  container-type: inline-size;
+  container-name: widget;
+}
+
 /* ====================== 作用域别名（S11 OsConfigProvider）===============
  * @theme 的语义别名在 :root 上求值：子树里只改 seed（--raw-accent）不会传导，
  * 所以 Provider 根（.os-config）就近重声明强调色/info 别名，指向同一批 --raw-* 变量。
@@ -317,6 +363,7 @@
   --color-accent-bg-hover: var(--raw-accent-bg-hover);
   --color-accent-border: var(--raw-accent-border);
   --color-accent-text: var(--raw-accent-text);
+  --color-accent-fill: var(--raw-accent-fill);
   --color-accent-strong: var(--raw-accent-text);
   --color-accent-soft: var(--raw-accent-bg);
   --color-info: var(--raw-accent);

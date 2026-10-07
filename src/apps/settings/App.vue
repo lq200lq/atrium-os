@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import OsAlert from '@/ui/OsAlert.vue'
@@ -18,6 +18,7 @@ import {
   type AccentKey,
 } from '@/kernel/stores/theme'
 import { useWindowManager } from '@/kernel/stores/windowManager'
+import { useWindowContext } from '@/kernel/composables/useWindowContext'
 import { useErrorLog } from '@/kernel/observability/errorLog'
 import { LOCALES, useAppName, type Locale } from '@/i18n'
 import OsButton from '@/ui/OsButton.vue'
@@ -30,6 +31,7 @@ const registry = useAppRegistry()
 const wm = useWindowManager()
 const errorLog = useErrorLog()
 const appName = useAppName()
+const { win } = useWindowContext()
 
 const version = __APP_VERSION__
 
@@ -74,12 +76,44 @@ function resetLayout() {
   const ids = wm.windows.map((w) => w.id)
   for (const id of ids) wm.close(id)
 }
+
+/* ── 下钻落点（§4.5 / H-1）：快捷设置件给 `{ section: 'appearance' }`，
+ * 这里把那一节滚进视口并上一次性高亮——不落首页。取值只认白名单，
+ * 免得 payload 直接进选择器。 ───────────────────────────────────────── */
+const SECTIONS = ['account', 'appearance', 'dock', 'window', 'diagnostics', 'system'] as const
+const scroller = ref<HTMLElement | null>(null)
+const focusedSection = ref<string | null>(null)
+let focusTimer: ReturnType<typeof setTimeout> | null = null
+
+function sectionFlash(id: string): string {
+  return focusedSection.value === id ? 'bg-accent-soft' : ''
+}
+
+watch(
+  () => (win.value?.payload as { section?: string } | undefined)?.section,
+  (section) => {
+    if (!section || !SECTIONS.includes(section as (typeof SECTIONS)[number])) return
+    void nextTick(() => {
+      const el = scroller.value?.querySelector<HTMLElement>(`[data-section="${section}"]`)
+      if (!el) return
+      el.scrollIntoView({ block: 'start' })
+      focusedSection.value = section
+      if (focusTimer) clearTimeout(focusTimer)
+      focusTimer = setTimeout(() => (focusedSection.value = null), 1600)
+    })
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
-  <div class="h-full overflow-y-auto text-ui text-ink">
+  <div ref="scroller" class="h-full overflow-y-auto text-ui text-ink">
     <!-- 用户与角色 -->
-    <section class="border-b border-line p-4">
+    <section
+      data-section="account"
+      class="border-b border-line p-4 transition-colors duration-base"
+      :class="sectionFlash('account')"
+    >
       <h2 class="mb-1 flex items-center gap-xs text-title font-strong">
         <OsIcon name="user" :size="15" class="text-accent-strong" />
         {{ t('settings.account.title') }}
@@ -117,7 +151,11 @@ function resetLayout() {
     </section>
 
     <!-- 外观 -->
-    <section class="border-b border-line p-4">
+    <section
+      data-section="appearance"
+      class="border-b border-line p-4 transition-colors duration-base"
+      :class="sectionFlash('appearance')"
+    >
       <h2 class="mb-3 flex items-center gap-xs text-title font-strong">
         <OsIcon name="sparkles" :size="15" class="text-accent-strong" />
         {{ t('settings.appearance.title') }}
@@ -161,7 +199,11 @@ function resetLayout() {
     </section>
 
     <!-- Dock 固定项 -->
-    <section class="border-b border-line p-4">
+    <section
+      data-section="dock"
+      class="border-b border-line p-4 transition-colors duration-base"
+      :class="sectionFlash('dock')"
+    >
       <h2 class="mb-1 flex items-center gap-xs text-title font-strong">
         <OsIcon name="boxes" :size="15" class="text-accent-strong" />
         {{ t('settings.dock.title') }}
@@ -188,7 +230,11 @@ function resetLayout() {
     </section>
 
     <!-- 窗口 -->
-    <section class="border-b border-line p-4">
+    <section
+      data-section="window"
+      class="border-b border-line p-4 transition-colors duration-base"
+      :class="sectionFlash('window')"
+    >
       <h2 class="mb-3 flex items-center gap-xs text-title font-strong">
         <OsIcon name="puzzle" :size="15" class="text-accent-strong" />
         {{ t('settings.window.title') }}
@@ -202,7 +248,11 @@ function resetLayout() {
     </section>
 
     <!-- 诊断：错误日志回看（说明走 OsAlert、级别走 OsTag、空态走 OsResult，不再手写 chip 与空文案） -->
-    <section class="border-b border-line p-4">
+    <section
+      data-section="diagnostics"
+      class="border-b border-line p-4 transition-colors duration-base"
+      :class="sectionFlash('diagnostics')"
+    >
       <h2 class="mb-1 flex items-center gap-xs text-title font-strong">
         <OsIcon name="activity" :size="15" class="text-accent-strong" />
         {{ t('settings.diagnostics.title') }}
@@ -242,7 +292,11 @@ function resetLayout() {
     </section>
 
     <!-- 系统信息 -->
-    <section class="p-4">
+    <section
+      data-section="system"
+      class="p-4 transition-colors duration-base"
+      :class="sectionFlash('system')"
+    >
       <h2 class="mb-3 flex items-center gap-xs text-title font-strong">
         <OsIcon name="shield" :size="15" class="text-accent-strong" />
         {{ t('settings.system.title') }}

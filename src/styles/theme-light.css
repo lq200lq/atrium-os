@@ -35,6 +35,14 @@
   --raw-glass-border: rgba(255, 255, 255, 0.4);
   --raw-glass-border-active: rgba(255, 255, 255, 0.6);
 
+  /* 小组件表面（§4.6）：卡片必须自带可读底，可读性不外包给壁纸。
+   * solid 档是不透明代表色，只用于派生三级墨色（HIG：用不透明灰度值而非白色透明度）；
+   * surface 档才是实际卡片底（保留 backdrop-blur 的质感，但它不再负责读得清）。 */
+  --raw-widget-surface: rgba(255, 255, 255, 0.72);
+  --raw-widget-surface-solid: #f4f8fd;
+  --raw-widget-ink: var(--raw-ink);
+  --raw-widget-border: rgba(255, 255, 255, 0.55);
+
   /* 阴影浓度（几何在 tokens.css 的 --shadow-* 里） */
   --raw-shadow-strong: rgba(15, 23, 42, 0.3);
   --raw-shadow-pop: rgba(15, 23, 42, 0.25);

@@ -58,6 +58,18 @@ const date = () =>
     </div>
 
     <div class="flex shrink-0 items-center gap-3 whitespace-nowrap text-ui text-ink">
+      <!-- 桌面速览（解 E10）：窗口层整体透明化，再点或点桌面还原；快捷键 ⌘⇧D 同开关 -->
+      <button
+        type="button"
+        class="inline-flex h-control-sm items-center gap-2xs rounded-chip px-xs text-ink-mute transition duration-quick hover:bg-glass-raise hover:text-ink"
+        :class="ui.desktopRevealed ? 'bg-glass-raise text-ink' : ''"
+        :aria-label="t('context.showDesktop')"
+        :aria-pressed="ui.desktopRevealed"
+        :title="`${t('context.showDesktop')} ⌘⇧D`"
+        @click="ui.toggleDesktopReveal()"
+      >
+        <OsIcon name="layout-grid" :size="16" />
+      </button>
       <button
         type="button"
         class="relative"
@@ -68,8 +80,6 @@ const date = () =>
         <OsIcon name="bell" :size="16" />
         <OsBadge class="absolute -right-1.5 -top-1" :count="notif.unread" />
       </button>
-      <OsIcon name="wifi" :size="15" />
-      <OsIcon name="battery-full" :size="15" />
       <span class="tabular-nums">{{ time() }} {{ date() }}</span>
     </div>
   </header>

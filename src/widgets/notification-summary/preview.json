@@ -1,0 +1,10 @@
+{
+  "notification-summary": {
+    "unread": 2,
+    "items": [
+      { "titleKey": "widgets.sample.noticeBackup" },
+      { "titleKey": "widgets.sample.noticeReport" },
+      { "titleKey": "widgets.sample.noticeDeploy" }
+    ]
+  }
+}

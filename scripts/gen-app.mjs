@@ -14,7 +14,6 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const APPS_DIR = resolve(ROOT, 'src/apps')
 
 const ICONS = [
-  'battery-full',
   'bell',
   'bot',
   'boxes',
@@ -30,7 +29,6 @@ const ICONS = [
   'search',
   'sparkles',
   'trash-2',
-  'wifi',
   'x',
 ]
 const CATEGORIES = ['system', 'productivity', 'data', 'settings', 'other']

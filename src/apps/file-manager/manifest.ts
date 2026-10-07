@@ -5,7 +5,7 @@ export const manifest: AppManifest = {
   name: '文件管理',
   nameKey: 'apps.fileManager',
   icon: 'folder',
-  tint: 'from-sky-500 to-blue-600',
+  tint: 'from-sky-700 to-blue-800',
   entry: () => import('./App.vue'),
   window: { w: 680, h: 460, minW: 480, minH: 320 },
   singleton: false,

@@ -8,13 +8,17 @@ export interface Rect {
   h: number
 }
 
-export function desktopBounds(): Rect {
+export function desktopBoundsOf(width: number, height: number): Rect {
   return {
     x: 0,
     y: TOP_BAR_HEIGHT,
-    w: window.innerWidth,
-    h: window.innerHeight - TOP_BAR_HEIGHT - DOCK_ZONE_HEIGHT,
+    w: width,
+    h: height - TOP_BAR_HEIGHT - DOCK_ZONE_HEIGHT,
   }
+}
+
+export function desktopBounds(): Rect {
+  return desktopBoundsOf(window.innerWidth, window.innerHeight)
 }
 
 export function clamp(v: number, min: number, max: number): number {

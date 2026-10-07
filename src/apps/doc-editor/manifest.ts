@@ -5,7 +5,7 @@ export const manifest: AppManifest = {
   name: '文档编辑',
   nameKey: 'apps.docEditor',
   icon: 'notebook-pen',
-  tint: 'from-blue-500 to-indigo-600',
+  tint: 'from-blue-600 to-indigo-700',
   entry: () => import('./App.vue'),
   window: { w: 720, h: 520, minW: 480, minH: 360 },
   singleton: false,

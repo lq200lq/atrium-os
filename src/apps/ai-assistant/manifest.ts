@@ -5,7 +5,7 @@ export const manifest: AppManifest = {
   name: 'AI 助手',
   nameKey: 'apps.aiAssistant',
   icon: 'bot',
-  tint: 'from-violet-500 to-purple-600',
+  tint: 'from-violet-600 to-purple-700',
   entry: () => import('./App.vue'),
   window: { w: 420, h: 560, minW: 340, minH: 320 },
   singleton: true,

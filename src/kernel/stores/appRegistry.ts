@@ -35,6 +35,8 @@ interface AppBase {
   window: AppWindowSpec
   singleton?: boolean
   dock?: boolean
+  /** Dock 锚定组：固定在最左侧并与常规组用分割线隔开（应用中心＝启动器定位） */
+  dockAnchor?: boolean
   keywords?: string[]
   /** 语义化版本，用于文档站与 CHANGELOG（S6 消费） */
   version?: string
@@ -65,12 +67,20 @@ export const useAppRegistry = defineStore('appRegistry', {
     /** 当前会话可访问的应用（已按 order 排序）；派生入口一律消费此 getter，不各自过滤 */
     accessibleApps(state): RegisteredApp[] {
       const session = useSession()
-      return state.apps.filter((a) => session.canAccessApp(a))
+      return state.apps.filter((a) => session.canAccess(a))
     },
     /** Dock 应用：可访问 + 用户固定项（settings 覆盖 manifest.dock 默认） */
     dockApps(): RegisteredApp[] {
       const settings = useSettings()
       return this.accessibleApps.filter((a) => settings.isPinned(a.id, a.dock !== false))
+    },
+    /** Dock 锚定组：固定在最左侧、与常规组分隔（manifest.dockAnchor） */
+    dockAnchors(): RegisteredApp[] {
+      return this.dockApps.filter((a) => a.dockAnchor)
+    },
+    /** Dock 常规组：锚定组之后的其余应用 */
+    dockRest(): RegisteredApp[] {
+      return this.dockApps.filter((a) => !a.dockAnchor)
     },
     byId: (state) => (id: string) => state.apps.find((a) => a.id === id),
   },

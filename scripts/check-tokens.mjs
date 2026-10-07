@@ -97,9 +97,20 @@ const RULES = [
     re: /\b(?:bg|text|border|from|to|via|ring|fill|stroke)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}\b/g,
     ratchet: true,
   },
+  {
+    id: 'widget-foreground',
+    // 作用域规则：只对 `src/widgets/` 下的件生效（同一写法在别处属别的子系统口径）
+    scope: /(^|\/)src\/widgets\//,
+    why: '桌面件前景三档走 text-widget-ink / -ink-mute / -ink-disabled（不透明灰度，A-8），文字不低于 text-caption（§10-9/§10-11）',
+    re: /\btext-white\b|\btext-micro\b/g,
+  },
 ]
 
-export function scanText(text) {
+/**
+ * 扫一段源码。`file` 是相对扫描根的路径，**作用域规则靠它判定**（如 `scope` 只命中 `src/widgets/`）；
+ * 不传时作用域规则一律跳过，所以「这段文本本身违规」与「这个文件里的这行违规」是两类断言。
+ */
+export function scanText(text, file = '') {
   const violations = []
   const lines = text.split('\n')
   lines.forEach((line, idx) => {
@@ -113,6 +124,8 @@ export function scanText(text) {
       if (reason.length > 3) return
     }
     for (const rule of RULES) {
+      // 作用域规则只在路径匹配时生效；不传 `file`（只扫一段文本）时一律跳过
+      if (rule.scope && !rule.scope.test(file)) continue
       rule.re.lastIndex = 0
       const hit = rule.re.exec(line)
       if (!hit) continue
@@ -149,7 +162,7 @@ export function run(root) {
   const counts = {}
   for (const file of files) {
     const rel = relative(root, file).split('\\').join('/')
-    const all = scanText(readFileSync(file, 'utf8'))
+    const all = scanText(readFileSync(file, 'utf8'), rel)
     const hard = all.filter((v) => !RATCHET_RULES.has(v.rule))
     const allowed = baseline[rel] ?? {}
     const over = []

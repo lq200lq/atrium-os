@@ -8,10 +8,12 @@ withDefaults(
     disabled?: boolean
     /** 右侧说明文字；非空才渲染。button 非可标注元素，点击文本不会切换开关 */
     label?: string
+    /** 可访问名称：套在外层 label 里或只渲染开关本体时必传——与 OsSelect/OsInput 的 ariaLabel 同一契约 */
+    ariaLabel?: string
     /** 非 default 时给开关本体加语义描边 + 状态环（default 态无描边，与 Input 家族不同） */
     status?: Status
   }>(),
-  { disabled: false, label: '', status: 'default' },
+  { disabled: false, label: '', ariaLabel: undefined, status: 'default' },
 )
 const model = defineModel<boolean>({ required: true })
 </script>
@@ -25,6 +27,7 @@ const model = defineModel<boolean>({ required: true })
       type="button"
       role="switch"
       :aria-checked="model"
+      :aria-label="ariaLabel || undefined"
       :disabled="disabled"
       class="relative h-5 w-9 rounded-full transition"
       :class="[model ? 'bg-accent' : 'bg-ink-mute', controlStatusClass(status, false)]"

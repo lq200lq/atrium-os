@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { createFixtureDataSource } from '@/kernel/data/fixtureDataSource'
 import type { SortSpec } from '@/kernel/data/types'
+import { useWindowContext } from '@/kernel/composables/useWindowContext'
 import OsButton from '@/ui/OsButton.vue'
 import OsCard from '@/ui/OsCard.vue'
 import OsDescriptions, { type DescriptionItem } from '@/ui/OsDescriptions.vue'
@@ -11,7 +12,7 @@ import OsInput from '@/ui/OsInput.vue'
 import OsSelect from '@/ui/OsSelect.vue'
 import OsSwitch from '@/ui/OsSwitch.vue'
 import OsTable, { type TableColumn } from '@/ui/OsTable.vue'
-import { DEPTS, SEED, type Employee } from './seed'
+import { DEPTS, SEED, type Employee } from '@/kernel/data/orgSeed'
 
 const PAGE_SIZE = 8
 
@@ -151,13 +152,41 @@ const statItems = computed<DescriptionItem[]>(() => [
   { key: 'dept', label: '部门筛选', value: dept.value || '全部部门' },
   { key: 'keyword', label: '关键字', value: keyword.value || '（无）' },
 ])
+
+const { win } = useWindowContext()
+
+/**
+ * 小组件下钻的落点（§4.5 / E14）：`open('data-board', { chart: 'headcount-by-dept' })`
+ * 不再只落首页——把「统计概览」滚进视口并高亮一次，用户知道卡片那条内容对应这里。
+ */
+const overviewEl = ref<HTMLElement | null>(null)
+const overviewFocused = ref(false)
+let focusTimer: ReturnType<typeof setTimeout> | null = null
+
+watch(
+  () => (win.value?.payload as { chart?: string } | undefined)?.chart,
+  (chart) => {
+    if (chart !== 'headcount-by-dept') return
+    void nextTick(() => {
+      overviewEl.value?.scrollIntoView({ block: 'nearest' })
+      overviewFocused.value = true
+      if (focusTimer) clearTimeout(focusTimer)
+      focusTimer = setTimeout(() => (overviewFocused.value = false), 1600)
+    })
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <div class="flex h-full flex-col text-ui">
-    <OsCard class="m-sm shrink-0" :padded="false">
+    <OsCard
+      class="m-sm shrink-0 transition duration-base"
+      :class="overviewFocused ? 'ring-2 ring-primary' : ''"
+      :padded="false"
+    >
       <template #title>统计概览</template>
-      <div class="px-md py-xs">
+      <div ref="overviewEl" class="px-md py-xs">
         <OsDescriptions :items="statItems" :column="2" />
       </div>
     </OsCard>

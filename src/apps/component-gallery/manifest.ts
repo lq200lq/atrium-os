@@ -5,7 +5,7 @@ export const manifest: AppManifest = {
   name: '组件陈列',
   nameKey: 'apps.componentGallery',
   icon: 'boxes',
-  tint: 'from-fuchsia-500 to-pink-600',
+  tint: 'from-fuchsia-600 to-pink-700',
   entry: () => import('./App.vue'),
   window: { w: 760, h: 560, minW: 560, minH: 420 },
   singleton: true,

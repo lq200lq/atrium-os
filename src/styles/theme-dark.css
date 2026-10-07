@@ -35,6 +35,12 @@
   --raw-glass-border: rgba(148, 163, 184, 0.18);
   --raw-glass-border-active: rgba(148, 163, 184, 0.34);
 
+  /* 小组件表面（§4.6）：与浅主题同一套语义，只是数值反相——前景与表面同层派生 */
+  --raw-widget-surface: rgba(30, 41, 59, 0.62);
+  --raw-widget-surface-solid: #1f2b3f;
+  --raw-widget-ink: var(--raw-ink);
+  --raw-widget-border: rgba(148, 163, 184, 0.24);
+
   /* 阴影浓度（深底需要更浓的黑才能读出场） */
   --raw-shadow-strong: rgba(0, 0, 0, 0.55);
   --raw-shadow-pop: rgba(0, 0, 0, 0.5);

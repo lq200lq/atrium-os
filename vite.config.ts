@@ -92,6 +92,13 @@ export default defineConfig({
           if (/[\\/]node_modules[\\/](@vue|vue|pinia|vue-i18n|@intlify)[\\/]/.test(id)) return 'vue'
           return 'vendor'
         },
+        // 件的组件块按 kind 命名（默认名全是 `App-<hash>.js`，十个件不可辨）。
+        // T8「首屏不加载未上桌面件」的判据要靠这个名字在 dist 里认出件代码，见 `scripts/check-bundle.mjs`。
+        chunkFileNames(chunkInfo) {
+          const id = chunkInfo.facadeModuleId ?? ''
+          const kind = /[\\/]src[\\/]widgets[\\/]([^\\/]+)[\\/]/.exec(id)?.[1]
+          return kind ? `assets/widget-${kind}-[hash].js` : 'assets/[name]-[hash].js'
+        },
       },
     },
   },
