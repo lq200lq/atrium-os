@@ -4,6 +4,8 @@
 
 # Atrium OS
 
+[English](README.en.md) | **简体中文**
+
 [![CI](https://github.com/lq200lq/atrium-os/actions/workflows/ci.yml/badge.svg)](https://github.com/lq200lq/atrium-os/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
