@@ -6,6 +6,7 @@
 | `size` | `Size` | 否 | `undefined` | 高度与内边距同档联动（h-control-* + px-*）；缺省可被 OsConfigProvider 的 size 覆盖 |
 | `disabled` | `boolean` | 否 | `false` | 落原生 disabled，鼠标态走 is-disabled 唯一写法 |
 | `loading` | `boolean` | 否 | `false` | 前置等宽 spinner（防文案跳动），自动禁用点击并置 aria-busy |
+| `tint` | `string` | 否 | `undefined` | 品牌渐变实底（小组件库「添加」用）：给了它就取代 primary 的强调色底，白字对 ≥600 档渐变沿用磁贴那套对比度约定 |
 
 **Slots**
 

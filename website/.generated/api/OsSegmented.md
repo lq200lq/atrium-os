@@ -14,6 +14,10 @@
 | --- | --- | --- |
 | `v-model` | `string` | — |
 
+**Slots**
+
+- `option-prefix`
+
 **引用类型**（`src/ui/types.ts`）
 
 ```ts

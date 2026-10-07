@@ -15,6 +15,8 @@ npm run gen:app -- hello-world --name "Hello" --icon sparkles --order 50
 
 要把一个**外部网站**挂成应用（不写 Vue 组件），走 `embed` 类目，见 §6。
 
+要把能力挂在**桌面上**而不是开窗口（时钟、待办这类），写的是小组件而不是应用，见《WebOS小组件开发指南.md》。
+
 ## 2. 应用是如何被自动收集的
 
 `main.ts` 用 Vite 的 `import.meta.glob` 扫描所有 manifest 并注册：
@@ -32,23 +34,24 @@ for (const mod of Object.values(manifestModules)) registry.register(mod.manifest
 
 ## 3. `AppManifest` 字段表
 
-| 字段          | 类型                                                            | 必填   | 说明                                                                                                    |
-| ------------- | --------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| `id`          | `string`                                                        | 是     | 全局唯一，kebab-case；同时是命令前缀（`<id>:open`）与目录名                                             |
-| `name`        | `string`                                                        | 是     | 显示名称（窗口标题、Dock title、应用中心标签）                                                          |
-| `icon`        | `IconName`                                                      | 是     | 取值见 `src/kernel/icons.ts` 的 `ICON_MAP`（lucide 子集）                                               |
-| `tint`        | `string`                                                        | 否     | 图标底渐变类，如 `from-sky-500 to-blue-600`；缺省为中性灰                                               |
-| `entry`       | `() => Promise<Component>`                                      | 二选一 | DOM 应用的懒加载入口，固定写 `() => import('./App.vue')`；与 `embed` 互斥（两者都不给或都给都编译不过） |
-| `embed`       | `{ url: string }`                                               | 二选一 | 外部网页应用：内容区由内核的 `EmbedView` 渲染该地址的 iframe，**不需要 App.vue**（见 §6）               |
-| `window`      | `{ w, h, minW?, minH? }`                                        | 是     | 初始窗口尺寸与最小尺寸                                                                                  |
-| `singleton`   | `boolean`                                                       | 否     | `true` 时同一应用只保留一个窗口，再次打开聚焦既有窗口                                                   |
-| `dock`        | `boolean`                                                       | 否     | 缺省 `true`；设 `false` 则不进 Dock（仍可被 Spotlight / exec 打开）                                     |
-| `keywords`    | `string[]`                                                      | 否     | Spotlight / 应用中心搜索命中的额外关键词                                                                |
-| `version`     | `string`                                                        | 否     | 语义化版本，文档站与 CHANGELOG 消费（S6）                                                               |
-| `category`    | `'system' \| 'productivity' \| 'data' \| 'settings' \| 'other'` | 否     | 应用分类，缺省 `other`                                                                                  |
-| `permissions` | `string[]`                                                      | 否     | 访问所需权限点集合；为空/缺省表示公开（S2 消费）                                                        |
-| `nameKey`     | `string`                                                        | 否     | i18n 文案 key，缺省回退到 `name`（S5 消费）                                                             |
-| `order`       | `number`                                                        | 否     | 排序权重，越小越靠前，缺省 `100`                                                                        |
+| 字段          | 类型                                                            | 必填   | 说明                                                                                                                                 |
+| ------------- | --------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`          | `string`                                                        | 是     | 全局唯一，kebab-case；同时是命令前缀（`<id>:open`）与目录名                                                                          |
+| `name`        | `string`                                                        | 是     | 显示名称（窗口标题、Dock title、应用中心标签）                                                                                       |
+| `icon`        | `IconName`                                                      | 是     | 取值见 `src/kernel/icons.ts` 的 `ICON_MAP`（lucide 子集）                                                                            |
+| `tint`        | `string`                                                        | 否     | 图标底渐变类，如 `from-sky-600 to-blue-700`；**取 ≥600 档**（白线图标对渐变各端点须 ≥4.5:1，`tile-contrast` 门禁把守）；缺省为中性灰 |
+| `entry`       | `() => Promise<Component>`                                      | 二选一 | DOM 应用的懒加载入口，固定写 `() => import('./App.vue')`；与 `embed` 互斥（两者都不给或都给都编译不过）                              |
+| `embed`       | `{ url: string }`                                               | 二选一 | 外部网页应用：内容区由内核的 `EmbedView` 渲染该地址的 iframe，**不需要 App.vue**（见 §6）                                            |
+| `window`      | `{ w, h, minW?, minH? }`                                        | 是     | 初始窗口尺寸与最小尺寸                                                                                                               |
+| `singleton`   | `boolean`                                                       | 否     | `true` 时同一应用只保留一个窗口，再次打开聚焦既有窗口                                                                                |
+| `dock`        | `boolean`                                                       | 否     | 缺省 `true`；设 `false` 则不进 Dock（仍可被 Spotlight / exec 打开）                                                                  |
+| `dockAnchor`  | `boolean`                                                       | 否     | 设 `true` 则固定到 Dock **最左侧单独一组**，与常规应用用分割线隔开（应用中心＝启动器定位）                                           |
+| `keywords`    | `string[]`                                                      | 否     | Spotlight / 应用中心搜索命中的额外关键词                                                                                             |
+| `version`     | `string`                                                        | 否     | 语义化版本，文档站与 CHANGELOG 消费（S6）                                                                                            |
+| `category`    | `'system' \| 'productivity' \| 'data' \| 'settings' \| 'other'` | 否     | 应用分类，缺省 `other`                                                                                                               |
+| `permissions` | `string[]`                                                      | 否     | 访问所需权限点集合；为空/缺省表示公开（S2 消费）                                                                                     |
+| `nameKey`     | `string`                                                        | 否     | i18n 文案 key，缺省回退到 `name`（S5 消费）                                                                                          |
+| `order`       | `number`                                                        | 否     | 排序权重，越小越靠前，缺省 `100`                                                                                                     |
 
 > 新增字段一律**可选**，以免破坏既有应用。
 

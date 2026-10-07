@@ -60,6 +60,7 @@ export default defineConfig({
           text: '指南',
           items: [
             { text: '应用开发指南', link: '/guide/app-development' },
+            { text: '小组件开发指南', link: '/guide/widget-development' },
             { text: '架构与规范', link: '/architecture' },
           ],
         },
