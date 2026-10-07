@@ -15,20 +15,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run type-check
-      - run: npm run lint
-      # 提交钩子只做暂存文件格式化，全仓一致性靠这里兜（prettier --check）
-      - run: npm run format:check
-      # 设计 token 审计：源码不得出现裸色值/裸圆角/小数间距/裸层级（早失败）
-      - run: npm run check:tokens
-      - run: npm run test:unit:coverage
+      # 本地一条命令复现本 job：npm run verify
+      # （type-check / lint / format:check / token·widget·i18n 三门禁 / coverage / build:check / docs:build）
+      - run: npm run verify
       - run: npx playwright install --with-deps chromium
       # 无障碍扫描在 a11y 专岗跑、截图 diff 在 visual 专岗跑，这里排除避免重复占时
-      - run: npm run test:e2e -- --grep-invert "a11y|visual"
-      # 构建 + 包体预算门禁（manualChunks 分包、首屏与单 chunk 阈值）
-      - run: npm run build:check
-      # 文档站可构建性校验
-      - run: npm run docs:build
+      - run: npm run verify:e2e
       # E2E 失败时上传 trace/screenshot 产物便于排查
       - if: failure()
         uses: actions/upload-artifact@v4
