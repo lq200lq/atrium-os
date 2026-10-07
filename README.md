@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/assets/banner.jpg" alt="Atrium OS —— 浏览器内桌面 OS 形态的纯前端企业级脚手架" />
+</p>
+
 # Atrium OS
 
 [![CI](https://github.com/lq200lq/atrium-os/actions/workflows/ci.yml/badge.svg)](https://github.com/lq200lq/atrium-os/actions/workflows/ci.yml)
@@ -15,6 +19,37 @@
 - **i18n**：zh-CN / en-US 双语言包，键集对齐有测试护栏，界面中文硬编码有门禁
 - **桌面小组件**：右锚定流式网格、拖拽与离散换档、`gen:widget` 生成器、契约门禁
 - **质量线**：类型 strict、ESLint、Prettier、单测 + Playwright e2e、axe 无障碍扫描、组件级视觉基线、包体预算
+
+## 界面预览
+
+以下均为 `npm run dev` 真实运行界面的截图（1440×900 视口 @2x），不是设计稿。
+
+<p align="center">
+  <img src=".github/assets/shot-desktop.jpg" alt="桌面：顶栏全局搜索、右锚定小组件（时钟 / 日历 / 待办）与 Dock" />
+</p>
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src=".github/assets/shot-file-manager.jpg" alt="文件管理：VFS 目录树与文件表格" /><br />
+      <sub>文件管理：VFS 目录树 + 文件表格</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src=".github/assets/shot-component-gallery.jpg" alt="组件陈列：Os 组件库交互浏览" /><br />
+      <sub>组件陈列：41 件 Os 组件交互浏览</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src=".github/assets/shot-data-board.jpg" alt="数据看板：筛选、分页、排序统一契约" /><br />
+      <sub>数据看板：筛选 / 分页 / 排序统一契约</sub>
+    </td>
+    <td align="center">
+      <img src=".github/assets/shot-dark.jpg" alt="暗色主题：语义化 Token 一键切换" /><br />
+      <sub>暗色主题：语义化 Token 一键切换</sub>
+    </td>
+  </tr>
+</table>
 
 ## 快速开始
 
