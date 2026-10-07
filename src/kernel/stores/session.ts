@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { idbGet, idbSet } from '../fs/idb'
+import { persistBoundary } from './persistHelper'
 
 const SESSION_KEY = 'session-v1'
 
@@ -79,22 +80,18 @@ export const useSession = defineStore('session', {
     },
 
     async persist() {
-      try {
-        await idbSet(SESSION_KEY, { userId: this.currentUserId })
-      } catch (e) {
-        console.warn('[session] 持久化失败', e)
-      }
+      await persistBoundary('session', '持久化失败', () =>
+        idbSet(SESSION_KEY, { userId: this.currentUserId }),
+      )
     },
 
     async restore() {
-      try {
+      await persistBoundary('session', '恢复失败', async () => {
         const saved = await idbGet<{ userId?: unknown }>(SESSION_KEY)
         if (saved && typeof saved.userId === 'string' && USERS.some((u) => u.id === saved.userId)) {
           this.currentUserId = saved.userId
         }
-      } catch (e) {
-        console.warn('[session] 恢复失败', e)
-      }
+      })
     },
   },
 })

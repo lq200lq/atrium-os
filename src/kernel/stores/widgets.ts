@@ -9,6 +9,7 @@ import {
 } from './widgetRegistry'
 import { useWidgetRuntime } from './widgetRuntime'
 import type { WidgetCell } from '../widget/geometry'
+import { persistBoundary } from './persistHelper'
 
 const WIDGETS_KEY = 'widgets-v1'
 const KINDS_KEY = 'widget-kinds-v1'
@@ -333,19 +334,15 @@ export const useWidgets = defineStore('widgets', {
     },
 
     async persist(op: string) {
-      try {
-        await idbSet(WIDGETS_KEY, snapshot(this.items))
-      } catch (e) {
-        console.warn(`[widgets] ${op}持久化失败`, e)
-      }
+      await persistBoundary('widgets', `${op}持久化失败`, () =>
+        idbSet(WIDGETS_KEY, snapshot(this.items)),
+      )
     },
 
     async persistKinds(op: string) {
-      try {
-        await idbSet(KINDS_KEY, snapshot(this.kinds))
-      } catch (e) {
-        console.warn(`[widgets] 安装态${op}持久化失败`, e)
-      }
+      await persistBoundary('widgets', `安装态${op}持久化失败`, () =>
+        idbSet(KINDS_KEY, snapshot(this.kinds)),
+      )
     },
 
     /** 还原：实例与 kind 生命周期各占一个键，并行读；kind 由构建期 glob 同步注册，早于本方法 */
@@ -355,7 +352,7 @@ export const useWidgets = defineStore('widgets', {
 
     /** 只还原实例；kind 由构建期 glob 同步注册，早于本方法的调用 */
     async restoreInstances() {
-      try {
+      await persistBoundary('widgets', '恢复失败', async () => {
         const saved = await idbGet<unknown>(WIDGETS_KEY)
         // 首次运行（从没写过）按 manifest.seed 铺一批默认件，保住既有桌面的观感；
         // 用户清空过则落库为 []，不再是 undefined，不会把删掉的件又补回来。
@@ -387,14 +384,12 @@ export const useWidgets = defineStore('widgets', {
           })
         }
         this.items = clean
-      } catch (e) {
-        console.warn('[widgets] 恢复失败', e)
-      }
+      })
     },
 
     /** kind 生命周期：与实例同一口径丢弃手改数据（kind 已注销、条目非对象） */
     async restoreKinds() {
-      try {
+      await persistBoundary('widgets', '小组件安装态恢复失败', async () => {
         const saved = await idbGet<unknown>(KINDS_KEY)
         if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return
         const registry = useWidgetRegistry()
@@ -406,9 +401,7 @@ export const useWidgets = defineStore('widgets', {
           clean[kindId] = { installed: r.installed !== false, enabled: r.enabled !== false }
         }
         this.kinds = clean
-      } catch (e) {
-        console.warn('[widgets] 小组件安装态恢复失败', e)
-      }
+      })
     },
   },
 })

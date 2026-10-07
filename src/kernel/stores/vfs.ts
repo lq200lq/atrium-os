@@ -10,6 +10,7 @@ import {
   type FsNode,
   type VfsChangeEvent,
 } from '../fs/types'
+import { persistBoundary } from './persistHelper'
 
 const FS_KEY = 'fs-v1'
 
@@ -89,13 +90,11 @@ export const useVfs = defineStore('vfs', {
 
     /** 落库结果要能被调用方判：小组件数据靠它做「乐观写 → 失败回滚」（§4.2 规则 2） */
     async persist(): Promise<boolean> {
-      try {
+      const ok = await persistBoundary('vfs', '持久化失败，仅保留内存数据', async () => {
         await idbSet(FS_KEY, toRaw(this.nodes))
         return true
-      } catch (e) {
-        console.warn('[vfs] 持久化失败，仅保留内存数据', e)
-        return false
-      }
+      })
+      return ok ?? false
     },
 
     uniquePath(dir: string, name: string, ignore?: string): string {

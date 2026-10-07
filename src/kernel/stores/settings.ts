@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { toRaw } from 'vue'
 import { idbGet, idbSet } from '../fs/idb'
 import { LOCALES, setLocale, type Locale } from '@/i18n'
+import { persistBoundary } from './persistHelper'
 
 const SETTINGS_KEY = 'settings-v1'
 
@@ -40,15 +41,13 @@ export const useSettings = defineStore('settings', {
     },
 
     async persist() {
-      try {
-        await idbSet(SETTINGS_KEY, { dockPinned: toRaw(this.dockPinned), lang: this.lang })
-      } catch (e) {
-        console.warn('[settings] 持久化失败', e)
-      }
+      await persistBoundary('settings', '持久化失败', () =>
+        idbSet(SETTINGS_KEY, { dockPinned: toRaw(this.dockPinned), lang: this.lang }),
+      )
     },
 
     async restore() {
-      try {
+      await persistBoundary('settings', '恢复失败', async () => {
         const saved = await idbGet<{ dockPinned?: unknown; lang?: unknown }>(SETTINGS_KEY)
         if (saved && saved.dockPinned && typeof saved.dockPinned === 'object') {
           this.dockPinned = { ...(saved.dockPinned as Record<string, boolean>) }
@@ -57,9 +56,7 @@ export const useSettings = defineStore('settings', {
           this.lang = saved.lang as Locale
           setLocale(this.lang)
         }
-      } catch (e) {
-        console.warn('[settings] 恢复失败', e)
-      }
+      })
     },
   },
 })

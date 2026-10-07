@@ -5,6 +5,7 @@ import { clamp, clampRect, desktopBounds, type Rect } from '../layout'
 import { useAppRegistry } from './appRegistry'
 import { useNotification } from './notification'
 import { useSession } from './session'
+import { persistBoundary } from './persistHelper'
 
 const LAYOUT_KEY = 'layout-v1'
 
@@ -212,27 +213,25 @@ export const useWindowManager = defineStore('windowManager', {
     },
 
     async persistLayout() {
-      const snapshot: SavedWin[] = this.windows.map((w) => ({
-        appId: w.appId,
-        title: w.title,
-        x: w.x,
-        y: w.y,
-        w: w.w,
-        h: w.h,
-        z: w.z,
-        status: w.status,
-        prevRect: w.prevRect ? { ...w.prevRect } : undefined,
-        payload: w.payload === undefined ? undefined : toRaw(w.payload),
-      }))
-      try {
+      await persistBoundary('wm', '布局持久化失败', async () => {
+        const snapshot: SavedWin[] = this.windows.map((w) => ({
+          appId: w.appId,
+          title: w.title,
+          x: w.x,
+          y: w.y,
+          w: w.w,
+          h: w.h,
+          z: w.z,
+          status: w.status,
+          prevRect: w.prevRect ? { ...w.prevRect } : undefined,
+          payload: w.payload === undefined ? undefined : toRaw(w.payload),
+        }))
         await idbSet(LAYOUT_KEY, snapshot)
-      } catch (e) {
-        console.warn('[wm] 布局持久化失败', e)
-      }
+      })
     },
 
     async restoreLayout() {
-      try {
+      await persistBoundary('wm', '布局恢复失败', async () => {
         const saved = await idbGet<SavedWin[]>(LAYOUT_KEY)
         if (!saved || saved.length === 0) return
         const registry = useAppRegistry()
@@ -264,9 +263,7 @@ export const useWindowManager = defineStore('windowManager', {
             .filter((w) => w.status !== 'minimized')
             .sort((a, b) => a.z - b.z)
             .pop()?.id ?? null
-      } catch (e) {
-        console.warn('[wm] 布局恢复失败', e)
-      }
+      })
     },
   },
 })

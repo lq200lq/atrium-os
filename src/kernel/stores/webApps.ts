@@ -4,6 +4,7 @@ import { idbGet, idbSet } from '../fs/idb'
 import { normalizeWebUrl } from '../webapp/url'
 import { useAppRegistry, type AppManifest } from './appRegistry'
 import { useWindowManager } from './windowManager'
+import { persistBoundary } from './persistHelper'
 
 const WEBAPPS_KEY = 'webapps-v1'
 
@@ -118,16 +119,14 @@ export const useWebApps = defineStore('webApps', {
     },
 
     async persist(op: string) {
-      try {
-        await idbSet(WEBAPPS_KEY, toRaw(this.items))
-      } catch (e) {
-        console.warn(`[webapps] ${op}持久化失败`, e)
-      }
+      await persistBoundary('webapps', `${op}持久化失败`, () =>
+        idbSet(WEBAPPS_KEY, toRaw(this.items)),
+      )
     },
 
     /** 只还原数据，注册由 main.ts 完成（注册必须在 wm.restoreLayout 之前） */
     async restore() {
-      try {
+      await persistBoundary('webapps', '恢复失败', async () => {
         const saved = await idbGet<unknown>(WEBAPPS_KEY)
         if (!Array.isArray(saved)) return
         const clean: WebAppRecord[] = []
@@ -141,9 +140,7 @@ export const useWebApps = defineStore('webApps', {
           clean.push({ id: r.id, name: r.name, url: parsed.url, addedAt: Number(r.addedAt) || 0 })
         }
         this.items = clean
-      } catch (e) {
-        console.warn('[webapps] 恢复失败', e)
-      }
+      })
     },
   },
 })

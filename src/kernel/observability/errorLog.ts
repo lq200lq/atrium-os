@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { toRaw } from 'vue'
 import { idbGet, idbSet } from '../fs/idb'
+import { persistBoundary } from '../stores/persistHelper'
 
 const ERRORLOG_KEY = 'errorlog-v1'
 /** 环形缓冲上限：只保留最近 N 条，避免无限增长撑爆 IndexedDB */
@@ -59,26 +60,22 @@ export const useErrorLog = defineStore('errorLog', {
     },
 
     async persist() {
-      try {
-        await idbSet(
+      await persistBoundary('errorLog', '持久化失败', () =>
+        idbSet(
           ERRORLOG_KEY,
           toRaw(this.entries).map((e) => ({ ...e })),
-        )
-      } catch (err) {
-        console.warn('[errorLog] 持久化失败', err)
-      }
+        ),
+      )
     },
 
     async restore() {
-      try {
+      await persistBoundary('errorLog', '恢复失败', async () => {
         const saved = await idbGet<ErrorEntry[]>(ERRORLOG_KEY)
         if (Array.isArray(saved)) {
           this.entries = saved.slice(0, MAX_ENTRIES)
           seq = this.entries.reduce((m, e) => Math.max(m, e.id), 0)
         }
-      } catch (err) {
-        console.warn('[errorLog] 恢复失败', err)
-      }
+      })
     },
   },
 })

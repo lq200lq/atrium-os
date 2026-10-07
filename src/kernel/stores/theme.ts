@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { idbGet, idbSet } from '../fs/idb'
+import { persistBoundary } from './persistHelper'
 
 const THEME_KEY = 'theme-v1'
 const THEME_VERSION = 2
@@ -74,20 +75,18 @@ export const useTheme = defineStore('theme', {
     },
 
     async persist() {
-      try {
-        await idbSet(THEME_KEY, {
+      await persistBoundary('theme', '持久化失败', () =>
+        idbSet(THEME_KEY, {
           version: THEME_VERSION,
           wallpaper: this.wallpaper,
           mode: this.mode,
           accent: this.accent,
-        })
-      } catch (e) {
-        console.warn('[theme] 持久化失败', e)
-      }
+        }),
+      )
     },
 
     async restore() {
-      try {
+      await persistBoundary('theme', '恢复失败', async () => {
         const saved = await idbGet<PersistedTheme>(THEME_KEY)
         // 迁移：旧数据（无 version）只有 wallpaper，mode/accent 取缺省
         if (saved) {
@@ -95,9 +94,7 @@ export const useTheme = defineStore('theme', {
           if (isMode(saved.mode)) this.mode = saved.mode
           if (isAccent(saved.accent)) this.accent = saved.accent
         }
-      } catch (e) {
-        console.warn('[theme] 恢复失败', e)
-      }
+      })
       this.apply()
     },
   },
