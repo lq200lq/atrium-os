@@ -2,12 +2,15 @@
 // 生成一个新的桌面小组件骨架：src/widgets/<id>/{manifest.ts,App.vue,preview.json}
 // 并把它进两份语言包（widgets.names.* / widgets.descriptions.*），最后跑一遍契约门禁（T5/T9/T12）。
 // 用法：
-//   npm run gen:widget                                 交互式
-//   npm run gen:widget -- world-clock --name "世界时钟" --icon clock --sizes sm,md --default-size md --order 60
-//   可选：--desc-zh "看现在的世界时间" --desc-en "Check world time" --open-app settings
+//   npm run gen:widget -- world-clock --name "世界时钟" --icon clock --sizes sm,md \
+//     --default-size md --order 60 \
+//     --desc-zh "看现在的世界时间" --desc-en "Check world time anywhere" \
+//     --keywords "clock,time,时钟" --open-app settings
+//   下钻二选一（必答）：--open-app <appId>（建 payloadFor 落点）或 --exempt-reason "<理由>"（§4.9 豁免）
+//   不带 id 或 --name 走交互式，缺任一必填项直接报错退出——生成物不再产出占位 TODO。
 // 不引入任何额外依赖（plop 等），与 scripts/gen-app.mjs 同构。
-// T11 准入答卷：manifest 顶部自动带出「主结论 / 变化来源 / 下钻落点或豁免 / 配置数 ≤3」四格空模板，
-// 四格填不满（人工评审项）就不进 §4.9 清单。
+// T11 准入答卷：manifest 顶部自动带出「主结论 / 变化来源 / 下钻落点或豁免 / 配置数 ≤3」四格模板，
+// 下钻格按本次入参直接填好，其余三格（人工评审项）填不满就不进 §4.9 清单。
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -101,8 +104,10 @@ async function collect() {
     defaultSize: args['default-size'] ?? '',
     order: args.order ?? '',
     openApp: args['open-app'] ?? '',
+    exemptReason: args['exempt-reason'] ?? '',
     descZh: args['desc-zh'] ?? '',
     descEn: args['desc-en'] ?? '',
+    keywords: args.keywords ?? '',
     singleton: args.singleton === true,
   }
 
@@ -127,8 +132,27 @@ async function collect() {
         result.defaultSize = await ask(rl, '初始尺寸档', normalizeSizes(result.sizes)[0])
       }
       if (!result.order) result.order = await ask(rl, 'order 排序权重（越小越靠前）', '100')
-      if (!result.openApp) {
-        result.openApp = await ask(rl, '下钻目标 appId（留空＝走「下钻豁免：理由」模板）', '')
+      if (!result.descZh) {
+        result.descZh = await ask(rl, '中文描述（动词开头一句话；禁「本件/这个」自指，T9）')
+      }
+      if (!result.descEn) {
+        result.descEn = await ask(rl, '英文描述（句子式大写；禁 This widget 式自指，T9）')
+      }
+      if (!result.keywords) {
+        result.keywords = await ask(
+          rl,
+          '搜索关键词（逗号分隔，中英皆可——管理面搜索只消费这一处）',
+          `${result.id}, ${result.name}`,
+        )
+      }
+      if (!result.openApp && !result.exemptReason) {
+        result.openApp = await ask(rl, '下钻目标 appId（留空则必须给豁免理由）', '')
+        if (!result.openApp) {
+          result.exemptReason = await ask(
+            rl,
+            '下钻豁免理由（§4.9 准入第 3 条：卡片内容本身就是答案才可豁免）',
+          )
+        }
       }
       if (!result.singleton) {
         result.singleton = (await ask(rl, '桌面只允许一个实例？(y/N)', 'n')).toLowerCase() === 'y'
@@ -139,6 +163,25 @@ async function collect() {
   }
 
   validateId(result.id)
+  // 必填收口：缺一项直接 usage 报错退出——生成物不再产出占位 TODO（K1 残留清零）
+  const missing = []
+  if (!result.descZh.trim()) missing.push('--desc-zh')
+  if (!result.descEn.trim()) missing.push('--desc-en')
+  if (!splitKeywords(result.keywords).length) missing.push('--keywords')
+  if (!result.openApp && !result.exemptReason.trim()) missing.push('--open-app 或 --exempt-reason')
+  if (missing.length) {
+    console.error(`缺少必填参数：${missing.join('、')}`)
+    console.error(
+      '用法：gen:widget <id> --name <名> --desc-zh <中文描述> --desc-en <英文描述> --keywords <词,词> (--open-app <appId> | --exempt-reason "<豁免理由>")',
+    )
+    console.error('（不带 id 或 --name 即进入交互式逐项提问）')
+    exit(1)
+  }
+  if (result.openApp && result.exemptReason.trim()) {
+    console.error('--open-app 与 --exempt-reason 互斥：落点与豁免只能二选一')
+    exit(1)
+  }
+
   const sizes = normalizeSizes(result.sizes)
   // 英文名：en-US 的 widgets.names 叶子不能用中文（names 齐平去重门禁按语言各自看）
   const nameEn =
@@ -146,10 +189,6 @@ async function collect() {
     titleCase(result.id)
       .replace(/([A-Z])/g, ' $1')
       .trim()
-  // T9 模板：动词开头、禁自指；author 之后要改成贴件的一句话
-  const descZh =
-    result.descZh || `查看${result.name || result.id}的内容（TODO：改成动词开头的一句话）`
-  const descEn = result.descEn || `Check the ${nameEn} at a glance. (TODO: rewrite verb-first)`
   return {
     id: result.id,
     name: result.name || result.id,
@@ -160,28 +199,41 @@ async function collect() {
     defaultSize: sizes.includes(result.defaultSize) ? result.defaultSize : sizes[0],
     order: Number.parseInt(result.order, 10) || 100,
     openApp: result.openApp || '',
-    descZh,
-    descEn,
+    exemptReason: result.exemptReason.trim(),
+    descZh: result.descZh.trim(),
+    descEn: result.descEn.trim(),
+    keywords: splitKeywords(result.keywords),
     singleton: Boolean(result.singleton),
   }
+}
+
+function splitKeywords(raw) {
+  return String(raw || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
 }
 
 function manifestSource(cfg) {
   const tintLine = cfg.tint ? `\n  tint: '${cfg.tint}',` : ''
   const singletonLine = cfg.singleton ? '\n  singleton: true,' : ''
-  // T5 下钻列：给了 appId 就出对象形态（appId + payloadFor 空模板），
-  // 没给就出「下钻豁免：」模板——两种都必须由 author 把 TODO 换成真答案。
+  // T5 下钻列：给了 appId 就出对象形态（appId + payloadFor），没给就带本次入参的豁免理由——
+  // 两条路都由入参一次答完，不再留「TODO 换真答案」的空桩。
   const drillLine = cfg.openApp
-    ? `\n  openAppId: {\n    appId: '${cfg.openApp}',\n    // TODO(T5/H-1)：给下钻构造器，落在具体内容上（参数 ctx = { size, config, selected }，需要时加回形参）\n    payloadFor: () => ({ /* TODO: 下钻参数 */ }),\n  },`
-    : `\n  // 下钻豁免：TODO 写明豁免理由（§4.9 准入第 3 条：卡片内容本身就是答案才可豁免）`
+    ? `\n  openAppId: {\n    appId: '${cfg.openApp}',\n    // 落点构造：ctx = { size, config, selected }。空对象＝落首页；评审要求落在具体内容时按 ctx 构造\n    payloadFor: () => ({}),\n  },`
+    : `\n  // 下钻豁免：${cfg.exemptReason}（§4.9 准入第 3 条：卡片内容本身就是答案才可豁免）`
+  const drillAnswer = cfg.openApp
+    ? `落点 → ${cfg.openApp}（payloadFor 已建，落在具体内容时按 ctx 补构造）`
+    : `豁免：${cfg.exemptReason}`
   const sizes = cfg.sizes.map((s) => `'${s}'`).join(', ')
+  const keywords = cfg.keywords.map((k) => `'${k.replace(/'/g, "\\'")}'`).join(', ')
   return `import type { WidgetManifest } from '@/kernel/stores/widgetRegistry'
 
 /**
  * 准入答卷（§4.9 考卷 / T11，人工评审项）——四格都非空才可进清单：
  * - 主结论（用户扫一眼拿走什么）：
  * - 变化来源（它凭什么不是一张静态贴纸）：
- * - 下钻落点或豁免（payload 形状 / 豁免理由）：
+ * - 下钻落点或豁免（payload 形状 / 豁免理由）：${drillAnswer}
  * - 配置数（H-9：≤3，当前 schema 0 项）：
  */
 export const manifest: WidgetManifest = {
@@ -193,7 +245,7 @@ export const manifest: WidgetManifest = {
   icon: '${cfg.icon}',${tintLine}
   entry: () => import('./App.vue'),
   widget: { sizes: [${sizes}], defaultSize: '${cfg.defaultSize}' },${singletonLine}
-  keywords: ['${cfg.id}'], // TODO: 补搜索词（中英都要有，管理面搜索只消费这一个数组）
+  keywords: [${keywords}],
   // 配置 schema（§4.12 恒必填；每加一项去两份语言包 widgets.config.* 补 label，齐平门禁 T7）
   config: [],${drillLine}
   version: '0.1.0',
@@ -214,11 +266,9 @@ const { size } = useWidgetContext()
 
 <template>
   <div class="flex h-full min-h-0 flex-col justify-center gap-2xs">
+    <!-- 内容预算（§4.4 R1）：每一档（{{ size }}）放什么、放几行、放不下怎么办，按档位设计后替换本注释 -->
     <!-- 前景三级只用 text-widget-ink / -ink-mute（禁裸 \`opacity-*\`），文字不低于 text-caption（禁 \`text-micro\`）：指南 §10-9、§10-11 -->
     <p class="text-title font-strong text-widget-ink">${cfg.name}</p>
-    <p class="text-caption text-widget-ink-mute">
-      TODO：这一档（{{ size }}）的内容预算——放什么、放几行、放不下怎么办（§4.4 R1）。
-    </p>
   </div>
 </template>
 `
@@ -312,15 +362,18 @@ console.log('无需修改 main.ts 或壳层，重启 dev server 后即自动注�
 console.log('桌面右键「添加小组件」即可把它放到桌面。')
 
 console.log('\nauthor 还须手工完成（门禁与评审会拦）：')
-console.log('  1. 填 manifest 顶部准入答卷四格（T11，空即评审否决）；')
-console.log(`  2. 下钻列把 TODO 换成真答案：payloadFor 参数（T5）或「下钻豁免：理由」；`)
+console.log(
+  '  1. 填 manifest 顶部准入答卷的三格空模板（主结论/变化来源/配置数；下钻格已按入参填好，T11）；',
+)
+console.log(
+  '  2. 若给的是 --open-app：确认 payloadFor 落在具体内容上（空对象＝落首页，按 H-1 属半吊子下钻）；',
+)
 console.log(
   "  3. 每加一个 config 项，在两份语言包 widgets.config.* 各补一条 <key>: '文案'（T7 齐平）；",
 )
-console.log(`  4. 把 widgets.descriptions.${cfg.id} 的模板句改成动词开头的一句话（T9）；`)
-console.log('  5. 若声明 manifest.data，把 preview.json 的键对齐样例数据（§4.8）。')
+console.log('  4. 若声明 manifest.data，把 preview.json 的键对齐样例数据（§4.8）。')
 console.log(
-  '  6. `tint` 那行是一处 palette-class 棘轮命中（新文件 0 容忍）：npm run check:tokens 会拦，',
+  '  5. `tint` 那行是一处 palette-class 棘轮命中（新文件 0 容忍）：npm run check:tokens 会拦，',
 )
 console.log(
   '     确认要留这个品牌色后跑 `node scripts/check-tokens.mjs --update-baseline` 记进基线；',
@@ -340,5 +393,5 @@ if (check.status !== 0) {
     `\n[gen-widget] 门禁未过：请把上面对话列出的违规清零（重点是 src/widgets/${cfg.id}/ 的新件），再提交。`,
   )
 } else {
-  console.log(`[gen-widget] 门禁通过：src/widgets/${cfg.id} 结构合格，记得补答卷与下钻答案。`)
+  console.log(`[gen-widget] 门禁通过：src/widgets/${cfg.id} 结构合格，记得补答卷三格与落地内容。`)
 }
