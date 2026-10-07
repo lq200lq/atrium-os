@@ -47,13 +47,13 @@ docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 
 ### 2.3 测试策略
 
-| 层     | 工具                     | 覆盖对象                                                                                                                                                                                  | 不做什么                                     |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| 单元   | Vitest + happy-dom       | store 纯逻辑（windowManager/vfs/icons/notification）、纯函数                                                                                                                              | 不测视觉                                     |
-| 组件   | Vitest + @vue/test-utils | 基础组件（src/ui）的 props/emit 契约                                                                                                                                                      | 不测样式渲染像素                             |
-| E2E    | Playwright               | 按主题拆分的 spec（壳层/窗口/权限/数据/组件/主题/可观测…）                                                                                                                                | 不穷举交互                                   |
-| 无障碍 | Playwright + axe-core    | `a11y.spec.ts` 13 次 axe 扫描（壳层 / Spotlight / 陈列 7 页签 / 设置 / 网页应用面板与弹窗 / embed 窗口）serious/critical 必须为 0；`keyboard.spec.ts` 键盘契约；`contrast.spec.ts` 对比度 | 不做 AA 之外的全量 WCAG 打分                 |
-| 视觉   | Playwright 截图基线      | `visual.spec.ts` 10 张组件级基线（壳层明暗 / Spotlight / 陈列窗口 7 页签）随仓库提交，CI 比对                                                                                             | 不做全页面像素回归（噪声大，见规划 §8 定案） |
+| 层     | 工具                     | 覆盖对象                                                                                                                                                                                                                      | 不做什么                                     |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| 单元   | Vitest + happy-dom       | store 纯逻辑（windowManager/vfs/icons/notification）、纯函数                                                                                                                                                                  | 不测视觉                                     |
+| 组件   | Vitest + @vue/test-utils | 基础组件（src/ui）的 props/emit 契约                                                                                                                                                                                          | 不测样式渲染像素                             |
+| E2E    | Playwright               | 按主题拆分的 spec（壳层/窗口/权限/数据/组件/主题/可观测…）                                                                                                                                                                    | 不穷举交互                                   |
+| 无障碍 | Playwright + axe-core    | `a11y.spec.ts` 17 次 axe 扫描（壳层 / Spotlight / 陈列 7 页签 / 设置 / 网页应用面板与弹窗 / embed 窗口 / 小组件抽屉·中心·卡片菜单·配置弹层）serious/critical 必须为 0；`keyboard.spec.ts` 键盘契约；`contrast.spec.ts` 对比度 | 不做 AA 之外的全量 WCAG 打分                 |
+| 视觉   | Playwright 截图基线      | `visual.spec.ts` 10 张组件级基线（壳层明暗 / Spotlight / 陈列窗口 7 页签）随仓库提交，CI 比对                                                                                                                                 | 不做全页面像素回归（噪声大，见规划 §8 定案） |
 
 覆盖率下限自 S12 起按目录分档（`vitest.config.ts`）：全局 75/72/78/78（stmts/branch/funcs/lines）之外，另设 `src/ui/**` 85/78/85/88 与 `src/kernel/**` 65/58/70/68 两块地板。分档而不是一刀切全局，是因为 `windows`/`i18n` 的覆盖结构与组件层不同，混在一个全局阈值里只会把地板架空。
 
@@ -70,7 +70,7 @@ docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 | job      | 内容                                                                                                                                                           |
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `check`  | install → `type-check` → `lint` → `format:check` → `check:tokens` → `test:unit:coverage` → E2E（`--grep-invert "a11y\|visual"`）→ `build:check` → `docs:build` |
-| `a11y`   | `test:e2e:a11y`（axe 13 次扫描 + 键盘契约），独立红                                                                                                            |
+| `a11y`   | `test:e2e:a11y`（axe 17 次扫描：静态场景 10 + 组件陈列页签 7；键盘契约另计），独立红                                                                           |
 | `visual` | `test:e2e:visual` 截图 diff；缺本平台基线时先跑 `--update-snapshots` 并把产物上传为 `visual-baselines-linux`，提交后转为真正的 diff 门禁                       |
 
 截图基线按平台分目录（`snapshotPathTemplate` 里的 `{platform}`）：字体栅格化与抗锯齿跨 OS 不可比，同 OS 的 diff 才是有效门禁，所以 darwin 基线守护本地开发、linux 基线由 CI 首跑引导生成。
@@ -117,27 +117,31 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 ### 3.2 WebOS 视觉语言（现状固化为规范）
 
-| 语言      | 定义                                                           | 落点                   |
-| --------- | -------------------------------------------------------------- | ---------------------- |
-| 玻璃材质  | 半透明白 + `backdrop-blur-xl` + 白描边（/30~/60）              | 顶栏、Dock、窗口、弹层 |
-| 交通灯    | 三色圆钮 12px：关闭 #ff5f57 / 最小化 #febc2e / 最大化 #28c840  | 窗口标题栏             |
-| tint 磁贴 | 48px 圆角磁贴 + Tailwind 渐变（manifest.tint）+ 内嵌白色线图标 | Dock、应用中心         |
-| 活跃态    | 活动窗口对比度高于非活动（白 /85 + 重阴影 vs /70 + 轻阴影）    | 窗口、标题栏           |
-| 线性图标  | lucide-vue-next，一律经 `OsIcon` 出口                          | 全仓                   |
+| 语言      | 定义                                                                                               | 落点                                  |
+| --------- | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| 玻璃材质  | 半透明白 + `backdrop-blur-xl` + 白描边（/30~/60）                                                  | 顶栏、Dock、窗口、弹层                |
+| 交通灯    | 三色圆钮 12px：关闭 #ff5f57 / 最小化 #febc2e / 最大化 #28c840                                      | 窗口标题栏                            |
+| tint 磁贴 | 48px 圆角磁贴 + Tailwind 渐变（manifest.tint，**≥600 档**）+ 内嵌白色线图标（对渐变各端点 ≥4.5:1） | Dock、应用中心、小组件库              |
+| 小组件卡  | 玻璃材质 + `rounded-dock` + `shadow-dock` + 尺寸位（sm/md/lg）                                     | `WidgetFrame` 一处，**不进 `src/ui`** |
+| 活跃态    | 活动窗口对比度高于非活动（白 /85 + 重阴影 vs /70 + 轻阴影）                                        | 窗口、标题栏                          |
+| 线性图标  | lucide-vue-next，一律经 `OsIcon` 出口                                                              | 全仓                                  |
+
+> **小组件卡片材质为什么不进 `src/ui`**：`rounded-dock + bg-glass-bar + border-glass-border + shadow-dock + backdrop-blur-xl` 是**壳层材质**（与 Dock/TopBar 同族），而 `src/ui` 是窗口内设计系统（表面档是 `rounded-surface`）。材质只存在于 `shell/WidgetFrame.vue` 一处（应用侧只渲染内容），进 `src/ui` 会同时进 API 表生成面与 `src/ui/**` 覆盖率地板，且等于邀请应用在窗口里伪造 dock 面。出现**第二个**壳层消费者需要同一材质时，再抽 `shell/WidgetSurface.vue`（仍不进 `src/ui`）。
 
 ### 3.3 token 清单
 
 色彩（CSS 变量，`@theme` 映射为工具类）：
 
-| token                                                     | 值                                                                    | 用途                                                                                    |
-| --------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `--color-glass-strong` / `base` / `raise` / `bar` / `pop` | 白 0.85 / 0.70 / 0.45 / 0.28 / 0.92                                   | 活动窗口体 / 非活动窗口体与活动标题栏 / hover 与非活动标题栏 / 顶栏·Dock·Widgets / 弹层 |
-| `--color-glass-border` / `glass-border-active`            | 白 0.40 / 0.60                                                        | 常规玻璃描边 / 活动窗口与弹层描边                                                       |
-| `--color-ink-strong` / `ink` / `ink-mute`                 | slate-800 / 700 / 400                                                 | 文本三级（标题 / 正文 / 辅助）                                                          |
-| `--color-accent` / `accent-strong` / `accent-soft`        | sky-500 / 700 / 100                                                   | 主强调（按钮 / 选中文字 / 选中底）                                                      |
-| `--color-danger` / `warning` / `success`                  | rose-500 / amber-500 / emerald-500                                    | 语义                                                                                    |
-| `--color-traffic-close/min/max`                           | #ff5f57 / #febc2e / #28c840                                           | 交通灯                                                                                  |
-| `--color-file-dir/docx/xlsx/pptx/pdf/other`               | amber-500 / sky-500 / emerald-500 / orange-500 / rose-500 / slate-400 | 文件类型（唯一允许的彩色例外），工具类 `text-file-*`                                    |
+| token                                                     | 值                                                                     | 用途                                                                                    |
+| --------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `--color-glass-strong` / `base` / `raise` / `bar` / `pop` | 白 0.85 / 0.70 / 0.45 / 0.28 / 0.92                                    | 活动窗口体 / 非活动窗口体与活动标题栏 / hover 与非活动标题栏 / 顶栏·Dock·Widgets / 弹层 |
+| `--color-glass-border` / `glass-border-active`            | 白 0.40 / 0.60                                                         | 常规玻璃描边 / 活动窗口与弹层描边                                                       |
+| `--color-ink-strong` / `ink` / `ink-mute`                 | slate-800 / 700 / 400                                                  | 文本三级（标题 / 正文 / 辅助）                                                          |
+| `--color-accent` / `accent-strong` / `accent-soft`        | sky-500 / 700 / 100                                                    | 主强调（强调文字 / 选中底）                                                             |
+| `--color-accent-fill`                                     | 由 `--raw-accent` 派生：`oklch(from … 50% c h)`（保色相/彩度、钉明度） | 实填控件底（主按钮 + 白字；明暗与 4 套预设同深，恒定 ≥4.5:1）                           |
+| `--color-danger` / `warning` / `success`                  | rose-500 / amber-500 / emerald-500                                     | 语义                                                                                    |
+| `--color-traffic-close/min/max`                           | #ff5f57 / #febc2e / #28c840                                            | 交通灯                                                                                  |
+| `--color-file-dir/docx/xlsx/pptx/pdf/other`               | amber-500 / sky-500 / emerald-500 / orange-500 / rose-500 / slate-400  | 文件类型（唯一允许的彩色例外），工具类 `text-file-*`                                    |
 
 圆角与阴影/动效/字号的具体刻度见 3.4；下表只列「角色 → 值」。
 
@@ -292,16 +296,16 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 
 **键盘与焦点规范（S12 成文）**：这一类行为在 S11 之前只散落在个别组件里，现在定为契约，验收在 `tests/e2e/keyboard.spec.ts`（6 条）+ `tests/e2e/focus.spec.ts`（4 条）+ `tests/e2e/a11y.spec.ts`（axe 13 次扫描 + 降级一条）。
 
-| 条目     | 规范                                                                                                                                                                                          | 落点                                                                        |
-| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| 焦点可见 | 键盘焦点一律走 token 环：`--raw-focus-width`（2px）+ `--raw-focus-ring`（accent 45% 混合），由 `main.css` 的 `:focus-visible` 一处定义；组件不得再写 `outline-none` 自废                      | `focus.spec.ts` 断言每一站 ≥2px 实线，且鼠标点击不套环                      |
-| Tab 顺序 | 与 DOM 顺序一致，不加正/负 `tabindex` 插队：壳层为顶栏 → 桌面 → Dock                                                                                                                          | `keyboard.spec.ts`「纯 Tab 可达」                                           |
-| Esc 退出 | 每个浮层都必须能从键盘原路退出：`OsDialog`→`@cancel`、`OsDrawer`→`@close`（S12 补）、`OsDropdown`/`OsPopconfirm`→内部 hide、Spotlight/通知中心→`closeOverlays()`                              | 对话框、抽屉、Spotlight 三条 E2E                                            |
-| 焦点归还 | 浮层关闭后焦点必须回到打开它的元素（记住 `document.activeElement`，卸载/关闭时 `focus()`，节点已消失则不动）。没有这条，键盘用户每关一次浮层就要从页头重新 Tab 一遍                           | `OsDialog.onBeforeUnmount` / `OsDrawer` 的 `watch(open)` / `Spotlight` 同构 |
-| 唤起键   | `⌘K`/`Ctrl+K` 是**开合开关**而不是只开有关（否则键盘用户无法用同一键位退出）                                                                                                                  | `App.vue` 的全局 keydown                                                    |
-| 方向键   | 列表型浮层用 `aria-current="true"` 标活动项（Spotlight 结果），树型结构支持上下移动 + 回车展开/选中（`OsTree`）                                                                               | `keyboard.spec.ts`、`tree.spec.ts`                                          |
-| 可访问名 | 无可见 label 的原生控件必须有名：录入族（`OsInput/OsInputNumber/OsTextarea/OsSelect/OsCheckbox`）走 `ariaLabel` 契约，`OsTree` 复选框取节点名，图标按钮（顶栏铃铛等）取 `aria-label`          | axe `label`/`button-name`/`select-name` 在各扫描场景均为 0                  |
-| 动效降级 | `prefers-reduced-motion: reduce` 下时长统一压到 `--duration-reduced`（0.01ms）并取消入场位移，但**状态切换本身照常发生**——Vue 的 Transition 靠 `transitionend` 判定结束，降级不能把它一起关掉 | `a11y.spec.ts` 降级用例（窗口能开也能关 + 时长实测 ≤1ms）                   |
+| 条目     | 规范                                                                                                                                                                                                                                                                                                                                          | 落点                                                                                                                                                                                                           |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 焦点可见 | 键盘焦点一律走 token 环：`--raw-focus-width`（2px）+ `--raw-focus-ring`（accent 45% 混合），由 `main.css` 的 `:focus-visible` 一处定义；组件不得再写 `outline-none` 自废                                                                                                                                                                      | `focus.spec.ts` 断言每一站 ≥2px 实线、鼠标点击不套环，并钉住基线规则随样式表发布（那条按选择器精确值认，2026-10-06 起；原先取「第一条含 `:focus-visible` 的规则」，任何 `focus-visible:*` 工具类都能把它顶红） |
+| Tab 顺序 | 与 DOM 顺序一致，不加正/负 `tabindex` 插队：壳层为顶栏 → 桌面 → Dock                                                                                                                                                                                                                                                                          | `keyboard.spec.ts`「纯 Tab 可达」                                                                                                                                                                              |
+| Esc 退出 | 每个浮层都必须能从键盘原路退出：`OsDialog`→`@cancel`、`OsDrawer`→`@close`（S12 补）、`OsDropdown`/`OsPopconfirm`→内部 hide、Spotlight/通知中心→`closeOverlays()`                                                                                                                                                                              | 对话框、抽屉、Spotlight 三条 E2E                                                                                                                                                                               |
+| 焦点归还 | 浮层关闭后焦点必须回到打开它的元素（记住 `document.activeElement`，卸载/关闭时 `focus()`，节点已消失则不动）。没有这条，键盘用户每关一次浮层就要从页头重新 Tab 一遍                                                                                                                                                                           | `OsDialog.onBeforeUnmount` / `OsDrawer` 的 `watch(open)` / `Spotlight` 同构                                                                                                                                    |
+| 唤起键   | `⌘K`/`Ctrl+K` 是**开合开关**而不是只开有关（否则键盘用户无法用同一键位退出）                                                                                                                                                                                                                                                                  | `App.vue` 的全局 keydown                                                                                                                                                                                       |
+| 方向键   | 列表型浮层用 `aria-current="true"` 标活动项（Spotlight 结果），树型结构支持上下移动 + 回车展开/选中（`OsTree`）                                                                                                                                                                                                                               | `keyboard.spec.ts`、`tree.spec.ts`                                                                                                                                                                             |
+| 可访问名 | 无可见 label 的原生控件必须有名：录入族（`OsInput/OsInputNumber/OsTextarea/OsSelect/OsCheckbox`）走 `ariaLabel` 契约，`OsTree` 复选框取节点名，图标按钮（顶栏铃铛等）取 `aria-label`；`OsSwitch` 的开关本体除旋钮外无文字，字段标签得靠 `aria-label` 落上去（`WidgetConfigFields` 里那行标签是它的兄弟节点，与开关自身的 `<label>` 没有关联） | axe `label`/`button-name`/`select-name` 在各扫描场景均为 0（2026-10-06 新增「小组件卡片配置弹层」场景即报出一个无名开关：配置面在此之前从未挂进扫描面，规则本身一直是有的）                                    |
+| 动效降级 | `prefers-reduced-motion: reduce` 下时长统一压到 `--duration-reduced`（0.01ms）并取消入场位移，但**状态切换本身照常发生**——Vue 的 Transition 靠 `transitionend` 判定结束，降级不能把它一起关掉                                                                                                                                                 | `a11y.spec.ts` 降级用例（窗口能开也能关 + 时长实测 ≤1ms）                                                                                                                                                      |
 
 未做（诚实记录，不在 S12 范围内）：浮层的**焦点陷阱**（Tab 循环锁在浮层内）与打开时自动聚焦首个可交互元素。`OsDialog`/`OsDrawer` 已声明 `aria-modal="true"`，但辅助技术之外，纯键盘仍可 Tab 到浮层背后的桌面元素。补这条要先定「谁负责 trap」（组件 vs 壳层），单独立项。
 
@@ -317,9 +321,12 @@ src/
     internal/         # 不对外暴露的共用件（control.ts 刻度映射、scale.ts 布局刻度、placement.ts 浮层定位、level.ts 分级配色/图标、text.ts 作用域取词（S11）、ControlShell 外框）
   components/         # 组合型组件（OsIcon 等，可依赖 ui/）
   windows/            # 窗口 chrome：WindowFrame/WindowManager/ErrorBoundary + EmbedView（外部网页应用内容区）
+  shell/              # 壳层：TopBar/Dock/Desktop/NotificationCenter/Spotlight + WidgetLayer/WidgetFrame/WidgetGallery（桌面小组件宿主与库）
+  widgets/            # 桌面小组件（每件：manifest.ts + App.vue）——只动一个目录即接入，见《WebOS小组件开发指南.md》
   kernel/
     webapp/           # url.ts：外部应用地址校验归一（用户输入的安全边界，纯函数）
-    stores/           # windowManager/appRegistry/webApps/vfs/theme/session/settings/notification/icons
+    widget/           # geometry.ts：小组件网格常量 + widgetGrid/spanPx/packRight（纯函数，右锚定流式）
+    stores/           # windowManager/appRegistry/widgetRegistry/widgets/webApps/vfs/theme/session/settings/notification/icons
 public/               # Vite 静态目录：embed-demo.html（同源嵌入样本）、docs/（docs:embed 产物，gitignore）
 tests/
   unit/               # Vitest 单测
@@ -334,17 +341,17 @@ tests/
 
 > 下表数字是 **S1~S6 打底完成时（2026-10-04）的基线快照**，不作为现状读数。当前组件数见 §4.2，各阶段增量与实测数（单测/E2E/包体）见《WebOS对标AntDesign迭代规划.md》§9。
 
-| 项            | 状态                 | 说明                                                                                                                                                                                                                           |
-| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 工程规范      | 已完成（2026-10-04） | ESLint flat（vue/ts/prettier 兼容）+ Prettier + husky/lint-staged（lint-staged + type-check 门禁）                                                                                                                             |
-| 单测基建      | 已完成（2026-10-04） | Vitest + happy-dom + @vue/test-utils；45 个用例（windowManager/vfs/notification/icons/layout/ui 契约）                                                                                                                         |
-| E2E 冒烟      | 已完成（2026-10-04） | Playwright chromium 6 条冒烟（壳层/Dock 语义/交通灯/拖拽/Spotlight/布局刷新还原），替代手工点测                                                                                                                                |
-| CI 门禁       | 已完成（2026-10-04） | `.github/workflows/ci.yml`：type-check → lint → unit → e2e；仓库暂无远端，CI 未实跑过，待首次 push 验证                                                                                                                        |
-| 设计 token 化 | 已完成（2026-10-04） | `src/styles/tokens.css`（Tailwind `@theme`）；全仓硬编码色值/字号/阴影/时长已收敛，computed style 断言验证（玻璃/交通灯/文件类型/字号层级）                                                                                    |
-| 基础组件收口  | 已完成（2026-10-04） | `src/ui/` 五个组件落地并被 WindowFrame/TopBar/file-manager 消费，props/emit 契约有单测                                                                                                                                         |
-| 无障碍门禁    | 已完成（2026-10-05） | axe 13 次扫描 serious/critical = 0（`BASELINE` 空表，只减不增；D2′ 另加网页应用三场景，扫描前统一等窗口过渡收尾，壳层就绪屏障收进 `gotoShell()`）+ 键盘/焦点契约 10 条 + 对比度含暗色×4 预设与中性 `ink-mute`/`on-accent` 盲区 |
-| 视觉回归基线  | 已完成（2026-10-05） | `visual.spec.ts` 10 张组件级基线随仓库提交（`darwin/`），时钟冻结 + `reducedMotion` + `animations:'disabled'` 三处钉死不确定项，CI 独立 job 比对                                                                               |
-| 提交信息门禁  | 已完成（2026-10-05） | `commitlint` + `.husky/commit-msg`：中文全角冒号「类型：描述」，半角与自由文本实测被挡（exit=1）                                                                                                                               |
+| 项            | 状态                 | 说明                                                                                                                                                                                                                                                                                                          |
+| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 工程规范      | 已完成（2026-10-04） | ESLint flat（vue/ts/prettier 兼容）+ Prettier + husky/lint-staged（lint-staged + type-check 门禁）                                                                                                                                                                                                            |
+| 单测基建      | 已完成（2026-10-04） | Vitest + happy-dom + @vue/test-utils；45 个用例（windowManager/vfs/notification/icons/layout/ui 契约）                                                                                                                                                                                                        |
+| E2E 冒烟      | 已完成（2026-10-04） | Playwright chromium 6 条冒烟（壳层/Dock 语义/交通灯/拖拽/Spotlight/布局刷新还原），替代手工点测                                                                                                                                                                                                               |
+| CI 门禁       | 已完成（2026-10-04） | `.github/workflows/ci.yml`：type-check → lint → unit → e2e；仓库暂无远端，CI 未实跑过，待首次 push 验证                                                                                                                                                                                                       |
+| 设计 token 化 | 已完成（2026-10-04） | `src/styles/tokens.css`（Tailwind `@theme`）；全仓硬编码色值/字号/阴影/时长已收敛，computed style 断言验证（玻璃/交通灯/文件类型/字号层级）                                                                                                                                                                   |
+| 基础组件收口  | 已完成（2026-10-04） | `src/ui/` 五个组件落地并被 WindowFrame/TopBar/file-manager 消费，props/emit 契约有单测                                                                                                                                                                                                                        |
+| 无障碍门禁    | 已完成（2026-10-05） | axe 13 次扫描（当日读数；2026-10-06 小组件线补 4 个场景后为 17 次＝静态 10 + 组件陈列页签 7）serious/critical = 0（`BASELINE` 空表，只减不增；D2′ 另加网页应用三场景，扫描前统一等窗口过渡收尾，壳层就绪屏障收进 `gotoShell()`）+ 键盘/焦点契约 10 条 + 对比度含暗色×4 预设与中性 `ink-mute`/`on-accent` 盲区 |
+| 视觉回归基线  | 已完成（2026-10-05） | `visual.spec.ts` 10 张组件级基线随仓库提交（`darwin/`），时钟冻结 + `reducedMotion` + `animations:'disabled'` 三处钉死不确定项，CI 独立 job 比对                                                                                                                                                              |
+| 提交信息门禁  | 已完成（2026-10-05） | `commitlint` + `.husky/commit-msg`：中文全角冒号「类型：描述」，半角与自由文本实测被挡（exit=1）                                                                                                                                                                                                              |
 
 **实施期对规范的修正（回写此处）**
 

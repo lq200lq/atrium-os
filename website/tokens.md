@@ -37,6 +37,8 @@ WebOS 的视觉值全部收敛在三个文件里，组件只消费**刻度名**�
 
 工具类走 Tailwind 的 spacing 命名空间，`p-md` / `gap-sm` / `my-lg` 直接可用。
 
+小组件卡片另有一档**宿主专用内边距**：`--spacing-widget`（16px）与 `--spacing-widget-compact`（11px，工具类 `p-widget` / `p-widget-compact`）。档位由 `manifest.padding`（`'default' | 'compact'`）声明、宿主 `WidgetFrame` 落地——(HIG) 口径是「Mac 桌面使用较小外边距」，compact 档让 sm 内容区从 126px 回到 136px；件侧不可自行声明内边距。
+
 ### 圆角
 
 按**组件类别**分档，不按尺寸分档；相邻元素不得混档（如 8px 卡片里放 16px 按钮）：
@@ -66,6 +68,8 @@ WebOS 的视觉值全部收敛在三个文件里，组件只消费**刻度名**�
 | `display-1` | 48 / 56px   | 刻度上限，仅空态数字这类大屏展示 |
 
 字重只有两档：`font-regular`（400）与 `font-strong`（600）。**强调靠色彩与描边，不靠更粗的字重**；`font-medium` / `font-bold` 一律被门禁拒绝。
+
+**小组件文字地板**：`src/widgets/` 下禁用 `micro`（10px）——件内**文字**一律 ≥11px（功能设计 T3 同批断言）；符号（`OsIcon` 的 `:size`）与图形不受限。现状靠约定执行（指南 §10 禁止事项），非机械门禁。
 
 ### 控件高度
 
@@ -104,9 +108,29 @@ WebOS 的视觉值全部收敛在三个文件里，组件只消费**刻度名**�
 `--color-accent-strong` = `-text`，`--color-accent-soft` = `-bg`。S6 之前的代码在用，新代码一律用六级名；S8 组件契约统一时收敛掉。
 :::
 
+::: tip accent 的第七级：实填底
+`--color-accent-fill` 不靠混合锚点，而是把 `--raw-accent` 用 `oklch(from … 50% c h)` **钉住明度、只保色相与彩度**——浅主题（500 档）与深主题（400 档提亮）两套 seed 因此落到同一深度，主按钮「实填底 + 白字」对 4 套强调色 × 明暗恒定 ≥4.5:1，不必逐色手写。其余语义没有这一级。
+:::
+
 ### 中性填充四档
 
 `fill` / `fill-secondary` / `fill-tertiary` / `fill-quaternary` 是 alpha 灰，叠在任何着色表面上都能自然混合，用于 hover 底、分隔块、占位块——不要为这类场景新造 `bg-slate-*`。
+
+### 小组件表面 token（`--color-widget-*`，七档）
+
+桌面卡片的前景与表面**同层派生**（功能设计 D13）：卡片必须自带可读底，不把可读性外包给壁纸；`backdrop-blur` 只负责质感。次级/禁用前景是不透明灰度档，不是裸 `opacity-*`（(HIG) A-8）。
+
+| Token                | 用在哪                                     | 怎么来                                                                 |
+| -------------------- | ------------------------------------------ | ---------------------------------------------------------------------- |
+| `widget-surface`     | 卡片底（`bg-widget-surface`）              | 主题各给一档：浅色 `rgba(255,255,255,.72)`、深色 `rgba(30,41,59,.62)`   |
+| `widget-ink`         | 主前景（`text-widget-ink`）                | `var(--raw-ink)`，随主题翻转                                            |
+| `widget-ink-mute`    | 次级前景（替代混用的 `opacity-70/80/90`）  | `color-mix(ink 85%, surface-solid)`                                     |
+| `widget-ink-disabled`| 禁用/已完成（替代 `opacity-50`）           | `color-mix(ink 75%, surface-solid)`                                     |
+| `widget-line`        | 件内分隔                                   | `color-mix(ink 22%, transparent)`                                       |
+| `widget-fill`        | 件内浅底（chip、进度槽）                   | `color-mix(ink 12%, transparent)`                                       |
+| `widget-border`      | 卡片描边（`border-widget-border`）         | 主题各给一档（浅色白描边 / 深色石板蓝描边）                             |
+
+功能设计 §4.10 原文写「六档」，实现多列了 `border` 一档（2026-10-07 以代码为准）。件内**禁止** `text-white`、裸 `opacity-*` 前景、裸色值——材质类串只在 `kernel/widget/material.ts` 的 `WIDGET_CARD_CLASS` 一处（桌面卡片与预览沙箱共用）。
 
 ### 层级
 
@@ -159,6 +183,8 @@ Tailwind 4 没有 z-index 的 `@theme` 命名空间，所以用 `@utility` 提�
 ::: warning px 字面量为何允许
 container query 的宽度必须是静态值，浏览器不接受 `var()`。所以 `480px / 800px` 这两个字面量**只允许出现在 `tokens.css`**（同时以 `--bp-window-narrow/mid` 存在，供运行时读取），别处再写一个就算漂移。
 :::
+
+**小组件不参与这套断点**：桌面小组件的宽度是用户从 `sm/md/lg` 里选的已知离散值，宿主经 `useWidgetContext().size` 直接给出，组件按档分支即可——用容器查询反推已知事实是白付一层间接。卡片根（类串在 `kernel/widget/material.ts`）仍挂 `cq-widget`（`container-type: inline-size`，**无变体**），但**改尺寸不依赖它**：落点是 kind 已声明的离散档（从 `sizes` 里挑一档，入口为卡片菜单档位组与 `⌥←/⌥→`），不是容器宽度。`cq-widget` 的去留单独决定（现为「件按档渲染，不按像素渲染」的口径钉桩），别把它误当 resize 的前置；也正因为它不定义变体，刻度层里不出现第三个 px 字面量。
 
 ## 状态规范
 

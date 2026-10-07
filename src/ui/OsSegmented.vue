@@ -82,6 +82,7 @@ function onKeydown(event: KeyboardEvent) {
       ]"
       @click="select(option.value)"
     >
+      <slot name="option-prefix" :option="option" />
       <OsIcon v-if="option.icon" :name="option.icon" :size="14" />
       {{ option.label }}
     </button>

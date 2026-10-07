@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import OsIcon from '@/components/OsIcon.vue'
+import OsAppTile from '@/components/OsAppTile.vue'
 import OsSegmented from '@/ui/OsSegmented.vue'
 import WebAppsPanel from './WebAppsPanel.vue'
 import { useAppRegistry } from '@/kernel/stores/appRegistry'
@@ -51,18 +51,8 @@ const apps = computed(() => {
         class="flex flex-col items-center gap-2xs rounded-surface p-3 hover:bg-accent-soft"
         @click="wm.open(app.id)"
       >
-        <span
-          :class="[
-            'flex h-14 w-14 items-center justify-center rounded-dock bg-gradient-to-br text-display-3 shadow',
-            app.tint ?? 'from-slate-400 to-slate-500',
-          ]"
-        >
-          <OsIcon :name="app.icon" :size="26" class="text-on-accent" />
-        </span>
+        <OsAppTile :icon="app.icon" :tint="app.tint" size="md" />
         <span class="text-ink">{{ appName(app) }}</span>
-        <span class="text-caption text-ink-mute">{{
-          app.singleton ? t('appCenter.singleton') : t('appCenter.multi')
-        }}</span>
       </button>
       <p v-if="apps.length === 0" class="col-span-4 py-10 text-center text-ink-mute">
         {{ t('appCenter.noMatch') }}

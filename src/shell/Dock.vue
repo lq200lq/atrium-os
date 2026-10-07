@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import OsIcon from '@/components/OsIcon.vue'
+import { computed } from 'vue'
+import OsAppTile from '@/components/OsAppTile.vue'
 import { useAppRegistry, type RegisteredApp } from '@/kernel/stores/appRegistry'
 import { useWindowManager } from '@/kernel/stores/windowManager'
 import { useAppName } from '@/i18n'
@@ -7,6 +8,11 @@ import { useAppName } from '@/i18n'
 const registry = useAppRegistry()
 const wm = useWindowManager()
 const appName = useAppName()
+
+/** 两组：锚定组（最左，如应用中心）在前，常规组在后；空组不渲染分割线 */
+const dockGroups = computed(() =>
+  [registry.dockAnchors, registry.dockRest].filter((group) => group.length),
+)
 
 function onDockClick(app: RegisteredApp) {
   const wins = wm.windows.filter((w) => w.appId === app.id)
@@ -28,25 +34,31 @@ function onDockClick(app: RegisteredApp) {
   <nav
     class="fixed bottom-3 left-1/2 z-shell flex -translate-x-1/2 items-end gap-2 rounded-dock border border-glass-border bg-glass-bar px-3 py-2 shadow-dock backdrop-blur-xl"
   >
-    <button
-      v-for="app in registry.dockApps"
-      :key="app.id"
-      class="group relative flex flex-col items-center gap-1"
-      :title="appName(app)"
-      @click="onDockClick(app)"
-    >
+    <template v-for="(group, gi) in dockGroups" :key="gi">
       <span
-        :class="[
-          'flex h-12 w-12 items-center justify-center rounded-dock bg-gradient-to-br text-display-3 shadow-md transition-transform group-hover:-translate-y-1 group-hover:scale-105',
-          app.tint ?? 'from-slate-400 to-slate-500',
-        ]"
-      >
-        <OsIcon :name="app.icon" :size="24" class="text-white" />
-      </span>
-      <span
-        v-if="wm.isRunning(app.id)"
-        class="absolute -bottom-1 h-1 w-1 rounded-full bg-ink-mute"
+        v-if="gi > 0"
+        data-dock-divider
+        aria-hidden="true"
+        class="mx-2xs h-12 w-px shrink-0 bg-ink"
       />
-    </button>
+      <button
+        v-for="app in group"
+        :key="app.id"
+        class="group relative flex flex-col items-center gap-1"
+        :title="appName(app)"
+        @click="onDockClick(app)"
+      >
+        <OsAppTile
+          :icon="app.icon"
+          :tint="app.tint"
+          size="sm"
+          class="transition-transform group-hover:-translate-y-1 group-hover:scale-105"
+        />
+        <span
+          v-if="wm.isRunning(app.id)"
+          class="absolute -bottom-1 h-1 w-1 rounded-full bg-ink-mute"
+        />
+      </button>
+    </template>
   </nav>
 </template>

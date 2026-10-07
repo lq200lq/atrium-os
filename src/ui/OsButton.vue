@@ -14,8 +14,10 @@ const props = withDefaults(
     disabled?: boolean
     /** 前置等宽 spinner（防文案跳动），自动禁用点击并置 aria-busy */
     loading?: boolean
+    /** 品牌渐变实底（小组件库「添加」用）：给了它就取代 primary 的强调色底，白字对 ≥600 档渐变沿用磁贴那套对比度约定 */
+    tint?: string
   }>(),
-  { variant: 'ghost', size: undefined, disabled: false, loading: false },
+  { variant: 'ghost', size: undefined, disabled: false, loading: false, tint: undefined },
 )
 
 const resolvedSize = useControlSize(() => props.size)
@@ -29,9 +31,10 @@ const resolvedSize = useControlSize(() => props.size)
       'inline-flex items-center justify-center rounded-control transition disabled:is-disabled',
       controlHeightClass(resolvedSize),
       controlPaddingClass(resolvedSize),
-      variant === 'primary' && 'bg-accent text-on-accent hover:brightness-110',
-      variant === 'ghost' && 'border border-line text-ink hover:bg-surface-hover',
-      variant === 'danger' && 'border border-danger/30 text-danger hover:bg-danger/10',
+      tint && `bg-gradient-to-br ${tint} text-white shadow hover:brightness-110`,
+      !tint && variant === 'primary' && 'bg-accent-fill text-white hover:brightness-110',
+      !tint && variant === 'ghost' && 'border border-line text-ink hover:bg-surface-hover',
+      !tint && variant === 'danger' && 'border border-danger/30 text-danger hover:bg-danger/10',
     ]"
   >
     <!-- loading 用等宽占位，避免文案在切换时横向跳动 -->
