@@ -142,7 +142,7 @@ test('网页应用：管理面板、添加弹窗与 embed 窗口', async ({ page
   expectClean('web-app-dialog', await scan(page, 'web-app-dialog'))
 
   await dialog.locator('input').nth(0).fill('夹具站')
-  await dialog.locator('input').nth(1).fill('http://localhost:5199/embed-demo.html')
+  await dialog.locator('input').nth(1).fill('http://localhost:5399/embed-demo.html')
   await dialog.getByRole('button', { name: '确定' }).click()
   await expect(dialog).toHaveCount(0)
 

@@ -15,12 +15,14 @@ export default defineConfig({
     },
   },
   use: {
-    baseURL: 'http://localhost:5199',
+    // 5399：5199 曾被并行会话的外部 dev server 占用且 reuseExistingServer 静默复用了它，
+    // 14/14 视觉基线「假红」——端口独占 + 禁复用后，端口被占会直接报错而不是测到别人的服务
+    baseURL: 'http://localhost:5399',
   },
   webServer: {
-    command: 'npm run dev -- --port 5199 --strictPort',
-    url: 'http://localhost:5199',
-    reuseExistingServer: !process.env.CI,
+    command: 'npm run dev -- --port 5399 --strictPort',
+    url: 'http://localhost:5399',
+    reuseExistingServer: false,
     timeout: 60_000,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],

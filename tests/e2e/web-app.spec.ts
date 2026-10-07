@@ -14,10 +14,10 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('网页应用：添加后 Dock 出磁贴，窗口里 iframe 真的渲染出同源内容', async ({ page }) => {
-  const win = await addWebApp(page, FIXTURE_NAME, `http://localhost:5199${FIXTURE}`)
+  const win = await addWebApp(page, FIXTURE_NAME, `http://localhost:5399${FIXTURE}`)
   await expect(win.getByText(FIXTURE_NAME)).toBeVisible()
   await expect(win.getByText('共 1 个')).toBeVisible()
-  await expect(win.getByText(`http://localhost:5199${FIXTURE}`)).toBeVisible()
+  await expect(win.getByText(`http://localhost:5399${FIXTURE}`)).toBeVisible()
 
   await page.locator(dockTile(FIXTURE_NAME)).click()
   await expect(webWindow(page)).toBeVisible()
@@ -27,7 +27,7 @@ test('网页应用：添加后 Dock 出磁贴，窗口里 iframe 真的渲染出
 })
 
 test('网页应用：刷新后应用与窗口布局都在，内容仍渲染', async ({ page }) => {
-  await addWebApp(page, FIXTURE_NAME, `http://localhost:5199${FIXTURE}`)
+  await addWebApp(page, FIXTURE_NAME, `http://localhost:5399${FIXTURE}`)
   await page.locator(dockTile(FIXTURE_NAME)).click()
   await expect(webWindow(page)).toBeVisible()
 
@@ -43,7 +43,7 @@ test('网页应用：刷新后应用与窗口布局都在，内容仍渲染', as
 })
 
 test('网页应用：卸载连带关窗删磁贴，再刷新不复活', async ({ page }) => {
-  await addWebApp(page, FIXTURE_NAME, `http://localhost:5199${FIXTURE}`)
+  await addWebApp(page, FIXTURE_NAME, `http://localhost:5399${FIXTURE}`)
   await page.locator(dockTile(FIXTURE_NAME)).click()
   await expect(webWindow(page)).toBeVisible()
   await page.waitForTimeout(600)
@@ -93,7 +93,7 @@ test('内置文档中心：embed 类目样板渲染同源文档站首页', async
 test('访客角色不收窄 embed 类目：受限内置应用照旧隐藏，公开的两类仍在', async ({ page }) => {
   // S2 的权限模型只管内置应用的准入，用户添加的站点 permissions 为空即公开。
   // 这条断言的存在意义是防「新增类目顺手要求授权」：那样访客会连自己加的站点都打不开。
-  await addWebApp(page, FIXTURE_NAME, `http://localhost:5199${FIXTURE}`)
+  await addWebApp(page, FIXTURE_NAME, `http://localhost:5399${FIXTURE}`)
 
   await page.locator(dockTile('设置')).click()
   const settings = page.locator('section.absolute').filter({ hasText: '用户与角色' })

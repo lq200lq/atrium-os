@@ -80,7 +80,7 @@ test('守卫 docs-fallback 态：文档站缺页时降级页给可执行处方�
   page,
 }) => {
   await gotoShell(page)
-  await addWebApp(page, '缺页文档', `http://localhost:5199${MISSING_DOCS_PAGE}`)
+  await addWebApp(page, '缺页文档', `http://localhost:5399${MISSING_DOCS_PAGE}`)
   await page.locator(dockTile('缺页文档')).click()
 
   const frame = page.locator(`iframe[src$="${MISSING_DOCS_PAGE}"]`).contentFrame()
@@ -100,10 +100,10 @@ test('守卫 self-embed 态：把本站根路径当同源入口是用法错误�
   page,
 }) => {
   await gotoShell(page)
-  await addWebApp(page, '本站根路径', `http://localhost:5199${SITE_ROOT}`)
+  await addWebApp(page, '本站根路径', `http://localhost:5399${SITE_ROOT}`)
   await page.locator(dockTile('本站根路径')).click()
 
-  const frame = page.locator('iframe[src="http://localhost:5199/"]').contentFrame()
+  const frame = page.locator('iframe[src="http://localhost:5399/"]').contentFrame()
   const card = frame.locator('#embed-guard[data-atrium-guard="self-embed"]')
   await expect(card).toBeVisible()
   const zh = (await card.locator('p[lang="zh-CN"]').textContent()) ?? ''
@@ -132,7 +132,7 @@ test('被嵌入的实例零副作用：守卫文档不写 layout-v1，外层布�
   })
 
   await gotoShell(page)
-  await addWebApp(page, '本站根路径', `http://localhost:5199${SITE_ROOT}`)
+  await addWebApp(page, '本站根路径', `http://localhost:5399${SITE_ROOT}`)
 
   // 前置条件：内层得先恢复出一套**非空**布局，才谈得上「把旧快照写回去」。全新上下文里 layout-v1 是空的，
   // 内层的 restoreLayout 会原样早退、一次都不写——那样的绿是假的。所以先开一扇窗口并等防抖落盘（>400ms）。
@@ -142,7 +142,7 @@ test('被嵌入的实例零副作用：守卫文档不写 layout-v1，外层布�
   await page.waitForTimeout(700)
 
   await page.locator(dockTile('本站根路径')).click()
-  const embedFrame = page.locator('iframe[src="http://localhost:5199/"]').contentFrame()
+  const embedFrame = page.locator('iframe[src="http://localhost:5399/"]').contentFrame()
   // 等到守卫渲染：在「守卫挪回启动链尾」的旧形态里，这一刻内层的 restoreLayout 刚跑完、防抖正在计时，
   // 紧接着外层这笔改动就是会被内层旧快照盖掉的那一笔。
   await expect(embedFrame.locator('#embed-guard')).toBeVisible()
