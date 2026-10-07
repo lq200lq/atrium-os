@@ -2,11 +2,12 @@
 
 本页是 `docs/` 下设计文档的导读镜像。完整内容见仓库：
 
-- `docs/AtriumOS前端架构设计.md` —— 分层架构、壳层/内核/应用边界
-- `docs/AtriumOS小组件功能设计.md` / `docs/AtriumOS小组件开发指南.md` —— 桌面小组件的功能设计与接入契约（与本站[小组件开发指南](/guide/widget-development)同源）
-- `docs/AtriumOS设计规范与工程基建.md` —— token 体系、组件规范、工程门禁
-- `docs/AtriumOS脚手架迭代路线.md` —— S1–S6 阶段划分与实施状态回写
-- `docs/AtriumOS应用开发指南.md` —— 应用接入契约（与本站[指南](/guide/app-development)同源）
+- [AtriumOS前端架构设计.md](https://github.com/lq200lq/atrium-os/blob/main/docs/AtriumOS%E5%89%8D%E7%AB%AF%E6%9E%B6%E6%9E%84%E8%AE%BE%E8%AE%A1.md) —— 分层架构、壳层/内核/应用边界
+- [AtriumOS小组件功能设计.md](https://github.com/lq200lq/atrium-os/blob/main/docs/AtriumOS%E5%B0%8F%E7%BB%84%E4%BB%B6%E5%8A%9F%E8%83%BD%E8%AE%BE%E8%AE%A1.md) / [AtriumOS小组件开发指南.md](https://github.com/lq200lq/atrium-os/blob/main/docs/AtriumOS%E5%B0%8F%E7%BB%84%E4%BB%B6%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97.md) —— 桌面小组件的功能设计与接入契约（与本站[小组件开发指南](/guide/widget-development)同源）
+- [AtriumOS设计规范与工程基建.md](https://github.com/lq200lq/atrium-os/blob/main/docs/AtriumOS%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83%E4%B8%8E%E5%B7%A5%E7%A8%8B%E5%9F%BA%E5%BB%BA.md) —— token 体系、组件规范、工程门禁
+- [AtriumOS脚手架迭代路线.md](https://github.com/lq200lq/atrium-os/blob/main/docs/AtriumOS%E8%84%9A%E6%89%8B%E6%9E%B6%E8%BF%AD%E4%BB%A3%E8%B7%AF%E7%BA%BF.md) —— S1–S6 阶段划分与实施状态回写
+- [AtriumOS应用开发指南.md](https://github.com/lq200lq/atrium-os/blob/main/docs/AtriumOS%E5%BA%94%E7%94%A8%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%97.md) —— 应用接入契约（与本站[指南](/guide/app-development)同源）
+- [AtriumOS对标AntDesign迭代规划.md](https://github.com/lq200lq/atrium-os/blob/main/docs/AtriumOS%E5%AF%B9%E6%A0%87AntDesign%E8%BF%AD%E4%BB%A3%E8%A7%84%E5%88%92.md) —— S7~S14 规划与状态台账
 
 ## 分层架构
 

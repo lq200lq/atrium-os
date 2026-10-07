@@ -47,7 +47,7 @@
 ## 校验
 
 - 校验失败文案走 i18n `validation.*`（`required`/`minLen`/`maxLen`/`pattern`/`minNum`/`maxNum`），以 `{label}`/`{min}`/`{max}` 插值。
-- 必填星号用 `<span class="text-danger">*</span>` 渲染。
+- 必填星号用 `<span class="text-danger-text">*</span>` 渲染（`text-danger` 是 seed，对表面仅 3.67:1 不达 AA）。
 - 校验全部通过才派发 `submit`。
 
 ## 用法

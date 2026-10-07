@@ -27,7 +27,7 @@
 | 桌面 Desktop | 壁纸与品牌标语、桌面图标（我的电脑/工作资料/云盘/回收站）、右键菜单                                       | Shell                         |
 | Widgets      | 时钟、月历、今日事项、品牌卡片                                                                            | Shell                         |
 | Dock         | 应用图标、运行中指示、最小化窗口回收                                                                      | Shell                         |
-| 窗口         | 标题栏（交通灯/最小化/最大化/关闭）、内容区；示例：AI 助手、文档编辑器、工作流设计器、文件管理、应用中心  | Windows 层渲染，内容来自 Apps |
+| 窗口         | 标题栏（交通灯/最小化/最大化/关闭）、内容区；示例：AI 助手、文档编辑器、数据看板、文件管理、应用中心      | Windows 层渲染，内容来自 Apps |
 | 应用间联动   | AI 助手产出文档卡片 →「打开文档」唤起文档编辑器                                                           | Kernel（CommandBus）          |
 
 ## 3. 总体分层
@@ -40,7 +40,7 @@
 ├─ Windows（窗口渲染层）────────────────────────────────┤
 │ WindowFrame(标题栏/边框/缩放把手)  WindowManager(遍历渲染+KeepAlive)  │
 ├─ Apps（应用层：每个应用 = manifest + 懒加载组件）────────────┤
-│ ai-assistant  doc-editor  workflow-designer  file-manager  app-center  settings │
+│ ai-assistant  doc-editor  component-gallery  file-manager  app-center  settings │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -48,14 +48,14 @@
 
 ## 4. 技术选型
 
-| 项         | 选择                                                 | 理由                                                                                                    |
-| ---------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 框架       | Vue 3 + TypeScript + Vite                            | 组合式 API 适合 store 驱动的桌面 UI；TS 保证 manifest/store 契约                                        |
-| 状态       | Pinia + pinia-plugin-persistedstate                  | 窗口/应用/主题状态集中管理；布局与设置持久化开箱即用                                                    |
-| 工具       | VueUse                                               | useDraggable、useEventListener、useStorage、useRafFn 等减少胶水代码                                     |
-| 样式       | Tailwind CSS                                         | 桌面 UI 密度高，原子类效率与一致性最好                                                                  |
-| 图标       | lucide-vue-next                                      | 线性 SVG 图标，按需 tree-shake；经 `OsIcon` + `ICON_MAP` 统一出口渲染，`manifest.icon` 为类型安全图标名 |
-| 持久化介质 | localStorage（设置/布局）+ IndexedDB（VFS 文件内容） | 文件内容体积大，不入 localStorage                                                                       |
+| 项         | 选择                                                   | 理由                                                                                                    |
+| ---------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| 框架       | Vue 3 + TypeScript + Vite                              | 组合式 API 适合 store 驱动的桌面 UI；TS 保证 manifest/store 契约                                        |
+| 状态       | Pinia                                                  | 窗口/应用/主题状态集中管理；持久化走 kernel 的 IDB 边界（`persistHelper` 统一降级）                     |
+| 工具       | vue-i18n                                               | 双语言包与键集对齐护栏；组件内建文案收口 `useText()`                                                    |
+| 样式       | Tailwind CSS                                           | 桌面 UI 密度高，原子类效率与一致性最好                                                                  |
+| 图标       | lucide-vue-next                                        | 线性 SVG 图标，按需 tree-shake；经 `OsIcon` + `ICON_MAP` 统一出口渲染，`manifest.icon` 为类型安全图标名 |
+| 持久化介质 | IndexedDB（全部持久态：设置/布局/VFS/小组件/错误日志） | 统一经 `kernel/fs/idb`，写读边界由 `persistHelper` 统一降级，大体积数据不进 localStorage                |
 
 ## 5. 核心机制设计
 
@@ -210,17 +210,17 @@ src/
 ├─ apps/
 │  ├─ ai-assistant/        #   每应用：manifest.ts + App.vue + 内部组件
 │  ├─ doc-editor/
-│  ├─ workflow-designer/
+│  ├─ component-gallery/
+│  ├─ data-board/
 │  ├─ docs-center/         #   内置 embed 应用样板：manifest 只声明 embed.url，无 App.vue
 │  ├─ widget-center/       #   小组件中心：种类台账（安装/启用/卸载），面板复用 components/WidgetConsole
 │  ├─ today/               #   「今日」应用：月历/待办下钻的落点（消费 {date}/{scope} payload，读同一份 tasks/events）
 │  ├─ file-manager/
 │  ├─ app-center/
 │  └─ settings/
-├─ assets/                 # 壁纸、品牌资源
 ├─ styles/                 # 全局样式、CSS 变量
 ├─ entry.ts                # 模块入口：反嵌套守卫判定后才动态导入 main（被嵌入时内核不求值）
-└─ main.ts                 # 装 pinia/persistedstate，注册内置应用，挂载 DesktopRoot
+└─ main.ts                 # 装 pinia，构建期 glob 注册内置应用与小组件，挂载 DesktopRoot
 public/
 └─ docs/                   # docs:embed 同步的 VitePress 产物（构建期生成，gitignore）
 ```
