@@ -4,9 +4,45 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Atrium OS</title>
+    <!-- 首屏启动态：JS 模块落地前的空窗由它兜底；mount('#app') 清空容器，随之消失。
+         底色取壁纸 sky 的收尾色，与默认浅色主题衔接；不放文字，避免 i18n 前的半语种。 -->
+    <style>
+      .boot-screen {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e6f0f9;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI',
+          sans-serif;
+      }
+      .boot-spinner {
+        width: 28px;
+        height: 28px;
+        border: 3px solid rgb(14 165 233 / 0.25);
+        border-top-color: #0ea5e9;
+        border-radius: 50%;
+        animation: boot-spin 0.7s linear infinite;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <div class="boot-screen" aria-hidden="true"><div class="boot-spinner"></div></div>
+      <!-- 无 JS 时才渲染：与启动屏同款定位盖住空转的 spinner，只留可执行的处方 -->
+      <noscript>
+        <div class="boot-screen">
+          此应用需要启用 JavaScript 才能运行，请在浏览器设置中启用后刷新页面。
+        </div>
+      </noscript>
+    </div>
     <script type="module" src="/src/entry.ts"></script>
   </body>
 </html>
