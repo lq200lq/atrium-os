@@ -1,18 +1,21 @@
 <script setup lang="ts">
-import { onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import OsBadge from '@/ui/OsBadge.vue'
+import OsDropdown from '@/ui/OsDropdown.vue'
+import { useOS } from '@/kernel/composables/useOS'
 import { useNotification } from '@/kernel/stores/notification'
 import { useSettings } from '@/kernel/stores/settings'
 import { useShellUi } from '@/kernel/stores/shellUi'
+import type { MenuItem } from '@/ui/types'
 
 const ui = useShellUi()
 const notif = useNotification()
 const settings = useSettings()
+const os = useOS()
 const { t } = useI18n()
 
-const menus = ['workbench', 'file', 'edit', 'view', 'app', 'window', 'help'] as const
 const now = ref(new Date())
 const timer = setInterval(() => (now.value = new Date()), 1000)
 onUnmounted(() => clearInterval(timer))
@@ -21,6 +24,32 @@ const time = () =>
   now.value.toLocaleTimeString(settings.lang, { hour: '2-digit', minute: '2-digit', hour12: false })
 const date = () =>
   now.value.toLocaleDateString(settings.lang, { month: 'long', day: 'numeric', weekday: 'short' })
+
+/* 顶栏只留两个真有动作的下拉（此前七个菜单全是无 onClick 的死按钮）。
+ * 其余菜单语义在组件陈列的菜单 demo 里仍有展示，locale 键不删。 */
+const viewOpen = ref(false)
+const helpOpen = ref(false)
+
+const viewItems = computed<MenuItem[]>(() => [
+  {
+    key: 'toggle-desktop',
+    // 勾选态：MenuItem 无 checked 位，用 ✓ 前缀表达（受控显示，切换即消）
+    label: `${ui.desktopRevealed ? '✓ ' : ''}${t('context.showDesktop')}`,
+  },
+])
+const helpItems = computed<MenuItem[]>(() => [
+  { key: 'about', label: t('topbar.about') },
+  { key: 'docs', label: t('apps.docsCenter') },
+])
+
+function onViewPick(key: string) {
+  if (key === 'toggle-desktop') ui.toggleDesktopReveal()
+}
+
+function onHelpPick(key: string) {
+  if (key === 'about') os.exec('settings:open', { section: 'system' })
+  else if (key === 'docs') os.exec('docs-center:open')
+}
 </script>
 
 <template>
@@ -37,13 +66,24 @@ const date = () =>
     </div>
 
     <nav class="flex shrink-0 items-center gap-2xs">
-      <button
-        v-for="m in menus"
-        :key="m"
-        class="inline-flex h-control-sm items-center whitespace-nowrap rounded-chip px-xs text-ui text-ink hover:bg-glass-raise"
-      >
-        {{ t(`topbar.menus.${m}`) }}
-      </button>
+      <OsDropdown v-model:open="viewOpen" :items="viewItems" @click="onViewPick">
+        <button
+          class="inline-flex h-control-sm items-center whitespace-nowrap rounded-chip px-xs text-ui text-ink hover:bg-glass-raise"
+          aria-haspopup="menu"
+          :aria-expanded="viewOpen"
+        >
+          {{ t('topbar.menus.view') }}
+        </button>
+      </OsDropdown>
+      <OsDropdown v-model:open="helpOpen" :items="helpItems" @click="onHelpPick">
+        <button
+          class="inline-flex h-control-sm items-center whitespace-nowrap rounded-chip px-xs text-ui text-ink hover:bg-glass-raise"
+          aria-haspopup="menu"
+          :aria-expanded="helpOpen"
+        >
+          {{ t('topbar.menus.help') }}
+        </button>
+      </OsDropdown>
     </nav>
 
     <div class="min-w-0 flex-1 px-4">

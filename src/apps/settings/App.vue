@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import OsAlert from '@/ui/OsAlert.vue'
@@ -89,21 +89,23 @@ function sectionFlash(id: string): string {
   return focusedSection.value === id ? 'bg-accent-soft' : ''
 }
 
-watch(
-  () => (win.value?.payload as { section?: string } | undefined)?.section,
-  (section) => {
-    if (!section || !SECTIONS.includes(section as (typeof SECTIONS)[number])) return
-    void nextTick(() => {
-      const el = scroller.value?.querySelector<HTMLElement>(`[data-section="${section}"]`)
-      if (!el) return
-      el.scrollIntoView({ block: 'start' })
-      focusedSection.value = section
-      if (focusTimer) clearTimeout(focusTimer)
-      focusTimer = setTimeout(() => (focusedSection.value = null), 1600)
-    })
-  },
-  { immediate: true },
-)
+const sectionOf = computed(() => (win.value?.payload as { section?: string } | undefined)?.section)
+
+function applySection(section: string | undefined) {
+  if (!section || !SECTIONS.includes(section as (typeof SECTIONS)[number])) return
+  const el = scroller.value?.querySelector<HTMLElement>(`[data-section="${section}"]`)
+  if (!el) return
+  el.scrollIntoView({ block: 'start' })
+  focusedSection.value = section
+  if (focusTimer) clearTimeout(focusTimer)
+  focusTimer = setTimeout(() => (focusedSection.value = null), 1600)
+}
+
+/* 首开时 payload 在挂载前就位，而 setup 里的 immediate + nextTick 在异步 entry +
+ * Suspense 下会早于 ref 绑定（实测 scroller 仍为 null，静默不滚），所以挂载后直接应用；
+ * 窗口复用换段落（payload 变更）时 DOM 已在，走 watch 的变更路径。 */
+onMounted(() => applySection(sectionOf.value))
+watch(sectionOf, (section) => void nextTick(() => applySection(section)))
 </script>
 
 <template>
@@ -310,6 +312,18 @@ watch(
         <dd>{{ registry.accessibleApps.length }}</dd>
         <dt class="text-ink-mute">{{ t('settings.system.wallpapers') }}</dt>
         <dd>{{ WALLPAPER_KEYS.length }}</dd>
+        <dt class="text-ink-mute">{{ t('settings.system.license') }}</dt>
+        <dd>Apache-2.0</dd>
+        <dt class="text-ink-mute">{{ t('settings.system.repo') }}</dt>
+        <dd>
+          <a
+            href="https://github.com/lq200lq/atrium-os"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-accent-strong hover:underline"
+            >github.com/lq200lq/atrium-os</a
+          >
+        </dd>
       </dl>
     </section>
   </div>

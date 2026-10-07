@@ -2,6 +2,7 @@ export default {
   brand: { slogan: 'Atrium OS', tagline: 'Turn every capability into an app' },
   topbar: {
     search: 'Search apps, files, knowledge…',
+    about: 'About Atrium OS',
     menus: {
       workbench: 'Workbench',
       file: 'File',
@@ -458,6 +459,8 @@ export default {
       registered: 'Registered apps',
       accessible: 'Accessible',
       wallpapers: 'Wallpapers',
+      license: 'License',
+      repo: 'Source repo',
     },
     diagnostics: {
       title: 'Diagnostics',

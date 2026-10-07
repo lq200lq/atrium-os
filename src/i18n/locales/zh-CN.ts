@@ -2,6 +2,7 @@ export default {
   brand: { slogan: 'Atrium OS', tagline: '让一切能力成为应用' },
   topbar: {
     search: '搜索应用、文件、知识…',
+    about: '关于本系统',
     menus: {
       workbench: '工作台',
       file: '文件',
@@ -439,6 +440,8 @@ export default {
       registered: '已注册应用',
       accessible: '当前可访问',
       wallpapers: '壁纸候选',
+      license: '许可证',
+      repo: '源码仓库',
     },
     diagnostics: {
       title: '诊断日志',
