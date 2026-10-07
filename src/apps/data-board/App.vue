@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { createFixtureDataSource } from '@/kernel/data/fixtureDataSource'
 import type { SortSpec } from '@/kernel/data/types'
 import { useWindowContext } from '@/kernel/composables/useWindowContext'
@@ -15,6 +16,7 @@ import OsTable, { type TableColumn } from '@/ui/OsTable.vue'
 import { DEPTS, SEED, type Employee } from '@/kernel/data/orgSeed'
 
 const PAGE_SIZE = 8
+const { t } = useI18n()
 
 // 模拟异常开关：打开后数据源所有操作 reject，用于演示 error 三态、可重试与乐观回滚
 const failMode = ref(false)
@@ -37,7 +39,7 @@ const dept = ref('')
 const sort = ref<SortSpec | undefined>(undefined)
 
 const deptOptions = [
-  { value: '', label: '全部部门' },
+  { value: '', label: t('dataBoard.deptAll') },
   ...DEPTS.map((d) => ({ value: d, label: d })),
 ]
 
@@ -55,7 +57,7 @@ async function load() {
     rows.value = res.rows
     total.value = res.total
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '加载失败'
+    error.value = e instanceof Error ? e.message : t('dataBoard.loadFailed')
   } finally {
     loading.value = false
   }
@@ -94,17 +96,22 @@ const formRef = ref<InstanceType<typeof OsForm> | null>(null)
 const formModel = ref<Record<string, unknown>>({})
 
 const fields: FormField[] = [
-  { key: 'name', label: '姓名', type: 'input', required: true, min: 1 },
+  { key: 'name', label: t('dataBoard.name'), type: 'input', required: true, min: 1 },
   {
     key: 'dept',
-    label: '部门',
+    label: t('dataBoard.dept'),
     type: 'select',
     required: true,
     options: DEPTS.map((d) => ({ value: d, label: d })),
   },
-  { key: 'role', label: '职位', type: 'input', required: true },
-  { key: 'salary', label: '薪资', type: 'input', placeholder: '数字，可留空' },
-  { key: 'joinedAt', label: '入职日期', type: 'input', placeholder: 'YYYY-MM-DD' },
+  { key: 'role', label: t('dataBoard.role'), type: 'input', required: true },
+  {
+    key: 'salary',
+    label: t('dataBoard.salary'),
+    type: 'input',
+    placeholder: t('dataBoard.salaryPlaceholder'),
+  },
+  { key: 'joinedAt', label: t('dataBoard.joinedAt'), type: 'input', placeholder: 'YYYY-MM-DD' },
 ]
 
 function openCreate() {
@@ -138,19 +145,23 @@ async function confirmDialog() {
 }
 
 const columns: TableColumn<Employee>[] = [
-  { key: 'name', title: '姓名', sortable: true, width: '110px' },
-  { key: 'dept', title: '部门', width: '96px' },
-  { key: 'role', title: '职位', width: '130px' },
-  { key: 'salary', title: '薪资', sortable: true, align: 'right', width: '100px' },
-  { key: 'joinedAt', title: '入职日期', sortable: true, width: '120px' },
+  { key: 'name', title: t('dataBoard.name'), sortable: true, width: '110px' },
+  { key: 'dept', title: t('dataBoard.dept'), width: '96px' },
+  { key: 'role', title: t('dataBoard.role'), width: '130px' },
+  { key: 'salary', title: t('dataBoard.salary'), sortable: true, align: 'right', width: '100px' },
+  { key: 'joinedAt', title: t('dataBoard.joinedAt'), sortable: true, width: '120px' },
 ]
 
 // 统计头只从既有响应式状态派生，不引入新的数据流
 const statItems = computed<DescriptionItem[]>(() => [
-  { key: 'total', label: '记录总数', value: String(total.value) },
-  { key: 'shown', label: '本页行数', value: String(rows.value.length) },
-  { key: 'dept', label: '部门筛选', value: dept.value || '全部部门' },
-  { key: 'keyword', label: '关键字', value: keyword.value || '（无）' },
+  { key: 'total', label: t('dataBoard.statTotal'), value: String(total.value) },
+  { key: 'shown', label: t('dataBoard.statShown'), value: String(rows.value.length) },
+  { key: 'dept', label: t('dataBoard.statDept'), value: dept.value || t('dataBoard.deptAll') },
+  {
+    key: 'keyword',
+    label: t('dataBoard.statKeyword'),
+    value: keyword.value || t('dataBoard.noValue'),
+  },
 ])
 
 const { win } = useWindowContext()
@@ -185,22 +196,28 @@ watch(
       :class="overviewFocused ? 'ring-2 ring-primary' : ''"
       :padded="false"
     >
-      <template #title>统计概览</template>
+      <template #title>{{ t('dataBoard.statTitle') }}</template>
       <div ref="overviewEl" class="px-md py-xs">
         <OsDescriptions :items="statItems" :column="2" />
       </div>
     </OsCard>
     <div class="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2">
       <div class="w-44 w-narrow:w-full">
-        <OsInput v-model="keyword" placeholder="搜索姓名/职位" @enter="reload" />
+        <OsInput
+          v-model="keyword"
+          :placeholder="t('dataBoard.searchPlaceholder')"
+          @enter="reload"
+        />
       </div>
       <div class="w-32 w-narrow:w-full">
         <OsSelect v-model="dept" :options="deptOptions" placeholder="" />
       </div>
-      <OsButton size="sm" @click="reload">查询</OsButton>
+      <OsButton size="sm" @click="reload">{{ t('common.search') }}</OsButton>
       <div class="ml-auto flex items-center gap-3">
-        <OsSwitch v-model="failMode" label="模拟异常" />
-        <OsButton size="sm" variant="primary" @click="openCreate">新增</OsButton>
+        <OsSwitch v-model="failMode" :label="t('dataBoard.failSwitch')" />
+        <OsButton size="sm" variant="primary" @click="openCreate">
+          {{ t('dataBoard.create') }}
+        </OsButton>
       </div>
     </div>
 
@@ -215,17 +232,17 @@ watch(
         :total="total"
         :page-size="PAGE_SIZE"
         row-key="id"
-        empty-text="没有匹配的记录"
+        :empty-text="t('dataBoard.empty')"
         @sort-change="onSort"
         @retry="load"
       >
         <template #actions="{ row }">
           <div class="flex justify-end gap-2">
             <button class="text-accent-strong hover:underline" @click="openEdit(row as Employee)">
-              编辑
+              {{ t('common.edit') }}
             </button>
             <button class="text-danger hover:underline" @click="onDelete(row as Employee)">
-              删除
+              {{ t('common.delete') }}
             </button>
           </div>
         </template>
@@ -234,7 +251,7 @@ watch(
 
     <OsDialog
       v-if="dialog"
-      :title="dialog.mode === 'create' ? '新增员工' : '编辑员工'"
+      :title="dialog.mode === 'create' ? t('dataBoard.dialogCreate') : t('dataBoard.dialogEdit')"
       @confirm="confirmDialog"
       @cancel="dialog = null"
     >

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import { useOS } from '@/kernel/composables/useOS'
 import { baseName } from '@/kernel/fs/types'
@@ -15,6 +16,7 @@ interface Msg {
 const vfs = useVfs()
 const os = useOS()
 const feedback = useFeedback()
+const { t } = useI18n()
 const messages = ref<Msg[]>([
   {
     role: 'bot',
@@ -76,7 +78,7 @@ function generatePlan() {
             class="shrink-0 rounded-control bg-violet-500 px-xs py-2xs text-white hover:brightness-110"
             @click="os.exec('doc-editor:open', { key: m.doc, path: m.doc })"
           >
-            打开文档
+            {{ t('aiAssistant.openDoc') }}
           </button>
         </div>
       </div>
@@ -87,20 +89,20 @@ function generatePlan() {
         @click="generatePlan"
       >
         <OsIcon name="sparkles" :size="13" />
-        帮我制定智慧园区方案
+        {{ t('aiAssistant.quickPlan') }}
       </button>
       <div class="flex items-center gap-2">
         <input
           v-model="input"
           class="h-control flex-1 rounded-full border border-line bg-surface px-md text-ui focus:border-violet-400"
-          placeholder="输入你的问题…"
+          :placeholder="t('aiAssistant.inputPlaceholder')"
           @keydown.enter="send"
         />
         <button
           class="inline-flex h-control items-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 px-md text-ui text-white hover:brightness-110"
           @click="send"
         >
-          发送
+          {{ t('aiAssistant.send') }}
         </button>
       </div>
     </div>

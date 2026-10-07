@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import { useOS } from '@/kernel/composables/useOS'
 import { useWindowContext } from '@/kernel/composables/useWindowContext'
@@ -11,6 +12,7 @@ const { winId, win } = useWindowContext()
 const vfs = useVfs()
 const wm = useWindowManager()
 const os = useOS()
+const { t, locale } = useI18n()
 
 const path = computed(() => (win.value.payload as { path?: string } | undefined)?.path)
 const node = computed(() => (path.value ? vfs.byPath(path.value) : undefined))
@@ -43,7 +45,7 @@ function onInput() {
     const p = path.value
     if (p && vfs.byPath(p)) {
       vfs.updateContent(p, content.value)
-      savedAt.value = new Date().toLocaleTimeString('zh-CN', { hour12: false })
+      savedAt.value = new Date().toLocaleTimeString(locale.value, { hour12: false })
     }
   }, 500)
 }
@@ -64,10 +66,10 @@ onUnmounted(() => {
 <template>
   <div class="flex h-full flex-col text-ui">
     <div class="flex items-center gap-3 border-b border-line px-4 py-2 text-ink">
-      <span class="truncate font-strong text-ink">{{ node?.name ?? '未关联文件' }}</span>
+      <span class="truncate font-strong text-ink">{{ node?.name ?? t('docEditor.noFile') }}</span>
       <span class="flex-1" />
-      <span v-if="savedAt" class="text-success">已保存 {{ savedAt }}</span>
-      <span v-else-if="node" class="text-ink-mute">编辑中…</span>
+      <span v-if="savedAt" class="text-success">{{ t('docEditor.saved') }} {{ savedAt }}</span>
+      <span v-else-if="node" class="text-ink-mute">{{ t('docEditor.editing') }}</span>
     </div>
 
     <div
@@ -75,13 +77,13 @@ onUnmounted(() => {
       class="flex flex-1 flex-col items-center justify-center gap-2 text-ink-mute"
     >
       <OsIcon name="trash-2" :size="48" :stroke-width="1.5" class="text-ink-mute" />
-      <p>文件已被删除或移动</p>
+      <p>{{ t('docEditor.missing') }}</p>
     </div>
     <textarea
       v-else
       v-model="content"
       class="min-h-0 flex-1 resize-none bg-transparent p-5 leading-relaxed text-ink"
-      placeholder="开始输入…"
+      :placeholder="t('docEditor.placeholder')"
       @input="onInput"
     />
   </div>

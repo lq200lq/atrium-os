@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import OsIcon from '@/components/OsIcon.vue'
 import { commandBus } from '@/kernel/bus/commandBus'
 import { useOS } from '@/kernel/composables/useOS'
@@ -41,6 +42,7 @@ interface Row extends Record<string, unknown> {
 const vfs = useVfs()
 const os = useOS()
 const feedback = useFeedback()
+const { t, locale } = useI18n()
 const ds = createVfsDataSource()
 const HOME = '/我的文件'
 const cwd = ref(HOME)
@@ -53,7 +55,7 @@ const dialog = ref<{ mode: 'mkdir' | 'newfile' | 'rename' } | null>(null)
 const formModel = ref<Record<string, unknown>>({ name: '' })
 
 const nameField: FormField[] = [
-  { key: 'name', label: '名称', type: 'input', required: true, min: 1 },
+  { key: 'name', label: t('fileManager.name'), type: 'input', required: true, min: 1 },
 ]
 
 const inTrash = computed(() => isUnderTrash(cwd.value))
@@ -87,11 +89,15 @@ function toRow(node: FsNode): Row {
     id: node.path,
     name: node.name,
     isDir,
-    kind: isDir ? '目录' : (node.name.split('.').pop()?.toUpperCase() ?? '文件'),
+    kind: isDir
+      ? t('fileManager.kindDir')
+      : (node.name.split('.').pop()?.toUpperCase() ?? t('fileManager.kindFile')),
     size: node.size,
-    sizeText: isDir ? `${vfs.ls(node.path).length} 项` : formatSize(node.size),
+    sizeText: isDir
+      ? t('fileManager.items', { n: vfs.ls(node.path).length })
+      : formatSize(node.size),
     updatedAt: node.updatedAt,
-    updatedText: new Date(node.updatedAt).toLocaleString('zh-CN', { hour12: false }),
+    updatedText: new Date(node.updatedAt).toLocaleString(locale.value, { hour12: false }),
     path: node.path,
     icon: fileIconName(node),
     iconCls: fileIconClass(node),
@@ -110,7 +116,7 @@ async function reload() {
     })
     rows.value = res.rows.map(toRow)
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '加载失败'
+    error.value = e instanceof Error ? e.message : t('fileManager.loadFailed')
   } finally {
     loading.value = false
   }
@@ -124,15 +130,15 @@ onUnmounted(() => offBus?.())
 watch(cwd, reload, { immediate: true })
 
 const columns = computed<TableColumn<Row>[]>(() => [
-  { key: 'name', title: '名称', sortable: true, slot: 'name' },
-  { key: 'kind', title: '类型', width: '88px' },
-  { key: 'sizeText', title: '大小', width: '96px', align: 'right' },
+  { key: 'name', title: t('fileManager.name'), sortable: true, slot: 'name' },
+  { key: 'kind', title: t('fileManager.kind'), width: '88px' },
+  { key: 'sizeText', title: t('fileManager.size'), width: '96px', align: 'right' },
   ...(inTrash.value
     ? []
     : [
         {
           key: 'updatedText',
-          title: '修改时间',
+          title: t('fileManager.updated'),
           width: '170px',
           sortable: true,
         } as TableColumn<Row>,
@@ -154,10 +160,10 @@ const selectedPath = computed(() => (selected.value[0] as string | undefined) ??
 
 const dialogTitle = computed(() =>
   dialog.value?.mode === 'mkdir'
-    ? '新建目录'
+    ? t('fileManager.newDir')
     : dialog.value?.mode === 'newfile'
-      ? '新建文档'
-      : '重命名',
+      ? t('fileManager.newFile')
+      : t('fileManager.rename'),
 )
 
 function navigate(path: string) {
@@ -176,8 +182,8 @@ function openDialog(mode: 'mkdir' | 'newfile' | 'rename') {
       mode === 'rename' && selectedPath.value
         ? baseName(selectedPath.value)
         : mode === 'mkdir'
-          ? '新建目录'
-          : '新建文档.txt',
+          ? t('fileManager.newDir')
+          : t('fileManager.defaultFileName'),
   }
   dialog.value = { mode }
 }
@@ -207,14 +213,14 @@ async function onDelete() {
   // 破坏性动作先过命令式确认：反馈上下文由壳层的 FeedbackHost 提供，
   // 确认态与通知都走同一条 store 队列，不在应用内另起一套对话框状态
   const ok = await feedback.confirm({
-    title: '移入回收站',
-    content: `确定要将「${name}」移入回收站吗？可从回收站还原。`,
-    okText: '移入回收站',
+    title: t('fileManager.trashTitle'),
+    content: t('fileManager.trashBody', { name }),
+    okText: t('fileManager.trashOk'),
   })
   if (!ok) return
   selected.value = []
   await ds.remove(path)
-  feedback.success('已移入回收站', name)
+  feedback.success(t('fileManager.trashed'), name)
 }
 
 // 还原为回收站专有动作，不在通用 CRUD 契约内，直接走 vfs store
@@ -271,17 +277,21 @@ watch(
       <div class="flex items-center gap-2 border-b border-line px-4 py-2">
         <OsBreadcrumb :items="crumbs" class="min-w-0 flex-1" @click="onCrumbClick" />
         <template v-if="!inTrash">
-          <OsButton size="sm" variant="primary" @click="openDialog('mkdir')">新建目录</OsButton>
-          <OsButton size="sm" variant="primary" @click="openDialog('newfile')">新建文档</OsButton>
-          <OsButton size="sm" :disabled="!selectedPath" @click="openDialog('rename')"
-            >重命名</OsButton
-          >
+          <OsButton size="sm" variant="primary" @click="openDialog('mkdir')">{{
+            t('fileManager.newDir')
+          }}</OsButton>
+          <OsButton size="sm" variant="primary" @click="openDialog('newfile')">{{
+            t('fileManager.newFile')
+          }}</OsButton>
+          <OsButton size="sm" :disabled="!selectedPath" @click="openDialog('rename')">{{
+            t('fileManager.rename')
+          }}</OsButton>
           <OsButton size="sm" variant="danger" :disabled="!selectedPath" @click="onDelete">
-            删除
+            {{ t('common.delete') }}
           </OsButton>
         </template>
         <OsButton v-else size="sm" variant="primary" :disabled="!selectedPath" @click="onRestore">
-          还原
+          {{ t('fileManager.restore') }}
         </OsButton>
       </div>
 
@@ -294,7 +304,7 @@ watch(
           :error="error"
           row-key="id"
           selectable
-          :empty-text="inTrash ? '回收站是空的' : '此目录为空'"
+          :empty-text="inTrash ? t('fileManager.emptyTrash') : t('fileManager.emptyDir')"
           @row-dblclick="onRowDblClick"
           @retry="reload"
         >

@@ -34,6 +34,7 @@
     "build:check": "npm run build && node scripts/check-tokens.mjs && node scripts/check-bundle.mjs && node scripts/gen-icons.mjs --check && node scripts/check-widget-contract.mjs",
     "check:tokens": "node scripts/check-tokens.mjs",
     "check:widgets": "node scripts/check-widget-contract.mjs",
+    "check:i18n": "node scripts/check-i18n-chrome.mjs",
     "preview": "vite preview",
     "type-check": "vue-tsc -b",
     "lint": "eslint .",
