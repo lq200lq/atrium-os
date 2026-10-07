@@ -19,7 +19,7 @@ npm run gen:widget -- world-clock --name "世界时钟" --icon clock --sizes sm,
 
 不带参数运行 `npm run gen:widget` 进入交互式问答。
 
-> **生成器现状（2026-10-07 实测，2026-10-06 复核并更新）**：`gen-widget` 已是「半可直接上线」——交互问答收 id/名称/图标/tint/档位/下钻目标/单例/双语描述，产出 `manifest.ts`（带 `nameKey`/`descriptionKey`/`config` 空数组/准入四格注释模板）与 `preview.json` 样例桩，**同步写两份语言包**的 `widgets.names.*`/`widgets.descriptions.*` 叶子，最后直接跑 `check-widget-contract`（T5/T9/T12）让门禁当场报缺口。原残留①（产出的 `App.vue` 是调试骨架，带 `text-micro` 与裸 `opacity-*`）**已消**——骨架换成合规写法：前景走三档 `text-widget-ink*`、文字不低于 `text-caption`、内衬归宿主、不再 `JSON.stringify(config)`，且当场会踩 `check:tokens` 的 `widget-foreground` 作用域规则自证合规。剩一处：`description`/`keywords` 没给答案时出 TODO 占位注释，判据 K1「完全落地」前照本指南 §3~§6 手工填。
+> **生成器现状（2026-10-07 实测，2026-10-06 复核并更新）**：`gen-widget` 已是「半可直接上线」——交互问答收 id/名称/图标/tint/档位/下钻目标/单例/双语描述，产出 `manifest.ts`（带 `nameKey`/`descriptionKey`/`config` 空数组/准入四格注释模板）与 `preview.json` 样例桩，**同步写两份语言包**的 `widgets.names.*`/`widgets.descriptions.*` 叶子，最后直接跑 `check-widget-contract`（T5/T9/T12）让门禁当场报缺口。原残留①（产出的 `App.vue` 是调试骨架，带 `text-micro` 与裸 `opacity-*`）**已消**——骨架换成合规写法：前景走三档 `text-widget-ink*`、文字不低于 `text-caption`、内衬归宿主、不再 `JSON.stringify(config)`，且当场会踩 `check:tokens` 的 `widget-foreground` 作用域规则自证合规。2026-10-07 收口：`--desc-zh`/`--desc-en`/`--keywords` 与 `--open-app` 或 `--exempt-reason` 收为必填（缺失即 usage 报错退出），交互问答逐项提问，生成物零占位 TODO——K1 残留清零，人工只剩准入答卷三格与落地内容。
 
 ## 2. 小组件是如何被自动收集的
 
@@ -364,5 +364,5 @@ husky pre-commit 会跑 lint-staged（eslint --fix + prettier）与 type-check�
 
 - **摆放与尺寸**：改尺寸（只给已声明档，入口是卡片菜单档位组与 `⌥←/⌥→`）与网格吸附拖拽**均已实现**（§5.1/§5.2，键盘等价物 §5.3）。卡片表面不放拖角手柄（2026-10-07 撤，见功能设计 §8 偏差 29）。明确不做的仍然是：像素级自由摆放、任意 span、跨 band 拉宽、特大档——见功能设计 §7 与决策 9。
 - **`cq-widget` 容器根**：`WidgetFrame` 仍挂着它且**刻意不定义变体**——改尺寸不需要容器查询（落点是离散 `size`，档位由宿主经 context 给出），别误以为换档依赖它；它的保留价值是在刻度层替作者钉住「件按档渲染，不按像素渲染」这句话。去留可单独决定，不阻塞任何功能。
-- **仍挂账的开放项**（分期与判据一律看功能设计 §5/§9，本附录只留指针）：实例粒度启用（→ 实例级 `hidden`；原文后面那句「需真实场景」**已于 2026-10-06 作废**——没有任何 kind 声明 `singleton`，同 kind 多实例是用户当下就能走到的路径，数据隔离与删件不删数据也已有腿，见上面的纪律条目与功能设计 §8 偏差 27，剩下的只是产品拍板 `hidden` 的 UI 落点）、`gen-widget` 模板里 `description`/`keywords` 的 TODO 占位注释（`App.vue` 骨架本身已于 2026-10-06 换成合规写法，剩 author 填文案）、`OsButton` danger 对比度（独立工作线）、视觉基线一次性重生成。管理面合一视图（预览挂载/搜索/无权限灰态行/tint/排序把手）**已于 2026-10-07 接线**，不再挂在账上；`focusInstanceId` 的传 id 调用方也已于 2026-10-06 由溢出清单「在管理台定位」补上（§8 原残项框已改写）；T10 去色目视图两条腿（桌面 + 管理面预览）也已在 `tests/e2e/widget-baseline.spec.ts` 落地。
+- **仍挂账的开放项**（分期与判据一律看功能设计 §5/§9，本附录只留指针）：实例粒度启用（→ 实例级 `hidden`；原文后面那句「需真实场景」**已于 2026-10-06 作废**——没有任何 kind 声明 `singleton`，同 kind 多实例是用户当下就能走到的路径，数据隔离与删件不删数据也已有腿，见上面的纪律条目与功能设计 §8 偏差 27，剩下的只是产品拍板 `hidden` 的 UI 落点）、（~~`gen-widget` 模板里 `description`/`keywords` 的 TODO 占位注释~~ **已于 2026-10-07 收为必填入参清零**）、（~~`OsButton` danger 对比度~~ **已于 2026-10-07 整类修全**：seed 作文字色的三处落点统一切 `text-danger-text`，对比度腿与类名断言已补，见架构设计开放问题）、（~~视觉基线一次性重生成~~ **darwin 14/14 已绿**，2026-10-07 多轮带归因重生成；linux 基线仍待 CI 首跑引导，属远端首跑挂账）。管理面合一视图（预览挂载/搜索/无权限灰态行/tint/排序把手）**已于 2026-10-07 接线**，不再挂在账上；`focusInstanceId` 的传 id 调用方也已于 2026-10-06 由溢出清单「在管理台定位」补上（§8 原残项框已改写）；T10 去色目视图两条腿（桌面 + 管理面预览）也已在 `tests/e2e/widget-baseline.spec.ts` 落地。
 - **右键菜单是壳层玻璃弹层**，不复用窗口内的 `OsMenu`（材质归属不同，见 §8）；因此没有二级子菜单，尺寸档平铺成条目。
