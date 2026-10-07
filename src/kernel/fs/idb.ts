@@ -1,4 +1,4 @@
-const DB_NAME = 'webos'
+const DB_NAME = 'atrium-os'
 const STORE = 'kv'
 
 function openDb(): Promise<IDBDatabase> {

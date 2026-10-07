@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------
  *   T5  契约字段不空转：src/widgets/<id>/manifest.ts 逐件核结构，
  *       下钻列「要么给落点（openAppId 对象 + payloadFor）、要么给豁免」，
- *       「只填 appId 落首页」判不合格（docs/WebOS小组件功能设计.md §4.5、H-1）。
+ *       「只填 appId 落首页」判不合格（docs/AtriumOS小组件功能设计.md §4.5、H-1）。
  *   T9  文案写法：两份语言包 widgets.descriptions.* 叶子齐平、同语言不重值，
  *       中文禁自指开头、英文句子式大写且禁 "This widget" 式自指（§4.8 H-5）。
  *   T12 配置面不越权：configEntry 指向的组件不 import kernel/stores、

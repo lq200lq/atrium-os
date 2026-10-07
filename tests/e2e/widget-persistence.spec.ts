@@ -101,7 +101,7 @@ const PER_KIND: { kind: Kind; size: WidgetSize; write: string }[] = [
 async function readKv(page: Page, keys: string[]): Promise<Record<string, unknown>> {
   return page.evaluate(async (ks: string[]) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const req = indexedDB.open('webos', 1)
+      const req = indexedDB.open('atrium-os', 1)
       req.onupgradeneeded = () => {
         if (!req.result.objectStoreNames.contains('kv')) req.result.createObjectStore('kv')
       }

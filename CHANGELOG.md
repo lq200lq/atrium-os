@@ -1,6 +1,6 @@
 # Changelog
 
-本文件记录 WebOS 前端脚手架的显著变更。版本由 [changesets](.changeset/) 管理。
+本文件记录 Atrium OS 前端脚手架的显著变更。版本由 [changesets](.changeset/) 管理。
 
 ## 0.1.0
 

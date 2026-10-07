@@ -1,5 +1,5 @@
 ---
-'webos': minor
+'atrium-os': minor
 ---
 
 S12 质量线：无障碍、视觉回归与流程门禁。**a11y 门禁默认执行**——`tests/e2e/a11y.spec.ts` 解除 `A11Y=1` 门控（四场景：壳层冷启动 / Spotlight / 组件陈列逐页签 / 设置窗口），已知违规基线 `BASELINE` 清空为 `{}`，即 0 个 axe serious/critical；`tests/e2e/contrast.spec.ts` 在 5 语义 × 明暗 × 4 预设之外补上 S7 的盲区（中性 `ink-mute` 叠 5 级表面、`on-accent` 实底前景），共 16 条。扫描做过非空跑证明：注入无 label 输入框与无 alt 图片，axe 如实报出 `label:critical` + `image-alt:critical`。

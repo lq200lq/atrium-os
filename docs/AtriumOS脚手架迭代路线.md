@@ -1,10 +1,10 @@
-# WebOS 脚手架迭代路线
+# Atrium OS 脚手架迭代路线
 
-> 定位：在《WebOS前端架构设计.md》（形态与机制）与《WebOS设计规范与工程基建.md》（门禁与 token）之上，规划**企业级前端脚手架**方向的后续迭代。载体保持 WebOS 桌面形态。
+> 定位：在《AtriumOS前端架构设计.md》（形态与机制）与《AtriumOS设计规范与工程基建.md》（门禁与 token）之上，规划**企业级前端脚手架**方向的后续迭代。载体保持 Atrium OS 桌面形态。
 >
 > 本文只规划、不实施。每阶段开工前先在此细化设计点，实施中的偏差与状态回写第 8 节。
 >
-> S1~S6 已全部完成（见第 8 节）。后续缺口以 Ant Design 体系为参照另文规划，编号续于 S7~S12，见《WebOS对标AntDesign迭代规划.md》。
+> S1~S6 已全部完成（见第 8 节）。后续缺口以 Ant Design 体系为参照另文规划，编号续于 S7~S12，见《AtriumOS对标AntDesign迭代规划.md》。
 
 ## 1. 路线定位
 
@@ -44,7 +44,7 @@
 - `AppManifest` 契约扩展：`version`、`category`、`permissions?`（S2 消费）、`nameKey?`（S5 消费）；字段全部类型安全，新增字段可选以免破坏现有 4 个应用
 - 自动注册：`main.ts` 的手工 import 换成 `import.meta.glob('./apps/*/manifest.ts', { eager: true })` 收集；注册顺序由 `manifest.order` 决定（Dock 与应用中心的排序不再依赖 import 顺序）
 - `scripts/gen-app.mjs` + `npm run gen:app`：交互式（或参数式）产出 `src/apps/<id>/{manifest.ts,App.vue}` 骨架，自带 token 化样式与 `useOS()` 示例；不引入 plop 等额外依赖
-- `docs/WebOS应用开发指南.md`：manifest 字段表、窗口/单例语义、CommandBus 与 VFS 用法、禁止事项（apps 之间不互相 import、不散落色值）
+- `docs/AtriumOS应用开发指南.md`：manifest 字段表、窗口/单例语义、CommandBus 与 VFS 用法、禁止事项（apps 之间不互相 import、不散落色值）
 
 **验收标准**
 
@@ -78,7 +78,7 @@
 
 ### S3 组件纵深：表格 / 表单 / 反馈（规模 L）
 
-**目标**：把 `src/ui` 从「五个基础件」扩到能拼出企业管理台页面的组件集，且展示方式本身符合 WebOS 形态。
+**目标**：把 `src/ui` 从「五个基础件」扩到能拼出企业管理台页面的组件集，且展示方式本身符合 Atrium OS 形态。
 
 **交付物**
 
@@ -190,9 +190,9 @@ S1 接入契约 ──┬─→ S2 权限 + settings ──┐
 ## 6. 范围外（明确不做）
 
 - 后端服务、登录协议、多端同步（RemoteFS 只留适配器接口）
-- 微前端 / 应用独立部署（评估触发点见架构文档「开放问题」：应用数 > 15）。**iframe 已按决策 D2′ 解禁**，但只作为「外部网页应用」类目的内容区实现（`AppManifest.embed` + 内置 `EmbedView`），不是应用隔离/独立部署方案，见《WebOS应用开发指南.md》§6
-- 移动端适配（WebOS 桌面形态，窄屏仅保持现有降级：Widgets 隐藏）
-- 视觉回归基线（**2026-10-05 S10 收尾翻案**：组件破 40 后改取「只做组件级快照」——8~10 个高价值界面的 Playwright 截图基线随仓库提交、CI 比对、抖动区用 mask 排除；全页面像素回归仍不做。决策依据见《WebOS对标AntDesign迭代规划.md》§8，实施排入 S12。此前口径为「暂不引入，以截图人工复核 + computed style 断言代替」）
+- 微前端 / 应用独立部署（评估触发点见架构文档「开放问题」：应用数 > 15）。**iframe 已按决策 D2′ 解禁**，但只作为「外部网页应用」类目的内容区实现（`AppManifest.embed` + 内置 `EmbedView`），不是应用隔离/独立部署方案，见《AtriumOS应用开发指南.md》§6
+- 移动端适配（Atrium OS 桌面形态，窄屏仅保持现有降级：Widgets 隐藏）
+- 视觉回归基线（**2026-10-05 S10 收尾翻案**：组件破 40 后改取「只做组件级快照」——8~10 个高价值界面的 Playwright 截图基线随仓库提交、CI 比对、抖动区用 mask 排除；全页面像素回归仍不做。决策依据见《AtriumOS对标AntDesign迭代规划.md》§8，实施排入 S12。此前口径为「暂不引入，以截图人工复核 + computed style 断言代替」）
 - 工作流设计器等重业务应用（属业务线，不属脚手架线）
 
 ## 7. 开放问题

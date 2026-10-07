@@ -2,9 +2,9 @@ import { expect, test, type Page } from '@playwright/test'
 import { addWebApp, dockTile, gotoShell, webWindow } from './helpers'
 
 // 文档站深链的运行链门禁（决策 D2′）：中间件只做「真文件存在才重写 req.url」，于是它的成败只能由
-// 「这个 URL 最终 serve 出的是文档站，还是 WebOS 自己的壳」来证明——只看 iframe 元素存在会放过整类失败。
+// 「这个 URL 最终 serve 出的是文档站，还是 Atrium OS 自己的壳」来证明——只看 iframe 元素存在会放过整类失败。
 // 正向断言刻意用 VitePress 的结构类（.VPHome / .VPDoc）而不是正文文案：文档内容天天改，结构类不牵连。
-// html[data-webos-guard] 计数为 0 是配套的反向锁（守卫写这个属性之后）：拦住「退回套壳也算通过」。
+// html[data-atrium-guard] 计数为 0 是配套的反向锁（守卫写这个属性之后）：拦住「退回套壳也算通过」。
 
 /**
  * 首页里由 VitePress 自己生成的三种形态（cleanUrls: true 下站内不存在带 .html 的内链，实测过）：
@@ -30,7 +30,7 @@ test('文档中心首开：iframe 里是文档站首页，不是被 SPA fallback
   const frame = await openDocsCenter(page)
   // .VPHome 只可能来自 VitePress 的首页模板：壳层自己的产物里没有这个类，所以在场即为正向证据
   await expect(frame.locator('.VPHome')).toBeVisible()
-  await expect(frame.locator('html[data-webos-guard]')).toHaveCount(0)
+  await expect(frame.locator('html[data-atrium-guard]')).toHaveCount(0)
 })
 
 test('文档站内链盘点：目录根 / 尾斜杠分区 / 无扩展名叶子三种形态都真在链接集合里', async ({
@@ -65,9 +65,9 @@ for (const [label, path] of [
     // 会话内点链接走的是 VitePress 自己的 SPA 路由，压根不发这个请求，测不到重写。
     await page.goto(path)
     await expect(page.locator('.VPHome, .VPDoc').first()).toBeVisible()
-    // 标题是第二枚正向锁：壳层是「万物皆应用 · WebOS」，文档站一律带「WebOS 脚手架」
-    await expect(page).toHaveTitle(/WebOS 脚手架/)
-    await expect(page.locator('html[data-webos-guard]')).toHaveCount(0)
+    // 标题是第二枚正向锁：壳层是「万物皆应用 · Atrium OS」，文档站一律带「Atrium OS 脚手架」
+    await expect(page).toHaveTitle(/Atrium OS 脚手架/)
+    await expect(page.locator('html[data-atrium-guard]')).toHaveCount(0)
   })
 }
 
@@ -84,9 +84,9 @@ test('守卫 docs-fallback 态：文档站缺页时降级页给可执行处方�
   await page.locator(dockTile('缺页文档')).click()
 
   const frame = page.locator(`iframe[src$="${MISSING_DOCS_PAGE}"]`).contentFrame()
-  const card = frame.locator('#embed-guard[data-webos-guard="docs-fallback"]')
+  const card = frame.locator('#embed-guard[data-atrium-guard="docs-fallback"]')
   await expect(card).toBeVisible()
-  await expect(frame.locator('html[data-webos-guard="docs-fallback"]')).toHaveCount(1)
+  await expect(frame.locator('html[data-atrium-guard="docs-fallback"]')).toHaveCount(1)
   await expect(card.locator('p[lang="zh-CN"]')).toContainText('npm run docs:embed')
   // 双语并列两个 lang 段落：此刻 i18n 还没启动，只能靠 lang 属性把两种语言同时摊开
   await expect(card.locator('p[lang="en"]')).toBeVisible()
@@ -104,7 +104,7 @@ test('守卫 self-embed 态：把本站根路径当同源入口是用法错误�
   await page.locator(dockTile('本站根路径')).click()
 
   const frame = page.locator('iframe[src="http://localhost:5199/"]').contentFrame()
-  const card = frame.locator('#embed-guard[data-webos-guard="self-embed"]')
+  const card = frame.locator('#embed-guard[data-atrium-guard="self-embed"]')
   await expect(card).toBeVisible()
   const zh = (await card.locator('p[lang="zh-CN"]').textContent()) ?? ''
   expect(zh).toContain('/docs/index.html')

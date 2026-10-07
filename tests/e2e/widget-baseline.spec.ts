@@ -69,7 +69,7 @@ async function landedPos(page: Page, kind: string) {
 
 function readStoredPos(kind: string): Promise<{ col: number; row: number } | null> {
   return new Promise((res, rej) => {
-    const open = indexedDB.open('webos', 1)
+    const open = indexedDB.open('atrium-os', 1)
     open.onupgradeneeded = () => open.result.createObjectStore('kv')
     open.onerror = () => rej(open.error)
     open.onsuccess = () => {

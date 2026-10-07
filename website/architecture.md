@@ -2,11 +2,11 @@
 
 本页是 `docs/` 下设计文档的导读镜像。完整内容见仓库：
 
-- `docs/WebOS前端架构设计.md` —— 分层架构、壳层/内核/应用边界
-- `docs/WebOS小组件功能设计.md` / `docs/WebOS小组件开发指南.md` —— 桌面小组件的功能设计与接入契约（与本站[小组件开发指南](/guide/widget-development)同源）
-- `docs/WebOS设计规范与工程基建.md` —— token 体系、组件规范、工程门禁
-- `docs/WebOS脚手架迭代路线.md` —— S1–S6 阶段划分与实施状态回写
-- `docs/WebOS应用开发指南.md` —— 应用接入契约（与本站[指南](/guide/app-development)同源）
+- `docs/AtriumOS前端架构设计.md` —— 分层架构、壳层/内核/应用边界
+- `docs/AtriumOS小组件功能设计.md` / `docs/AtriumOS小组件开发指南.md` —— 桌面小组件的功能设计与接入契约（与本站[小组件开发指南](/guide/widget-development)同源）
+- `docs/AtriumOS设计规范与工程基建.md` —— token 体系、组件规范、工程门禁
+- `docs/AtriumOS脚手架迭代路线.md` —— S1–S6 阶段划分与实施状态回写
+- `docs/AtriumOS应用开发指南.md` —— 应用接入契约（与本站[指南](/guide/app-development)同源）
 
 ## 分层架构
 
@@ -65,7 +65,7 @@ const layers = [
 ## 关键设计原则
 
 - **单一判定收口**：权限判定只在 `session.canAccess`，开窗 gate 只在 `wm.open`，避免多处过滤漂移；小组件实例的渲染入口同样经它派生。
-- **小组件是桌面件**：`WidgetRegistry` + `Widgets` 两个 store + `WidgetLayer/WidgetFrame`（`z-desktop`，在窗口之下），不进窗口体系、不进 Dock；卡片材质收敛在 `kernel/widget/material.ts` 一处（桌面与预览沙箱共用）。摆放与尺寸是「连续手势 + 离散吸附」：拖拽吸到整数格、换档只取已声明档（入口是卡片右键菜单的档位组与 `⌥←/⌥→`，卡片表面不放拖角手柄，2026-10-07 起，见功能设计 §8 偏差 29），不引入像素级自由态（架构 D15）；件内自有数据落 VFS `/我的数据`（D12）、表面走主题同源 token 层（D13）、内容有 HIG 参照的纪律（D14）。详见[小组件开发指南](/guide/widget-development)与 `docs/WebOS小组件功能设计.md`。
+- **小组件是桌面件**：`WidgetRegistry` + `Widgets` 两个 store + `WidgetLayer/WidgetFrame`（`z-desktop`，在窗口之下），不进窗口体系、不进 Dock；卡片材质收敛在 `kernel/widget/material.ts` 一处（桌面与预览沙箱共用）。摆放与尺寸是「连续手势 + 离散吸附」：拖拽吸到整数格、换档只取已声明档（入口是卡片右键菜单的档位组与 `⌥←/⌥→`，卡片表面不放拖角手柄，2026-10-07 起，见功能设计 §8 偏差 29），不引入像素级自由态（架构 D15）；件内自有数据落 VFS `/我的数据`（D12）、表面走主题同源 token 层（D13）、内容有 HIG 参照的纪律（D14）。详见[小组件开发指南](/guide/widget-development)与 `docs/AtriumOS小组件功能设计.md`。
 - **契约优先**：数据访问、应用接入都走类型安全契约，多实现共用同一套契约单测（`runContract`）。
 - **纯前端**：无后端/mock server，「真数据」= VFS store CRUD + IndexedDB。
 - **失败可查**：错误不只 `console.warn`，落库并在界面回看；数据层错误 reject 供乐观回滚，不吞异常、不同步抛。

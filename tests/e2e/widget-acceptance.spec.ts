@@ -4,7 +4,7 @@ import { expect, test, type Page, type Locator } from '@playwright/test'
 import { gotoShell } from './helpers'
 
 /**
- * §9 验收表的 e2e 腿 + §4.3 契约的 A-9 腿（docs/WebOS小组件功能设计.md）：
+ * §9 验收表的 e2e 腿 + §4.3 契约的 A-9 腿（docs/AtriumOS小组件功能设计.md）：
  *   T1 持久化往返——每个写操作 → reload → 状态仍在（§4.2 的三条写通道）
  *   T2 死白率——每件 × 每档，内容包围盒对卡片内框，连续死白 ≤15%（§2.2 E3 / §附之一的测法）
  *   T3 对比度 + 文字地板——件内文字 ≥11px、三档墨色对卡片底 ≥AA 正文，两套主题 × 三壁纸（§4.6）
@@ -271,7 +271,7 @@ async function mergeFs(page: Page, extra: Record<string, unknown>): Promise<void
   await page.evaluate(
     async ([key, nodes]: [string, Record<string, unknown>]) => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const req = indexedDB.open('webos', 1)
+        const req = indexedDB.open('atrium-os', 1)
         req.onupgradeneeded = () => {
           if (!req.result.objectStoreNames.contains('kv')) req.result.createObjectStore('kv')
         }
@@ -301,7 +301,7 @@ async function mergeFs(page: Page, extra: Record<string, unknown>): Promise<void
 async function writeKv(page: Page, entries: Record<string, unknown>): Promise<void> {
   await page.evaluate(async (list: [string, unknown][]) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const req = indexedDB.open('webos', 1)
+      const req = indexedDB.open('atrium-os', 1)
       req.onupgradeneeded = () => {
         if (!req.result.objectStoreNames.contains('kv')) req.result.createObjectStore('kv')
       }
@@ -326,7 +326,7 @@ async function writeKv(page: Page, entries: Record<string, unknown>): Promise<vo
 async function readKv(page: Page, keys: string[]): Promise<Record<string, unknown>> {
   return page.evaluate(async (ks: string[]) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const req = indexedDB.open('webos', 1)
+      const req = indexedDB.open('atrium-os', 1)
       req.onupgradeneeded = () => {
         if (!req.result.objectStoreNames.contains('kv')) req.result.createObjectStore('kv')
       }

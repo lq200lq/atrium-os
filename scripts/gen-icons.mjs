@@ -2,7 +2,7 @@
 /**
  * 图标白名单生成与校验（S11）。
  *
- * 为什么不是「全量动态解析 lucide」：实测（见 docs/WebOS对标AntDesign迭代规划.md §9 S11 条）
+ * 为什么不是「全量动态解析 lucide」：实测（见 docs/AtriumOS对标AntDesign迭代规划.md §9 S11 条）
  * 把整包 barrel 拉进 vendor 会同时打爆 vendor 单块上限与首屏预算，且 lucide-vue-next 没有
  * DynamicIcon。所以保留显式子集：内核文件由本脚本维护，业务侧加图标只改组件、跑一次
  * `npm run icons:gen`，不必再手写 import。

@@ -40,15 +40,15 @@ describe('renderSelfEmbedGuard 渲染降级页', () => {
   const causes: GuardCause[] = ['docs-fallback', 'self-embed']
 
   beforeEach(() => {
-    document.documentElement.removeAttribute('data-webos-guard')
+    document.documentElement.removeAttribute('data-atrium-guard')
     document.body.innerHTML = '<div id="app"><div id="stale-mount-target"></div></div>'
   })
 
   it.each(causes)('%s：成因写进 html 与卡片，挂载残留被清掉', (cause) => {
     renderSelfEmbedGuard(document, cause)
-    expect(document.documentElement.dataset.webosGuard).toBe(cause)
+    expect(document.documentElement.dataset.atriumGuard).toBe(cause)
     const card = document.querySelector<HTMLElement>('#embed-guard')
-    expect(card?.dataset.webosGuard).toBe(cause)
+    expect(card?.dataset.atriumGuard).toBe(cause)
     // 「被嵌入的那份实例连挂载点都不留」：入口在 store 之前就分叉，这里再锁一次渲染面
     expect(document.getElementById('stale-mount-target')).toBeNull()
     expect(document.querySelector('#app > .embed-guard-page')).not.toBeNull()

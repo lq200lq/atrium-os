@@ -379,7 +379,7 @@ export default {
     window: { title: '窗口', cascade: '层叠全部窗口', closeAll: '关闭全部窗口' },
     system: {
       title: '系统信息',
-      version: 'WebOS 版本',
+      version: 'Atrium OS 版本',
       registered: '已注册应用',
       accessible: '当前可访问',
       wallpapers: '壁纸候选',

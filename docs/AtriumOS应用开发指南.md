@@ -1,6 +1,6 @@
-# WebOS 应用开发指南
+# Atrium OS 应用开发指南
 
-> 面向对象：要在这套 WebOS 底座上新增一个应用的开发者。
+> 面向对象：要在这套 Atrium OS 底座上新增一个应用的开发者。
 > 目标：新增一个应用**只动一个目录**（`src/apps/<id>/`），不改壳层、不改 `main.ts`。
 
 ## 1. 30 秒上手
@@ -15,7 +15,7 @@ npm run gen:app -- hello-world --name "Hello" --icon sparkles --order 50
 
 要把一个**外部网站**挂成应用（不写 Vue 组件），走 `embed` 类目，见 §6。
 
-要把能力挂在**桌面上**而不是开窗口（时钟、待办这类），写的是小组件而不是应用，见《WebOS小组件开发指南.md》。
+要把能力挂在**桌面上**而不是开窗口（时钟、待办这类），写的是小组件而不是应用，见《AtriumOS小组件开发指南.md》。
 
 ## 2. 应用是如何被自动收集的
 
@@ -99,7 +99,7 @@ export const manifest: AppManifest = {
 - **`EmbedView` 在 `src/windows/`，不在 `src/ui/`**：它靠 `useWindowContext()` 反查自己所属窗口的 manifest，属于窗口 chrome 而非可复用 UI 原语，因此刻意不进组件 API 文档表的生成面。
 - **用户可在运行期添加**：应用中心「网页应用」分区填 名称 + 地址 即可，记录落 IndexedDB（键 `webapps-v1`，store `src/kernel/stores/webApps.ts`），启动时在 `main.ts` 的第一波 restore 里注册进 registry——**必须早于 `wm.restoreLayout()`**，否则窗口布局恢复时按「appId 不在注册表」被静默丢弃。
 - **地址是用户输入，校验在写入边界**：`src/kernel/webapp/url.ts` 的 `normalizeWebUrl()` 用**正向协议白名单**（只放 `http:`/`https:`——注意 `new URL('javascript:alert(1)')` 是能解析成功的，反向黑名单会漏），剥掉 URL 里的用户名/口令，要求 hostname 非空、总长 ≤2048。UI 校验只是体验，store 才是防线。
-- **sandbox 的确切取值是有意的**：给 `allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-presentation`，**唯独不给 `allow-top-navigation`**——这是本类目唯一真正的防护（拦住外部页面把整个 WebOS 顶掉）。`allow-scripts` + `allow-same-origin` 只对**同源**文档构成逃逸，而用户填的地址按构造是第三方；本仓唯一的同源嵌入是 E2E fixture `public/embed-demo.html`，它等同于未沙箱，仅限测试用。
+- **sandbox 的确切取值是有意的**：给 `allow-scripts allow-same-origin allow-forms allow-popups allow-modals allow-downloads allow-presentation`，**唯独不给 `allow-top-navigation`**——这是本类目唯一真正的防护（拦住外部页面把整个 Atrium OS 顶掉）。`allow-scripts` + `allow-same-origin` 只对**同源**文档构成逃逸，而用户填的地址按构造是第三方；本仓唯一的同源嵌入是 E2E fixture `public/embed-demo.html`，它等同于未沙箱，仅限测试用。
 - **跨源就是一条硬边界，不假装能翻越**：frame 内文档读不到，因此标题恒为 `manifest.name`、没有前进/后退、没有 URL 回读；暗色主题不会注入 frame。被 X-Frame-Options / CSP `frame-ancestors` 拒绝时 frame 里只剩下一个**父页读不到的空文档**（是 `about:blank` 还是浏览器自己的错误文档，跨源之后无从查证，也不必查证）且**照常触发 `load`**，无法可靠检测，所以 `EmbedView` 只做「8 秒未就绪 → warning + 重试 + 新标签页打开」，而不是谎称识别出了拒绝。实测口径（`https://www.google.com`，响应头 `x-frame-options: SAMEORIGIN`）：frame 拿到 200 并正常触发 `load`，画面是一片空白、界面停在就绪态且不给错误提示——这是**正确的**行为，任何「拒绝检测」都会连带误伤能正常嵌入的站点。限制因此在两处起作用的地方明示：添加/编辑弹窗的说明文案（告诉用户空白时该用什么），以及窗口工具栏常驻的「重试 / 新标签页打开」出口（任何时刻都走得出去）。
 - **同源入口有三层，各管一段**（口径已从「必须带扩展名」放宽，别再把它当硬约束）：
   1. **带扩展名的真文件地址**（`/docs/index.html`）最稳——不经任何重写直接命中静态服务，内置样板仍用它；
@@ -110,7 +110,7 @@ export const manifest: AppManifest = {
      降级页按成因分两态（此刻唯一还能观测的线索是 `location.pathname`）：`/docs/` 前缀 → `docs-fallback`，处方是 `npm run docs:embed`；其余 → `self-embed`，处方是改写成一个真实文件的地址。合成一句会把「跑一条命令就能修」和「这是你用错了」揉在一起，两条都拿不到。页面恒为浅色（它不启动 store，拿不到 `theme-v1`），双语用并列两个 `<p lang>` 而非 i18n（此刻 i18n 还没 boot）。
      门禁在 `tests/e2e/docs-deep-link.spec.ts`：首页内链形态盘点（三种形态必须都在集合里，新增坏形态会被按模式拦下）+ 三条代表性硬导航 + 守卫两态各自的处方与样式 + 一条「被嵌入的实例零副作用」——后者用 `addInitScript` 在每个文档里给 `IDBObjectStore.prototype.put` 记账，断言**内层一次都没写** `layout-v1`。为什么不断言「刷新后少没少窗口」：内层与外层各有一个 400ms 防抖，谁后落盘取决于模块图加载耗时，那是时序竞赛；「被嵌的文档不该写宿主的状态」才是无条件的不变量。
 - **文档站首开即有内容**：`public/docs` 是生成物且 gitignore，缺它时 iframe 会拿到 SPA fallback 的壳 HTML。`npm run dev` 因此挂了 `predev`（`node scripts/embed-docs.mjs --if-missing`）：已有就跳过，没有先 `vitepress build` 再复制（实测 1.6s）。`playwright.config.ts` 的 webServer 命令也是 `npm run dev …`，于是没挂 `pretest:e2e` 的 `test:e2e:a11y` / `test:e2e:visual` 两个 job 一并自愈——npm 的 `pre<script>` 只对同名 script 生效，这是它们此前拿不到 `public/docs` 的原因。
-- **文档站有站内搜索，快捷键归属要写清**：`website/.vitepress/config.ts` 开 `themeConfig.search = { provider: 'local' }`（VitePress 不自带搜索，不配就没有；默认件文案是英文，中文站要连 `options.translations` 一起配，否则触发件与弹窗 placeholder 都显示 "Search"）。热键 `⌘K`/`Ctrl+K` 与 `/` 和 WebOS Spotlight **同名但不冲突**：键盘事件只在获得焦点的那个 document 上派发，不跨 frame 边界。用户可感知的唯一 subtlety 是「焦点进了 frame 之后 ⌘K 开的是文档站内搜索，要用 Spotlight 得先点回壳层」——**别把它当 bug 去父层接管 frame 快捷键**，那等于给 embed 类目开同源专属特权，违反 D2′ 的「chrome 对类目一无所知」。代价核对（实测）：`docs:embed` 1.6s，新增 `@localSearchIndexroot` 与 `VPLocalSearchBox` 两个**懒加载** chunk 共 ≈201KB，全落 `dist/docs`；`scripts/check-bundle.mjs` 只扫 `dist/assets`，OS 首屏预算与单块预算都不受影响。
+- **文档站有站内搜索，快捷键归属要写清**：`website/.vitepress/config.ts` 开 `themeConfig.search = { provider: 'local' }`（VitePress 不自带搜索，不配就没有；默认件文案是英文，中文站要连 `options.translations` 一起配，否则触发件与弹窗 placeholder 都显示 "Search"）。热键 `⌘K`/`Ctrl+K` 与 `/` 和 Atrium OS Spotlight **同名但不冲突**：键盘事件只在获得焦点的那个 document 上派发，不跨 frame 边界。用户可感知的唯一 subtlety 是「焦点进了 frame 之后 ⌘K 开的是文档站内搜索，要用 Spotlight 得先点回壳层」——**别把它当 bug 去父层接管 frame 快捷键**，那等于给 embed 类目开同源专属特权，违反 D2′ 的「chrome 对类目一无所知」。代价核对（实测）：`docs:embed` 1.6s，新增 `@localSearchIndexroot` 与 `VPLocalSearchBox` 两个**懒加载** chunk 共 ≈201KB，全落 `dist/docs`；`scripts/check-bundle.mjs` 只扫 `dist/assets`，OS 首屏预算与单块预算都不受影响。
 - **a11y 与视觉门禁的扫描面不含文档站正文**（含它的搜索弹窗）：`tests/e2e/a11y.spec.ts` 刻意不打开文档中心窗口，`visual.spec.ts` 的截图对象也不含它——axe 会下钻同源 iframe，VitePress 自有页面的可访问性问题不该记在壳层门禁头上。
 - **固定 `singleton: true`**：同一站点开两个窗口是重复状态，脚手架层不给这个选项；不同的网页应用之间仍各开各的窗。
 - 用户添加的应用 `permissions` 为空（公开）：角色模型管的是内置应用的准入，自己添加的应用再给自己设门槛没有意义。名称也不走 `nameKey`——用户输入的名称是数据，本地化它没有意义（`useAppName()` 缺省回退 `name`）。

@@ -1,6 +1,6 @@
 # 应用开发指南
 
-WebOS 是一个「万物皆应用」的前端脚手架。每个应用是一个自包含目录 `src/apps/<id>/`，通过 `AppManifest` 契约接入，由 `import.meta.glob` 自动注册——**新增/删除应用无需修改壳层代码**。
+Atrium OS 是一个「万物皆应用」的前端脚手架。每个应用是一个自包含目录 `src/apps/<id>/`，通过 `AppManifest` 契约接入，由 `import.meta.glob` 自动注册——**新增/删除应用无需修改壳层代码**。
 
 ## 目录结构
 
@@ -81,7 +81,7 @@ export const manifest: AppManifest = {
 - **同源入口有三层，各管一段**：① 带扩展名的真文件地址（`/docs/index.html`）最稳，不经重写直接命中静态服务；② 目录根与无扩展名深链（`/docs/`、`/docs/components/`、`/docs/tokens`）由 `vite.config.ts` 的内联插件 `serve-embedded-docs` 按**存在性**重写——命中 `<path>.html` 或 `<path>/index.html` 才改 `req.url`，dev 查 `public/docs`、preview 查 `dist/docs`；③ 两层都没兜住的落 `src/entry.ts` 的反嵌套守卫（`window.self !== window.top` 时**内核一行都不执行**，只渲染一张按成因分两态的降级页：`/docs/` 前缀 → 提示跑 `npm run docs:embed`，其余 → 提示同源入口要写真实文件地址）。为什么需要 ②：Vite 服务 `public/`/`dist/` 的 sirv 配了 `extensions: []`，`htmlFallbackMiddleware` 又只看项目根，而文档站开了 `cleanUrls`，首页内链**全是**无扩展名或目录根形态——改 `cleanUrls: false` 也救不了 logo 的 `normalizeLink('/')` 与带尾斜杠的 nav。
 - **守卫在入口，不在启动主体**：`index.html` 的模块脚本指向 `src/entry.ts`，判定通过后才 `void import('./main')`。原因是被嵌的那份实例与外层**共用同一份 IndexedDB**：只要它跑过 `wm.restoreLayout()`，`windowManager` 的 400ms 防抖就会把内层刚恢复出的旧快照写回 `layout-v1`，盖掉外层这期间的布局改动。「不挂载」挡不住这件事，只有「不启动」挡得住——所以 `scripts/check-bundle.mjs` 的首屏口径同步改成 `index + main + vue + vendor`（顶层多一跳往返，但 `main` 那 77.7KB（纯检出实测）一分没少，漏算等于凭空少掉整个壳层）。
 - **文档站首开即有内容**：`public/docs` 是生成物且 gitignore，`npm run dev` 挂了 `predev`（缺产物才 `vitepress build` + 复制，实测 1.6s），Playwright 的 webServer 走同一条命令，因此不挂 `pretest:e2e` 的 a11y/visual job 也不会撞上「iframe 里只有一行裸文本」。
-- **文档站有站内搜索，⌘K 的归属要说清**：`website/.vitepress/config.ts` 开了 `themeConfig.search.provider = 'local'`（VitePress 不自带搜索，不配就没有；默认件文案是英文，中文站要一并配 `options.translations`）。热键 `⌘K`/`Ctrl+K` 与 `/` 和 WebOS Spotlight **同名但不冲突**——键盘事件只在获得焦点的那个 document 上派发，不跨 frame 边界。用户可感知的唯一一点：焦点进了 frame 之后 ⌘K 开的是文档站内搜索，要用 Spotlight 得先点回壳层。**这不是 bug，别去父层接管 frame 快捷键**——那等于给 embed 类目开同源专属特权，违反「chrome 对类目一无所知」。搜索索引与 `minisearch`/`mark.js`/`focus-trap` 全是 VitePress 自带依赖，只落 `dist/docs`（实测新增 2 个懒加载 chunk ≈ 201KB，`scripts/check-bundle.mjs` 只扫 `dist/assets`），OS 首屏预算不受影响。
+- **文档站有站内搜索，⌘K 的归属要说清**：`website/.vitepress/config.ts` 开了 `themeConfig.search.provider = 'local'`（VitePress 不自带搜索，不配就没有；默认件文案是英文，中文站要一并配 `options.translations`）。热键 `⌘K`/`Ctrl+K` 与 `/` 和 Atrium OS Spotlight **同名但不冲突**——键盘事件只在获得焦点的那个 document 上派发，不跨 frame 边界。用户可感知的唯一一点：焦点进了 frame 之后 ⌘K 开的是文档站内搜索，要用 Spotlight 得先点回壳层。**这不是 bug，别去父层接管 frame 快捷键**——那等于给 embed 类目开同源专属特权，违反「chrome 对类目一无所知」。搜索索引与 `minisearch`/`mark.js`/`focus-trap` 全是 VitePress 自带依赖，只落 `dist/docs`（实测新增 2 个懒加载 chunk ≈ 201KB，`scripts/check-bundle.mjs` 只扫 `dist/assets`），OS 首屏预算不受影响。
 - **a11y 与视觉门禁的扫描面不含文档站正文**（含它的搜索弹窗）：`tests/e2e/a11y.spec.ts` 刻意不打开文档中心窗口——axe 会下钻同源 iframe，VitePress 自有页面的可访问性问题不该记在壳层门禁的头上。
 - **不要在应用里自写 iframe**，也不要与 frame 内容建 `postMessage` 通道（本阶段没有这个协议）。
 

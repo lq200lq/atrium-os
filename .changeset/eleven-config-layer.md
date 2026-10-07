@@ -1,5 +1,5 @@
 ---
-'webos': minor
+'atrium-os': minor
 ---
 
 S11 全局配置层与文档自动化：新增 `OsConfigProvider`（`src/ui` 达 41 件）——一个可套在应用内任意子树上的作用域配置入口，聚合 `locale`（组件内建文案语言）、`size`（componentDefaults）、`theme`（`accent` 预设 / `controlHeight` / `radius` 刻度）。实现只有两条腿：CSS 变量写在子树根 `.os-config` 上（圆角与控件高就近覆盖；强调色只写 `data-accent` 预设名，seed 仍只在 `theme-light/dark.css` 的预设里、六级派生仍只在 `tokens.css` 的派生块里写一次），配置对象经 `provide/inject` 下发（`src/ui/config.ts` 的 `useConfig`/`useControlSize`）。职责边界按规划 §8 定案落地：`theme` store 管全局持久化设置，Provider 管子树局部覆盖且**不写 store**，所以作用域选择刷新即消失、不影响其它窗口。

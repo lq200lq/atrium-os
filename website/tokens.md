@@ -1,6 +1,6 @@
 # 设计 Token
 
-WebOS 的视觉值全部收敛在三个文件里，组件只消费**刻度名**，永远不写裸值：
+Atrium OS 的视觉值全部收敛在三个文件里，组件只消费**刻度名**，永远不写裸值：
 
 ```text
 刻度层  tokens.css        @theme 定义刻度与语义名 + :root 定义派生公式
@@ -120,15 +120,15 @@ WebOS 的视觉值全部收敛在三个文件里，组件只消费**刻度名**�
 
 桌面卡片的前景与表面**同层派生**（功能设计 D13）：卡片必须自带可读底，不把可读性外包给壁纸；`backdrop-blur` 只负责质感。次级/禁用前景是不透明灰度档，不是裸 `opacity-*`（(HIG) A-8）。
 
-| Token                | 用在哪                                     | 怎么来                                                                 |
-| -------------------- | ------------------------------------------ | ---------------------------------------------------------------------- |
-| `widget-surface`     | 卡片底（`bg-widget-surface`）              | 主题各给一档：浅色 `rgba(255,255,255,.72)`、深色 `rgba(30,41,59,.62)`   |
-| `widget-ink`         | 主前景（`text-widget-ink`）                | `var(--raw-ink)`，随主题翻转                                            |
-| `widget-ink-mute`    | 次级前景（替代混用的 `opacity-70/80/90`）  | `color-mix(ink 85%, surface-solid)`                                     |
-| `widget-ink-disabled`| 禁用/已完成（替代 `opacity-50`）           | `color-mix(ink 75%, surface-solid)`                                     |
-| `widget-line`        | 件内分隔                                   | `color-mix(ink 22%, transparent)`                                       |
-| `widget-fill`        | 件内浅底（chip、进度槽）                   | `color-mix(ink 12%, transparent)`                                       |
-| `widget-border`      | 卡片描边（`border-widget-border`）         | 主题各给一档（浅色白描边 / 深色石板蓝描边）                             |
+| Token                 | 用在哪                                    | 怎么来                                                                |
+| --------------------- | ----------------------------------------- | --------------------------------------------------------------------- |
+| `widget-surface`      | 卡片底（`bg-widget-surface`）             | 主题各给一档：浅色 `rgba(255,255,255,.72)`、深色 `rgba(30,41,59,.62)` |
+| `widget-ink`          | 主前景（`text-widget-ink`）               | `var(--raw-ink)`，随主题翻转                                          |
+| `widget-ink-mute`     | 次级前景（替代混用的 `opacity-70/80/90`） | `color-mix(ink 85%, surface-solid)`                                   |
+| `widget-ink-disabled` | 禁用/已完成（替代 `opacity-50`）          | `color-mix(ink 75%, surface-solid)`                                   |
+| `widget-line`         | 件内分隔                                  | `color-mix(ink 22%, transparent)`                                     |
+| `widget-fill`         | 件内浅底（chip、进度槽）                  | `color-mix(ink 12%, transparent)`                                     |
+| `widget-border`       | 卡片描边（`border-widget-border`）        | 主题各给一档（浅色白描边 / 深色石板蓝描边）                           |
 
 功能设计 §4.10 原文写「六档」，实现多列了 `border` 一档（2026-10-07 以代码为准）。件内**禁止** `text-white`、裸 `opacity-*` 前景、裸色值——材质类串只在 `kernel/widget/material.ts` 的 `WIDGET_CARD_CLASS` 一处（桌面卡片与预览沙箱共用）。
 

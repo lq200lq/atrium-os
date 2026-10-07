@@ -44,7 +44,7 @@ function remapDocsUrl(rawUrl: string, docsRoot: string): string | null {
  *
  * 为什么需要：Vite 服务 public/ 与 dist/ 用的 sirv 配了 `extensions: []`，而 htmlFallbackMiddleware
  * 只看项目根（dev 为 root、preview 为 dist）里有没有 index.html —— 于是 `/docs/`、`/docs/components/`、
- * `/docs/tokens` 这类「目录根 / 无扩展名」地址永远命中不了文档站产物里的真文件，最终被回退成 WebOS
+ * `/docs/tokens` 这类「目录根 / 无扩展名」地址永远命中不了文档站产物里的真文件，最终被回退成 Atrium OS
  * 自己的壳。文档站内 logo（`normalizeLink('/')`）与带尾斜杠的 nav 恰好就是这两种形态：会话内 SPA 路由
  * 正常，硬导航（新标签页、地址栏直达、vite preview 下跳页）全落守卫。
  *

@@ -1,5 +1,5 @@
 ---
-'webos': minor
+'atrium-os': minor
 ---
 
 S13 桌面小组件体系：把桌面上的小组件从「壳层里手写的三张卡片」升级为可扩展模块——开发者按「只动一个目录」（`src/widgets/<id>/`）的约定写自己的小组件，用户有增删/换尺寸/配置的闭环。
@@ -8,7 +8,7 @@ S13 桌面小组件体系：把桌面上的小组件从「壳层里手写的三�
 
 新增壳层：`WidgetLayer`（算网格、遍历实例、右下角「+N 个未显示」出口）→ `WidgetFrame`（玻璃卡材质 + 尺寸位 + ErrorBoundary/Suspense + 移除入口）→ 开发者组件；`WidgetGallery`（小组件库，懒加载 5.0KB 异步块）是唯一的增删/换尺寸/配置面，桌面右键菜单加「添加小组件」入口。玻璃卡材质类串由此只存在于 `WidgetFrame` 一处（旧壳层手写了三遍），**不进 `src/ui`**——那里是窗口内设计系统（表面档是 `rounded-surface`）。
 
-迁移与 DX：旧 `shell/Widgets.vue` 的时钟/月历/待办迁为 `src/widgets/{clock,calendar,todos}` 三个内置件（`seed: true`，首次运行按 `manifest.seed` 自动上桌面；用户清空过则不再补种），删除 `Widgets.vue`，演示待办数据按「语言包只放界面 chrome」移出 i18n（新增 `widgets.*` chrome 命名空间）。新增 `npm run gen:widget` 生成器、`docs/WebOS小组件开发指南.md` 与文档站 `/guide/widget-development`。小组件不再受 `xl` 断点硬隐藏：改由「能否放下一个完整 band（4 列）」决定，窄到 360px 才整层隐藏。
+迁移与 DX：旧 `shell/Widgets.vue` 的时钟/月历/待办迁为 `src/widgets/{clock,calendar,todos}` 三个内置件（`seed: true`，首次运行按 `manifest.seed` 自动上桌面；用户清空过则不再补种），删除 `Widgets.vue`，演示待办数据按「语言包只放界面 chrome」移出 i18n（新增 `widgets.*` chrome 命名空间）。新增 `npm run gen:widget` 生成器、`docs/AtriumOS小组件开发指南.md` 与文档站 `/guide/widget-development`。小组件不再受 `xl` 断点硬隐藏：改由「能否放下一个完整 band（4 列）」决定，窄到 360px 才整层隐藏。
 
 顺带修两处过程中被门禁拦下的缺陷：`OsSwitch` 是唯一没有 `ariaLabel` 的表单件，已按 `OsSelect`/`OsInput` 同一契约补齐（否则套在外层 label 里时开关没有可访问名）；a11y 的就绪屏障原先只等窗口过渡类，抽屉自身入场动画未跑完时玻璃层半透明会让 `color-contrast` 偶发假失败，屏障改为「无任何 `-enter-active`/`-leave-active`」。
 

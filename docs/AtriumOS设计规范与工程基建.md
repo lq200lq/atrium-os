@@ -1,6 +1,6 @@
-# WebOS 设计规范与工程基建
+# Atrium OS 设计规范与工程基建
 
-> 目标：把 WebOS 前端从「功能 demo」升级为**企业级基础项目**——改任何东西都有门禁、有 token 可依、有组件可复用。载体保持 WebOS 桌面形态（见《WebOS前端架构设计.md》）。
+> 目标：把 Atrium OS 前端从「功能 demo」升级为**企业级基础项目**——改任何东西都有门禁、有 token 可依、有组件可复用。载体保持 Atrium OS 桌面形态（见《AtriumOS前端架构设计.md》）。
 >
 > 本轮范围：**只打底**。不铺组件数量、不做文档站（Storybook/VitePress 留待组件库路线启动时评估）。
 
@@ -36,7 +36,7 @@ docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 
 **文档站同源嵌入链（`docs:embed`）**：VitePress 的 `base` 定为 `/docs/`，`scripts/embed-docs.mjs` 把它构建进 `website/.vitepress/dist` 后整份复制到 `public/docs/`（gitignore 的构建产物）。选「复制静态产物」而不是代理另一个 dev 端口，是因为 `public/` 由 Vite 静态服务，dev / `vite preview` / `dist/` 三处同源可达且零新依赖；代价是**改文档要重跑一次 `docs:embed`，没有 HMR**（写作时仍用 `docs:dev`，它同样挂在 `/docs/`）。脚本总是重建 dist——曾按「dist 已存在就跳过」写过，结果拷到了一份旧 base 的产物，坑就写在这里。`pretest:e2e` 带 `--if-missing`，本地反复跑 E2E 不会被文档构建拖慢，CI 是干净克隆故必然实跑。
 
-> 一个只有实测才能发现的边界：Vite 服务 `public/`（和 preview 的 `dist/`）用的 sirv 配了 `extensions: []`，`htmlFallbackMiddleware` 又只看项目根，于是 `/docs/`、`/docs/components/`、`/docs/tokens` 这类目录根与无扩展名深链**永远命中不了**文档站产物，落回来的是 WebOS 壳层自己的 `index.html`——iframe 里出现壳层就是「壳套壳」。而文档站开了 `cleanUrls`，站内链接本来就全是这两种形态（logo 走 `normalizeLink('/')`，带尾斜杠的 nav 同理），所以这不是「写地址时注意一下」能躲过去的问题。解法分三层，详见《WebOS应用开发指南.md》§6：`vite.config.ts` 的内联插件 `serve-embedded-docs` 按存在性重写（命中真文件才改 `req.url`，dev 查 `public/docs`、preview 查 `dist/docs`）→ 带扩展名的真文件地址天然不经重写 → 都没兜住的落 `src/entry.ts` 的反嵌套守卫（判定在内核之前，被嵌的那份文档连 `main.ts` 都不求值，降级页按成因分两态：`docs-fallback` 给 `npm run docs:embed`，`self-embed` 给「同源入口要写真实文件地址」）。守卫必须在入口而不是启动主体：内层与外层共用同一份 IndexedDB，只要它跑过一次 `wm.restoreLayout()`，400ms 防抖就会把内层的旧快照写回 `layout-v1`。门禁：`tests/e2e/docs-deep-link.spec.ts` 共 9 条（首页内链形态盘点 + 搜索装配 + 三条硬导航 + 守卫两态的处方与样式 + 被嵌实例零副作用），把中间件摘掉前三条必红，把守卫挪回启动链尾则零副作用那条必红（它用 `addInitScript` 给每个文档的 `IDBObjectStore.prototype.put` 记账，断言内层一次都没写 `layout-v1`——不靠「刷新后少没少窗口」，那两个防抖谁后落盘是时序竞赛）。
+> 一个只有实测才能发现的边界：Vite 服务 `public/`（和 preview 的 `dist/`）用的 sirv 配了 `extensions: []`，`htmlFallbackMiddleware` 又只看项目根，于是 `/docs/`、`/docs/components/`、`/docs/tokens` 这类目录根与无扩展名深链**永远命中不了**文档站产物，落回来的是 Atrium OS 壳层自己的 `index.html`——iframe 里出现壳层就是「壳套壳」。而文档站开了 `cleanUrls`，站内链接本来就全是这两种形态（logo 走 `normalizeLink('/')`，带尾斜杠的 nav 同理），所以这不是「写地址时注意一下」能躲过去的问题。解法分三层，详见《AtriumOS应用开发指南.md》§6：`vite.config.ts` 的内联插件 `serve-embedded-docs` 按存在性重写（命中真文件才改 `req.url`，dev 查 `public/docs`、preview 查 `dist/docs`）→ 带扩展名的真文件地址天然不经重写 → 都没兜住的落 `src/entry.ts` 的反嵌套守卫（判定在内核之前，被嵌的那份文档连 `main.ts` 都不求值，降级页按成因分两态：`docs-fallback` 给 `npm run docs:embed`，`self-embed` 给「同源入口要写真实文件地址」）。守卫必须在入口而不是启动主体：内层与外层共用同一份 IndexedDB，只要它跑过一次 `wm.restoreLayout()`，400ms 防抖就会把内层的旧快照写回 `layout-v1`。门禁：`tests/e2e/docs-deep-link.spec.ts` 共 9 条（首页内链形态盘点 + 搜索装配 + 三条硬导航 + 守卫两态的处方与样式 + 被嵌实例零副作用），把中间件摘掉前三条必红，把守卫挪回启动链尾则零副作用那条必红（它用 `addInitScript` 给每个文档的 `IDBObjectStore.prototype.put` 记账，断言内层一次都没写 `layout-v1`——不靠「刷新后少没少窗口」，那两个防抖谁后落盘是时序竞赛）。
 
 ### 2.2 提交规范
 
@@ -79,9 +79,9 @@ docs:dev / docs:build / docs:gen / docs:check / docs:preview / docs:embed
 
 ### 3.0 设计价值观（S7 成文，作为一切取舍的仲裁依据）
 
-四条价值取自企业级设计系统的共识，并按 WebOS 桌面形态重新解释。**两条决策规则**：① 两个方案冲突时，选让用户状态更「确定」的那个；② 不产生信息的装饰一律删掉。
+四条价值取自企业级设计系统的共识，并按 Atrium OS 桌面形态重新解释。**两条决策规则**：① 两个方案冲突时，选让用户状态更「确定」的那个；② 不产生信息的装饰一律删掉。
 
-| 价值观            | 在 WebOS 里的含义                                                                                                      | 落点示例                                                                                 |
+| 价值观            | 在 Atrium OS 里的含义                                                                                                  | 落点示例                                                                                 |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | 自然 Natural      | 沿用操作系统与既有企业软件的既成模式，不发明新交互：窗口有交通灯、Dock 承载常驻、⌘K 唤起搜索                           | 窗口拖拽/缩放走 pointer 事件与 macOS 手感一致；不做「双击标题栏才折叠」这类奇招          |
 | 确定 Certain      | 用户永远知道「我在哪 / 我刚做了什么 / 下一步是什么」。桌面形态没有页面跳转，状态必须由**窗口、Dock、通知三处冗余表达** | 鉴权拒绝：通知中心留痕 + 可点去设置的出口；加载/空/错误三态由组件内建，不靠文案提醒      |
@@ -115,7 +115,7 @@ token（styles/tokens.css 的 CSS 变量 + Tailwind @theme 映射）
 2. 允许 Tailwind 原语义类的例外：①中性面（`bg-slate-50/100/200`、`border-slate-200` 等）；②应用品牌色（AI 助手 violet、应用中心 indigo、manifest.tint 磁贴渐变）——这类 per-app 身份色不进系统 token。同类视觉在全仓只允许一种写法。
 3. 改 token 值全仓生效即为预期行为；需要局部特异视觉时走 variant/props，不复制样式。
 
-### 3.2 WebOS 视觉语言（现状固化为规范）
+### 3.2 Atrium OS 视觉语言（现状固化为规范）
 
 | 语言      | 定义                                                                                               | 落点                                  |
 | --------- | -------------------------------------------------------------------------------------------------- | ------------------------------------- |
@@ -322,7 +322,7 @@ src/
   components/         # 组合型组件（OsIcon 等，可依赖 ui/）
   windows/            # 窗口 chrome：WindowFrame/WindowManager/ErrorBoundary + EmbedView（外部网页应用内容区）
   shell/              # 壳层：TopBar/Dock/Desktop/NotificationCenter/Spotlight + WidgetLayer/WidgetFrame/WidgetGallery（桌面小组件宿主与库）
-  widgets/            # 桌面小组件（每件：manifest.ts + App.vue）——只动一个目录即接入，见《WebOS小组件开发指南.md》
+  widgets/            # 桌面小组件（每件：manifest.ts + App.vue）——只动一个目录即接入，见《AtriumOS小组件开发指南.md》
   kernel/
     webapp/           # url.ts：外部应用地址校验归一（用户输入的安全边界，纯函数）
     widget/           # geometry.ts：小组件网格常量 + widgetGrid/spanPx/packRight（纯函数，右锚定流式）
@@ -339,7 +339,7 @@ tests/
 
 ## 6. 实施状态
 
-> 下表数字是 **S1~S6 打底完成时（2026-10-04）的基线快照**，不作为现状读数。当前组件数见 §4.2，各阶段增量与实测数（单测/E2E/包体）见《WebOS对标AntDesign迭代规划.md》§9。
+> 下表数字是 **S1~S6 打底完成时（2026-10-04）的基线快照**，不作为现状读数。当前组件数见 §4.2，各阶段增量与实测数（单测/E2E/包体）见《AtriumOS对标AntDesign迭代规划.md》§9。
 
 | 项            | 状态                 | 说明                                                                                                                                                                                                                                                                                                          |
 | ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

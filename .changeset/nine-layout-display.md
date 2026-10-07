@@ -1,5 +1,5 @@
 ---
-'webos': minor
+'atrium-os': minor
 ---
 
 S9 组件纵深 · 布局与展示：`src/ui` 新增 13 件（共 31 件）并集中进 `types.ts` + `index.ts`。布局与容器：`OsSpace`（间隙/对齐/方向/换行走间距刻度）、`OsDivider`（可内嵌文案，`role="separator"`）、`OsGrid`（列数按**窗口宽度**经 `cq-window` container query 降档，档位表为静态字面量以便 Tailwind 扫描）、`OsCard`（标题/操作区/内容/页脚，可关内边距）、`OsDescriptions`（只读键值对，窄窗口恒 1 列）、`OsCollapse`（`accordion` + `panel-<key>` 插槽）。展示：`OsTypography`（四档字阶 + `ellipsis`/`rows`/`expandable`）、`OsTag`（五档预设 tint，只做标签）、`OsAvatar`（图/文/图标三级回退，直径复用控件高刻度）、`OsSegmented`（`radiogroup` 语义，可访问名必填约束写进 props 注释）、`OsTree`（可选勾选 + 父子聚合 + 懒加载 + roving tabindex 键盘导航，`checkedKeys` 取「终端 key」语义）。录入补全：`OsTextarea`（`autosize` 硬换行即时 + `scrollHeight` 修正软换行，`size` 只驱动内边距）、`OsInputNumber`（`step/min/max/precision`，逐键不写回、`change`/`blur` 提交并钳制，空值即 `undefined`）。迁移三处：file-manager 目录树改消费 `OsTree`（VFS 行为不回归，另得键盘导航与勾选联动）、data-board 顶部新建 `OsCard` + `OsDescriptions` 统计概览（全部由该页既有状态派生）、`OsForm` 的内联裸 `<textarea>` 收口为 `OsTextarea`。新增 `internal/scale.ts` 收口间距/对齐刻度→工具类映射；图标白名单加 `chevron-down`；组件陈列册增「布局」「展示」两个页签；文档站新增 `components/layout`、`components/display` 两页并扩 `form`/`index`。单测增至 44 文件 / 303 例（新组件各有契约单测），E2E 新增目录树两条用例（鼠标展开选择 + 方向键导航，键盘与 roving tabindex 只在真实浏览器可验）。

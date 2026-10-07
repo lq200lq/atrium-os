@@ -1,5 +1,5 @@
 /**
- * 反嵌套守卫：同源 embed 入口指向本站自己时，Vite 的 SPA fallback 会把 WebOS 的 index.html
+ * 反嵌套守卫：同源 embed 入口指向本站自己时，Vite 的 SPA fallback 会把 Atrium OS 的 index.html
  * 塞回 iframe，于是壳层被自己嵌入。判定与降级页放在**入口模块**（`src/entry.ts`）而不是启动主体里：
  * 被嵌入时整套内核必须一行都不执行——内层与外层共用同一份 IndexedDB，只要跑过 `wm.restoreLayout()`，
  * `windowManager` 的 400ms 防抖持久化就会把内层刚恢复出的旧快照写回 `layout-v1`，
@@ -32,14 +32,14 @@ interface GuardCopy {
 const COPY: Record<GuardCause, GuardCopy> = {
   'docs-fallback': {
     title: '文档站内容没备好 · Documentation not ready',
-    zh: '这里本该是 WebOS 文档站的一页，但本站现在没有这份页面，Vite 于是把 WebOS 自己的 index.html 返回给了它——被嵌进来的正是这套壳层，所以壳层不在自己里面再挂载一套。跑一次 npm run docs:embed 生成并同步文档站产物即可（npm run dev 首开会自动做这件事）。',
-    en: 'This address should serve a page of the WebOS documentation site, but that page does not exist yet, so Vite fell back to WebOS’ own index.html — the shell was embedding itself, so it refuses to mount. Run npm run docs:embed to build and sync the docs (npm run dev does this automatically on first run).',
+    zh: '这里本该是 Atrium OS 文档站的一页，但本站现在没有这份页面，Vite 于是把 Atrium OS 自己的 index.html 返回给了它——被嵌进来的正是这套壳层，所以壳层不在自己里面再挂载一套。跑一次 npm run docs:embed 生成并同步文档站产物即可（npm run dev 首开会自动做这件事）。',
+    en: 'This address should serve a page of the Atrium OS documentation site, but that page does not exist yet, so Vite fell back to Atrium OS’ own index.html — the shell was embedding itself, so it refuses to mount. Run npm run docs:embed to build and sync the docs (npm run dev does this automatically on first run).',
     link: '打开文档站首页 · Open the docs',
   },
   'self-embed': {
     title: '不能把本站嵌进本站 · This site cannot embed itself',
-    zh: '同源 embed 入口要写成一个真实文件的地址（如 /docs/index.html）。指向本站其它路径会被 SPA fallback 回退成 WebOS 自己的 index.html，iframe 里就会出现壳套壳，所以壳层不挂载。',
-    en: 'A same-origin embed entry must point at a real file URL (for example /docs/index.html). Any other path on this site falls back to WebOS’ own index.html, which would nest the shell inside itself, so nothing mounts here.',
+    zh: '同源 embed 入口要写成一个真实文件的地址（如 /docs/index.html）。指向本站其它路径会被 SPA fallback 回退成 Atrium OS 自己的 index.html，iframe 里就会出现壳套壳，所以壳层不挂载。',
+    en: 'A same-origin embed entry must point at a real file URL (for example /docs/index.html). Any other path on this site falls back to Atrium OS’ own index.html, which would nest the shell inside itself, so nothing mounts here.',
     link: '打开文档站首页 · Open the docs',
   },
 }
@@ -50,7 +50,7 @@ const COPY: Record<GuardCause, GuardCopy> = {
  */
 export function renderSelfEmbedGuard(doc: Document, cause: GuardCause): void {
   const copy = COPY[cause]
-  doc.documentElement.dataset.webosGuard = cause
+  doc.documentElement.dataset.atriumGuard = cause
   doc.title = copy.title
 
   const root = doc.getElementById('app')
@@ -63,7 +63,7 @@ export function renderSelfEmbedGuard(doc: Document, cause: GuardCause): void {
   const card = doc.createElement('section')
   card.id = 'embed-guard'
   card.className = 'embed-guard'
-  card.dataset.webosGuard = cause
+  card.dataset.atriumGuard = cause
 
   const heading = doc.createElement('h1')
   heading.textContent = cause === 'docs-fallback' ? '文档站内容没备好' : '不能把本站嵌进本站'

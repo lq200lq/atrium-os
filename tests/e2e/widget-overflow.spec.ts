@@ -56,7 +56,7 @@ async function writeKv(page: Page, key: string, value: unknown): Promise<void> {
   await page.evaluate(
     async ([k, v]: [string, unknown]) => {
       const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const req = indexedDB.open('webos', 1)
+        const req = indexedDB.open('atrium-os', 1)
         req.onupgradeneeded = () => {
           if (!req.result.objectStoreNames.contains('kv')) req.result.createObjectStore('kv')
         }
@@ -81,7 +81,7 @@ async function writeKv(page: Page, key: string, value: unknown): Promise<void> {
 async function readIds(page: Page): Promise<string[]> {
   const items = await page.evaluate(async (key: string) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const req = indexedDB.open('webos', 1)
+      const req = indexedDB.open('atrium-os', 1)
       req.onupgradeneeded = () => {
         if (!req.result.objectStoreNames.contains('kv')) req.result.createObjectStore('kv')
       }

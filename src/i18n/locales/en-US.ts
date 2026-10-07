@@ -398,7 +398,7 @@ export default {
     window: { title: 'Windows', cascade: 'Cascade all', closeAll: 'Close all' },
     system: {
       title: 'System',
-      version: 'WebOS version',
+      version: 'Atrium OS version',
       registered: 'Registered apps',
       accessible: 'Accessible',
       wallpapers: 'Wallpapers',

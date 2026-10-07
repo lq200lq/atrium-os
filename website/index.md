@@ -1,7 +1,7 @@
 ---
 layout: home
 hero:
-  name: WebOS 脚手架
+  name: Atrium OS 脚手架
   text: 企业级 Vue 3 前端脚手架
   tagline: 万物皆应用 —— 应用接入契约 / 权限模型 / 组件纵深 / 数据层 / 主题国际化 / 文档站与可观测
   actions:
