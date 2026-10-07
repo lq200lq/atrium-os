@@ -1,5 +1,5 @@
 export default {
-  brand: { slogan: 'Everything is an app', tagline: 'Turn every capability into an app' },
+  brand: { slogan: 'Atrium OS', tagline: 'Turn every capability into an app' },
   topbar: {
     search: 'Search apps, files, knowledge…',
     menus: {

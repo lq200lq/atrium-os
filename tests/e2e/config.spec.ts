@@ -87,7 +87,7 @@ test('作用域语言只改组件内建文案：内英外中，应用文案与�
 
   // 应用内容文案不受作用域影响，只跟着全局 i18n
   await expect(primaryButton(inside)).toHaveText('主要')
-  await expect(page.getByRole('banner').getByText('万物皆应用')).toBeVisible()
+  await expect(page.getByRole('banner').getByText('Atrium OS')).toBeVisible()
 })
 
 test('刷新不残留：三档取值回默认，全局主题与语言都没被带跑', async ({ page }) => {
@@ -117,7 +117,7 @@ test('刷新不残留：三档取值回默认，全局主题与语言都没被�
     0,
   )
   // 壳层文案与全局预设/语言均未因作用域操作而改变（Provider 从不写 store）
-  await expect(page.getByRole('banner').getByText('万物皆应用')).toBeVisible()
+  await expect(page.getByRole('banner').getByText('Atrium OS')).toBeVisible()
   await expect(page.getByRole('banner').getByText('搜索应用、文件、知识…')).toBeVisible()
   await expect(page.locator('html')).toHaveAttribute('data-accent', 'sky')
 })

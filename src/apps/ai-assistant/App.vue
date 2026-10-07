@@ -18,7 +18,7 @@ const feedback = useFeedback()
 const messages = ref<Msg[]>([
   {
     role: 'bot',
-    text: '你好！我是「万物皆应用」的 AI 助手。点击下方快捷指令，我会生成一份文档并通过 CommandBus 唤起文档编辑器。',
+    text: '你好！我是「Atrium OS」的 AI 助手。点击下方快捷指令，我会生成一份文档并通过 CommandBus 唤起文档编辑器。',
   },
 ])
 const input = ref('')

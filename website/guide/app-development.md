@@ -1,6 +1,6 @@
 # 应用开发指南
 
-Atrium OS 是一个「万物皆应用」的前端脚手架。每个应用是一个自包含目录 `src/apps/<id>/`，通过 `AppManifest` 契约接入，由 `import.meta.glob` 自动注册——**新增/删除应用无需修改壳层代码**。
+Atrium OS 是一个让一切能力成为应用的前端脚手架。每个应用是一个自包含目录 `src/apps/<id>/`，通过 `AppManifest` 契约接入，由 `import.meta.glob` 自动注册——**新增/删除应用无需修改壳层代码**。
 
 ## 目录结构
 

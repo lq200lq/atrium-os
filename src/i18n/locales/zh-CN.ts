@@ -1,5 +1,5 @@
 export default {
-  brand: { slogan: '万物皆应用', tagline: '让一切能力成为应用' },
+  brand: { slogan: 'Atrium OS', tagline: '让一切能力成为应用' },
   topbar: {
     search: '搜索应用、文件、知识…',
     menus: {

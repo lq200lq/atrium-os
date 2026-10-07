@@ -50,7 +50,7 @@ test('S5 国际化：切英文后壳层/设置/Spotlight/陈列文案全变且�
   await win.locator('input[name="app-lang"][value="en-US"]').check()
 
   // 壳层品牌 + 设置分区标题 + Dock 应用名（title 属性）本地化
-  await expect(page.getByRole('banner').getByText('Everything is an app')).toBeVisible()
+  await expect(page.getByRole('banner').getByText('Atrium OS')).toBeVisible()
   await expect(win.getByText('Users & Roles')).toBeVisible()
   await expect(page.locator('nav button[title="Files"]')).toBeVisible()
 
@@ -67,5 +67,5 @@ test('S5 国际化：切英文后壳层/设置/Spotlight/陈列文案全变且�
   // 语言偏好刷新后保持
   await page.waitForTimeout(600)
   await page.reload()
-  await expect(page.getByRole('banner').getByText('Everything is an app')).toBeVisible()
+  await expect(page.getByRole('banner').getByText('Atrium OS')).toBeVisible()
 })

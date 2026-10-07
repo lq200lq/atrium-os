@@ -65,7 +65,7 @@ for (const [label, path] of [
     // 会话内点链接走的是 VitePress 自己的 SPA 路由，压根不发这个请求，测不到重写。
     await page.goto(path)
     await expect(page.locator('.VPHome, .VPDoc').first()).toBeVisible()
-    // 标题是第二枚正向锁：壳层是「万物皆应用 · Atrium OS」，文档站一律带「Atrium OS 脚手架」
+    // 标题是第二枚正向锁：壳层是「Atrium OS」，文档站一律带「Atrium OS 脚手架」
     await expect(page).toHaveTitle(/Atrium OS 脚手架/)
     await expect(page.locator('html[data-atrium-guard]')).toHaveCount(0)
   })

@@ -18,12 +18,12 @@ describe('i18n 语言与回退', () => {
   beforeEach(() => setLocale('zh-CN'))
 
   it('默认中文取词', () => {
-    expect(translate('brand.slogan')).toBe('万物皆应用')
+    expect(translate('brand.slogan')).toBe('Atrium OS')
   })
 
   it('切换英文后取英文', () => {
     setLocale('en-US')
-    expect(translate('brand.slogan')).toBe('Everything is an app')
+    expect(translate('brand.slogan')).toBe('Atrium OS')
     expect(translate('common.confirm')).toBe('Confirm')
   })
 
