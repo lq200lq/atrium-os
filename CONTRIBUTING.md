@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢参与 Atrium OS。本文是提交代码前的检查单；设计口径以 `docs/` 内文档为准（docs-first，实施偏差回写对应文档）。
+感谢参与 Atrium OS。本文是提交代码前的检查单；设计口径以 `docs/` 内设计文档为准（docs-first，实施偏差回写对应文档）。该目录是维护者的本地工作区、不入库，公开导读见 `website/architecture.md`。
 
 ## 环境
 

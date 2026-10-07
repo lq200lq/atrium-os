@@ -5,6 +5,7 @@ test-results
 playwright-report
 website/.vitepress/cache
 public/docs
+/docs/
 *.tsbuildinfo
 *.local
 .DS_Store

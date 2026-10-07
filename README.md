@@ -57,7 +57,6 @@ src/
   i18n/        zh-CN / en-US 语言包
   styles/      设计 Token 与主题
   windows/     窗口内嵌视图
-docs/          设计文档与开发指南（中文，状态回写在各文档内）
 website/       VitePress 文档站
 scripts/       质量门禁与生成器（check-*、gen-*）
 tests/unit/    Vitest 单测（含门禁脚本的 fixture 自证）
@@ -66,19 +65,7 @@ tests/e2e/     Playwright e2e（a11y / keyboard / visual / 小组件验收）
 
 ## 文档
 
-设计与规划文档在 [`docs/`](docs)，均随代码演进回写状态：
-
-| 文档                                                                   | 内容                           |
-| ---------------------------------------------------------------------- | ------------------------------ |
-| [AtriumOS前端架构设计](docs/AtriumOS前端架构设计.md)                   | 分层架构、窗口系统、数据边界   |
-| [AtriumOS设计规范与工程基建](docs/AtriumOS设计规范与工程基建.md)       | 设计 Token、组件契约、门禁体系 |
-| [AtriumOS应用开发指南](docs/AtriumOS应用开发指南.md)                   | 新应用如何长在底座上           |
-| [AtriumOS小组件开发指南](docs/AtriumOS小组件开发指南.md)               | 小组件契约、几何与判据         |
-| [AtriumOS小组件功能设计](docs/AtriumOS小组件功能设计.md)               | 小组件功能线设计与落地状态     |
-| [AtriumOS脚手架迭代路线](docs/AtriumOS脚手架迭代路线.md)               | S1~S6 阶段规划与验收           |
-| [AtriumOS对标AntDesign迭代规划](docs/AtriumOS对标AntDesign迭代规划.md) | S7~S14 规划与状态台账          |
-
-在线文档站：`npm run docs:dev`（组件 API 表由 `npm run docs:gen` 从源码生成，`docs:check` 防漂移）。
+在线文档站：`npm run docs:dev`（组件 API 表由 `npm run docs:gen` 从源码生成，`docs:check` 防漂移）。架构与规范的导读见 [`website/architecture.md`](website/architecture.md)。
 
 ## 贡献
 
