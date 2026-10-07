@@ -56,7 +56,8 @@ describe('OsProgress 环形', () => {
     const ok = mount(OsProgress, { props: { percent: 100, type: 'circle' } })
     expect(classTokens(ok.element)).toContain('text-success')
     const bad = mount(OsProgress, { props: { percent: 40, type: 'circle', status: 'exception' } })
-    expect(classTokens(bad.element)).toContain('text-danger')
+    // 环线/数字走 -text 语义档（seed 作文字色 3.67:1 不达 AA）
+    expect(classTokens(bad.element)).toContain('text-danger-text')
   })
 
   it('直径走间距刻度 2xl，环内显示百分比，满格换 check 图标', () => {

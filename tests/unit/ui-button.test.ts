@@ -14,7 +14,9 @@ describe('OsButton', () => {
     const primary = mount(OsButton, { props: { variant: 'primary' } })
     const danger = mount(OsButton, { props: { variant: 'danger' } })
     expect(primary.classes()).toContain('bg-accent-fill')
-    expect(danger.classes()).toContain('text-danger')
+    // danger 文字必须走 -text 语义档：seed 直接作文字色对表面只有 3.67:1（AA 需 4.5:1）
+    expect(danger.classes()).toContain('text-danger-text')
+    expect(danger.classes()).not.toContain('text-danger')
   })
 
   it.each(['sm', 'md', 'lg'] as Size[])('%s 档取对应控件高度刻度', (size) => {

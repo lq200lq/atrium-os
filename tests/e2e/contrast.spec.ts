@@ -95,6 +95,10 @@ const NEUTRAL_PAIRS = [
   { fg: '--color-on-accent', bg: '--color-accent' },
   // S13 实填主按钮：深一档 accent-fill 底 + 白字（--raw-mix-lighten 明暗两主题都是 #fff）
   { fg: '--raw-mix-lighten', bg: '--color-accent-fill' },
+  // danger 按钮文字档（挂账修后）：OsButton danger / data-board 行内删除坐的表面，
+  // seed 直接作文字色时 light 只有 3.67:1——-text 档对两级表面都必须守住 AA
+  { fg: '--color-danger-text', bg: '--color-surface' },
+  { fg: '--color-danger-text', bg: '--color-surface-hover' },
 ]
 
 test.describe('中性文本与实底前景对比度（S12 axe 盲区）', () => {

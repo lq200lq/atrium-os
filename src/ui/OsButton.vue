@@ -34,7 +34,9 @@ const resolvedSize = useControlSize(() => props.size)
       tint && `bg-gradient-to-br ${tint} text-white shadow hover:brightness-110`,
       !tint && variant === 'primary' && 'bg-accent-fill text-white hover:brightness-110',
       !tint && variant === 'ghost' && 'border border-line text-ink hover:bg-surface-hover',
-      !tint && variant === 'danger' && 'border border-danger/30 text-danger hover:bg-danger/10',
+      !tint &&
+        variant === 'danger' &&
+        'border border-danger/30 text-danger-text hover:bg-danger/10',
     ]"
   >
     <!-- loading 用等宽占位，避免文案在切换时横向跳动 -->

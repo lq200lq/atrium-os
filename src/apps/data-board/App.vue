@@ -241,7 +241,7 @@ watch(
             <button class="text-accent-strong hover:underline" @click="openEdit(row as Employee)">
               {{ t('common.edit') }}
             </button>
-            <button class="text-danger hover:underline" @click="onDelete(row as Employee)">
+            <button class="text-danger-text hover:underline" @click="onDelete(row as Employee)">
               {{ t('common.delete') }}
             </button>
           </div>

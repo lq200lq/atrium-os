@@ -37,10 +37,11 @@ const BAR_CLASS: Record<ProgressStatus, string> = {
   success: 'bg-success',
   exception: 'bg-danger',
 }
+/** 文字/环线走 -text 语义档而非 seed：light 下 seed 对表面仅 3.67:1，-text 才够 AA 4.5:1 */
 const TEXT_CLASS: Record<ProgressStatus, string> = {
   normal: 'text-accent',
   success: 'text-success',
-  exception: 'text-danger',
+  exception: 'text-danger-text',
 }
 
 // 环形几何：直径取间距刻度 2xl（48px，h-2xl/w-2xl 类），环内数值是 viewBox 相对单位；
